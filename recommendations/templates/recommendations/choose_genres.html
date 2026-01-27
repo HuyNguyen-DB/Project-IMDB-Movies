@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chọn thể loại phim</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .genres-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .genre-btn {
+            padding: 10px 18px;
+            margin: 8px;
+            border: 1px solid #4CAF50;
+            border-radius: 20px;
+            background-color: white;
+            color: #4CAF50;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .genre-btn.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .submit-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 30px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎬 Chọn thể loại phim</h1>
+
+<div class="genres-container">
+    <form method="POST" action="{% url 'recommend' %}">
+        {% csrf_token %}
+
+        <!-- Hidden input để gửi genres giống input cũ -->
+        <input type="hidden" name="genres" id="genresInput">
+
+        <div id="genreButtons">
+            {% for genre in genres %}
+                <button type="button"
+                        class="genre-btn"
+                        data-genre="{{ genre }}">
+                    {{ genre }}
+                </button>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="submit-btn">
+            Xác nhận & Gợi ý phim
+        </button>
+    </form>
+</div>
+
+<script>
+    const buttons = document.querySelectorAll('.genre-btn');
+    const genresInput = document.getElementById('genresInput');
+    let selectedGenres = [];
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const genre = btn.dataset.genre;
+
+            if (selectedGenres.includes(genre)) {
+                selectedGenres = selectedGenres.filter(g => g !== genre);
+                btn.classList.remove('selected');
+            } else {
+                selectedGenres.push(genre);
+                btn.classList.add('selected');
+            }
+
+            // Ghép chuỗi giống input text cũ
+            genresInput.value = selectedGenres.join(',');
+        });
+    });
+</script>
+
+</body>
+</html>
