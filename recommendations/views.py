@@ -287,21 +287,40 @@ def build_user_genres_from_history(user):
 # Đặt phim
 @login_required
 def book_movie(request):
+
+    title = request.GET.get('title')
+    genre = request.GET.get('genre')
+    poster = request.GET.get('poster')
+
     if request.method == 'POST':
         form = BookMovieForm(request.POST)
+
         if form.is_valid():
-            # Lưu thông tin phim đã đặt vào database
             booked_movie = form.save(commit=False)
-            booked_movie.user = request.user  # Gắn với user đã đăng nhập
+
+            booked_movie.user = request.user
+            booked_movie.movie_title = title
+            booked_movie.movie_genre = genre
+
             booked_movie.save()
 
-            # Hiển thị thông báo thành công
             messages.success(request, "Đặt phim thành công!")
-            return redirect('user_home')  # Chuyển hướng về trang của user sau khi đặt phim
+            return redirect('user_home')
+
     else:
         form = BookMovieForm()
 
-    return render(request, 'recommendations/book_movie.html', {'form': form})
+    return render(
+        request,
+        'recommendations/book_movie.html',
+        {
+            'form': form,
+            'title': title,
+            'genre': genre,
+            'poster': poster
+        }
+    )
+
 
 # Kiểm tra nếu chưa đăng nhập
 def some_view(request):

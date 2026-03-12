@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <title>Danh sách phim</title>
 
-```
 <style>
     * {
         box-sizing: border-box;
@@ -103,7 +102,6 @@
         color: #555;
     }
 </style>
-```
 
 </head>
 
@@ -115,7 +113,6 @@
 
 <main>
 
-```
 <div class="action-buttons">
     <a href="{% url 'home' %}">
         <button>Trở về trang chủ</button>
@@ -138,13 +135,22 @@
                 <p><strong>Năm:</strong> {{ movie.startYear }}</p>
                 <p><strong>Thời lượng:</strong> {{ movie.runtimeMinutes }} phút</p>
 
+                {% if user.is_authenticated %}
+                <div style="margin-top:10px;">
+                    <a href="{% url 'book_movie' %}?title={{ movie.primaryTitle }}&genre={{ movie.genres }}&poster={{ movie.poster_url }}">
+                        <button style="padding:8px 15px;background:#ff5722;border:none;border-radius:6px;color:white;cursor:pointer;">
+                            Đặt phim
+                        </button>
+                    </a>
+                </div>
+                {% endif %}
+
             </div>
         {% endfor %}
     </div>
 {% else %}
     <p>Không có phim.</p>
 {% endif %}
-```
 
 </main>
 

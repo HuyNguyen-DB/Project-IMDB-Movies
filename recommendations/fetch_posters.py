@@ -2,9 +2,9 @@ import requests
 import time
 from recommendations.models import Movie
 
-API_KEY = "2597fbf6"
+API_KEY = "7d32be4d"
 
-def fetch_posters(limit=1000):
+def fetch_posters(limit=100000):
     movies = list(
         Movie.objects.filter(poster_url__isnull=True)[:limit]
     )
