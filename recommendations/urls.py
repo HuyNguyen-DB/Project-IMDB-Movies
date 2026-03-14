@@ -1,6 +1,8 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views  # Import views để kết nối với các hàm xử lý
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # Trang chủ của ứng dụng
@@ -24,4 +26,9 @@ urlpatterns = [
     
     # Đặt phim
     path('book_movie/', views.book_movie, name='book_movie'),
+
+    path('room/<str:room_id>/', views.room_detail, name='room_detail'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

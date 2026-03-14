@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ room.name }}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+            color: white;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 60px auto;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .description {
+            font-size: 18px;
+            color: #bbbbbb;
+            margin-bottom: 40px;
+            max-width: 800px;
+        }
+
+        .gallery-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #c500ff;
+            font-weight: 600;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            border-radius: 16px;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.08);
+        }
+
+        .gallery-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 16px;
+        }
+
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+
+        .booking-section {
+            margin-top: 50px;
+        }
+
+        .book-btn {
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: white;
+            padding: 16px 40px;
+            font-size: 20px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 200, 83, 0.3);
+        }
+
+        .book-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0, 200, 83, 0.5);
+        }
+
+        .status {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .available {
+            color: #00e676;
+        }
+
+        .maintenance {
+            color: orange;
+        }
+
+        .closed {
+            color: red;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            .gallery-title {
+                font-size: 24px;
+            }
+
+            .gallery-item img {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>{{ room.name }}</h1>
+
+    <div class="description">
+        {{ room.description }}
+    </div>
+
+    <div class="status">
+        {% if room.status == "available" %}
+            <span class="available">● Đang hoạt động</span>
+        {% elif room.status == "maintenance" %}
+            <span class="maintenance">● Đang bảo trì</span>
+        {% else %}
+            <span class="closed">● Đã đóng</span>
+        {% endif %}
+    </div>
+
+    <h2 class="gallery-title">Hình ảnh phòng</h2>
+
+    <div class="gallery">
+        {% for img in images %}
+            <div class="gallery-item">
+                <img src="{{ img.image.url }}" alt="{{ room.name }}">
+            </div>
+        {% empty %}
+            <p>Chưa có hình ảnh.</p>
+        {% endfor %}
+    </div>
+
+    <div class="booking-section">
+        <form method="POST" action="#">
+            {% csrf_token %}
+            <button class="book-btn">
+                🎟 Đặt phòng ngay
+            </button>
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

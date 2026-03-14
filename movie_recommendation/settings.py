@@ -132,7 +132,7 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 
@@ -143,3 +143,6 @@ LOGIN_REDIRECT_URL = '/'  # Chuyển hướng tới trang dành cho user/admin s
 
 # Cấu hình sau khi đăng xuất
 LOGOUT_REDIRECT_URL = 'login'  # Chuyển hướng đến trang đăng nhập sau khi đăng xuất
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

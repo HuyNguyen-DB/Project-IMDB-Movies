@@ -5,12 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-
+from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
 import numpy as np
-from .models import BookedMovie, Movie
+from .models import BookedMovie, Movie, ScreenRoom
 from .forms import EmailLoginForm, BookMovieForm
 from django.core.paginator import Paginator
 
@@ -36,19 +36,38 @@ def get_movies():
 def home(request):
     recommendations = []
 
-    # Lấy tất cả các bộ phim từ MongoDB và chuyển thành danh sách
-    movies_df = get_movies()
-
-    # Chuyển DataFrame thành danh sách các dictionary (dễ sử dụng trong Django template)
-    movies_list = movies_df.to_dict('records')
+    # Chỉ lấy 5 phim nổi bật
+    movies = Movie.objects.values(
+        'primaryTitle',
+        'startYear',
+        'runtimeMinutes',
+        'genres',
+        'poster_url'
+    ).order_by('-numVotes')[:5]
+    # Chỉ lấy phòng đang hoạt động
+    screen_rooms = ScreenRoom.objects.filter(
+        status='available'
+    ).only(
+        'room_id',
+        'name',
+        'description',
+        'status',
+        'image'
+    )
 
     if request.method == 'POST':
         user_genres = request.POST.get('genres', '').strip()
         user_title = request.POST.get('title', '').strip()
         recommendations = recommend(request, user_genres, user_title)
 
-    return render(request, 'recommendations/home.html', {'movies': movies_list, 'recommendations': recommendations})
-
+    return render(
+        request,
+        'recommendations/home.html',
+        {
+            'movies': movies,
+            'recommendations': recommendations,
+            'screen_rooms': screen_rooms,
+        })
 # Trang dành cho user đã đăng nhập
 @login_required
 def user_home(request):
@@ -110,53 +129,43 @@ def custom_login(request):
     return render(request, 'recommendations/login.html', {'form': form})
 
 # Hàm recommend gợi ý phim cho cả guest và user
-# ===== INIT (RUN 1 LẦN) =====
-movies_df = get_movies()
-
-movies_df['genres'] = movies_df['genres'].fillna('').str.lower()
-
-count_vectorizer = CountVectorizer(
-    tokenizer=lambda x: [g.strip() for g in x.split(',')]
-)
-
-genre_matrix = count_vectorizer.fit_transform(movies_df['genres'])
 def get_movie_recommendations(user_genres, num_recommendations=20):
-    user_genres = user_genres.lower()
-    user_genres_list = [g.strip() for g in user_genres.split(',')]
-    pattern = '|'.join(user_genres_list)
+    movies_df = get_movies()
 
-    filtered_movies = movies_df[
-        movies_df['genres'].str.contains(pattern, na=False)
-    ].copy()
-
-    if filtered_movies.empty:
+    if movies_df.empty or 'genres' not in movies_df.columns:
         return pd.DataFrame()
 
-    user_vec = count_vectorizer.transform([user_genres])
-    genre_matrix_filtered = count_vectorizer.transform(
-        filtered_movies['genres']
+    movies_df['genres'] = movies_df['genres'].fillna('').str.lower()
+
+    count_vectorizer = CountVectorizer(
+        tokenizer=lambda x: [g.strip() for g in x.split(',')]
     )
 
-    sim_scores = cosine_similarity(user_vec, genre_matrix_filtered)[0]
+    count_vectorizer.fit(movies_df['genres'])
 
-    filtered_movies['similarity'] = sim_scores
+    user_genres = user_genres.lower()
+    user_vec = count_vectorizer.transform([user_genres])
 
-    recommended = filtered_movies.sort_values(
+    genre_matrix = count_vectorizer.transform(movies_df['genres'])
+
+    sim_scores = cosine_similarity(user_vec, genre_matrix)[0]
+
+    movies_df['similarity'] = sim_scores
+
+    recommended = movies_df.sort_values(
         by=['similarity', 'averageRating'],
         ascending=False
     )
 
     return recommended[
-    [
-        'primaryTitle',
-        'genres',
-        'averageRating',
-        'startYear',
-        'runtimeMinutes',
-        'poster_url',  # 🔥 THÊM
-    ]
+        ['primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
     ].head(num_recommendations)
 def recommend(request, user_genres=None, user_title=None):
+    movies_df = get_movies()
+
+    if movies_df.empty:
+        return []
+
     recommendations = pd.DataFrame()
 
     if user_title:
@@ -185,16 +194,8 @@ def recommend(request, user_genres=None, user_title=None):
         )
 
     recommendations = recommendations[
-    [
-        'primaryTitle',
-        'genres',
-        'averageRating',
-        'startYear',
-        'runtimeMinutes',
-        'poster_url',  # 🔥
-    ]
+        ['primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
     ].drop_duplicates()
-
 
     return recommendations.to_dict('records')
 
@@ -327,3 +328,17 @@ def some_view(request):
     if not request.user.is_authenticated:
         messages.error(request, "Bạn cần đăng nhập để thực hiện hành động này.")
         return redirect('login')
+
+
+def room_detail(request, room_id):
+    room = get_object_or_404(ScreenRoom, room_id=room_id)
+    images = room.images.all()
+
+    return render(
+        request,
+        'recommendations/room_detail.html',
+        {
+            'room': room,
+            'images': images
+        }
+    )
