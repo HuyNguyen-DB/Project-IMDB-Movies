@@ -1,104 +1,221 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Chọn thể loại phim</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 30px;
-        }
+<meta charset="UTF-8">
+<title>Chọn thể loại phim</title>
 
-        h1 {
-            text-align: center;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-        .genres-container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-        }
+<style>
 
-        .genre-btn {
-            padding: 10px 18px;
-            margin: 8px;
-            border: 1px solid #4CAF50;
-            border-radius: 20px;
-            background-color: white;
-            color: #4CAF50;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+body{
+    font-family:'Poppins',sans-serif;
+    margin:0;
+    color:white;
+    background:linear-gradient(180deg,#020617,#020617,#020617);
+}
 
-        .genre-btn.selected {
-            background-color: #4CAF50;
-            color: white;
-        }
+/* HEADER */
 
-        .submit-btn {
-            display: block;
-            margin: 30px auto 0;
-            padding: 12px 30px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-    </style>
+header{
+    text-align:center;
+    padding:50px 20px 20px 20px;
+}
+
+header h1{
+    font-size:28px;
+    font-weight:600;
+}
+
+/* CARD */
+
+.genres-container{
+
+    max-width:950px;
+    margin:40px auto;
+    padding:50px;
+
+    border-radius:20px;
+
+    background:#0f172a;
+
+    box-shadow:
+    0 30px 80px rgba(0,0,0,0.6);
+
+}
+
+/* GENRE GRID */
+
+#genreButtons{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+/* GENRE BUTTON */
+
+.genre-btn{
+
+    padding:12px 24px;
+
+    margin:9px;
+
+    border-radius:30px;
+
+    border:none;
+
+    background:#22c55e; /* xanh lá */
+
+    color:white;
+
+    font-size:14px;
+
+    font-weight:500;
+
+    cursor:pointer;
+
+    transition:all 0.25s ease;
+}
+
+/* hover */
+
+.genre-btn:hover{
+
+    background:#16a34a;
+
+    transform:translateY(-2px);
+}
+
+/* selected */
+
+.genre-btn.selected{
+
+    background:#15803d;
+
+    box-shadow:0 6px 16px rgba(34,197,94,0.4);
+
+}
+
+/* SUBMIT BUTTON */
+
+.submit-btn{
+
+    display:block;
+
+    margin:45px auto 0 auto;
+
+    padding:15px 36px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    background:#ef4444; /* đỏ */
+
+    color:white;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    transition:0.25s;
+}
+
+.submit-btn:hover{
+
+    background:#dc2626;
+
+    transform:translateY(-2px);
+}
+
+/* BACK */
+
+.back-btn{
+
+    text-align:center;
+
+    margin-top:25px;
+}
+
+.back-btn a{
+
+    color:#cbd5f5;
+
+    text-decoration:none;
+
+    font-size:14px;
+}
+
+.back-btn a:hover{
+
+    color:white;
+}
+
+</style>
+
 </head>
+
 <body>
 
-<h1>🎬 Chọn thể loại phim</h1>
+<header>
+<h1>🎬 Chọn thể loại phim bạn thích</h1>
+</header>
 
 <div class="genres-container">
-    <form method="POST" action="{% url 'recommend' %}">
-        {% csrf_token %}
 
-        <!-- Hidden input để gửi genres giống input cũ -->
-        <input type="hidden" name="genres" id="genresInput">
+<form method="POST" action="{% url 'recommend' %}">
+{% csrf_token %}
 
-        <div id="genreButtons">
-            {% for genre in genres %}
-                <button type="button"
-                        class="genre-btn"
-                        data-genre="{{ genre }}">
-                    {{ genre }}
-                </button>
-            {% endfor %}
-        </div>
+<input type="hidden" name="genres" id="genresInput">
 
-        <button type="submit" class="submit-btn">
-            Xác nhận & Gợi ý phim
-        </button>
-    </form>
+<div id="genreButtons">
+{% for genre in genres %}
+<button type="button" class="genre-btn" data-genre="{{ genre }}">
+{{ genre }}
+</button>
+{% endfor %}
+</div>
+
+<button type="submit" class="submit-btn">
+🎯 Xác nhận & Gợi ý phim
+</button>
+
+</form>
+
+<div class="back-btn">
+<a href="/">← Quay lại trang chủ</a>
+</div>
+
 </div>
 
 <script>
-    const buttons = document.querySelectorAll('.genre-btn');
-    const genresInput = document.getElementById('genresInput');
-    let selectedGenres = [];
 
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const genre = btn.dataset.genre;
+const buttons=document.querySelectorAll('.genre-btn');
+const genresInput=document.getElementById('genresInput');
 
-            if (selectedGenres.includes(genre)) {
-                selectedGenres = selectedGenres.filter(g => g !== genre);
-                btn.classList.remove('selected');
-            } else {
-                selectedGenres.push(genre);
-                btn.classList.add('selected');
-            }
+let selectedGenres=[];
 
-            // Ghép chuỗi giống input text cũ
-            genresInput.value = selectedGenres.join(',');
-        });
+buttons.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+
+        const genre=btn.dataset.genre;
+
+        if(selectedGenres.includes(genre)){
+            selectedGenres=selectedGenres.filter(g=>g!==genre);
+            btn.classList.remove('selected');
+        }else{
+            selectedGenres.push(genre);
+            btn.classList.add('selected');
+        }
+
+        genresInput.value=selectedGenres.join(',');
+
     });
+});
+
 </script>
 
 </body>

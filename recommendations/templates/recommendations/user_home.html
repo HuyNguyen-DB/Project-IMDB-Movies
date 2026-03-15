@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -70,6 +71,10 @@ header h1{
 }
 
 .user-info li{
+
+    display:flex;
+    gap:20px;
+
     background:#020617;
     padding:20px;
     margin-bottom:15px;
@@ -77,20 +82,41 @@ header h1{
     border:1px solid #1f2937;
 }
 
+/* POSTER */
+
+.movie-poster{
+
+    width:110px;
+    height:160px;
+
+    border-radius:8px;
+
+    object-fit:cover;
+}
+
+/* MOVIE INFO */
+
+.movie-details{
+    flex:1;
+}
+
 .user-info li h3{
     margin:0 0 10px 0;
     color:#f472b6;
 }
 
+/* TEXT INFO (ĐỔI SANG TRẮNG ĐẬM) */
+
 .user-info li h4{
     margin:0 0 8px 0;
-    font-weight:normal;
-    color:#9ca3af;
+    font-weight:600;
+    color:white;
 }
 
 .user-info li p{
     margin:4px 0;
-    color:#9ca3af;
+    color:white;
+    font-weight:600;
 }
 
 /* BUTTON AREA */
@@ -134,6 +160,7 @@ header h1{
 }
 
 </style>
+
 </head>
 
 <body>
@@ -145,6 +172,7 @@ header h1{
 <div class="container">
 
 {% if messages %}
+
 <div class="alert">
 {% for message in messages %}
 <p>{{ message }}</p>
@@ -164,6 +192,12 @@ header h1{
 
 <li>
 
+<img class="movie-poster"
+src="https://via.placeholder.com/110x160.png?text=Movie"
+alt="Poster">
+
+<div class="movie-details">
+
 <h3>{{ movie.movie_title }}</h3>
 
 <h4>Thể loại: {{ movie.movie_genre }}</h4>
@@ -171,6 +205,8 @@ header h1{
 <p><strong>Đặt vào:</strong> {{ movie.date_booked }}</p>
 
 <p><strong>Ngày chiếu:</strong> {{ movie.booking_date }}</p>
+
+</div>
 
 </li>
 
