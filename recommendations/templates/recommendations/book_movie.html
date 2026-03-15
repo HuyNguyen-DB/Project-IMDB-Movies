@@ -1,243 +1,199 @@
 <!DOCTYPE html>
-
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lịch sử đặt phim</title>
+<title>Đặt phim</title>
 
 <style>
 
-*{
-    box-sizing:border-box;
-}
-
 body{
+    font-family: Arial, Helvetica, sans-serif;
     margin:0;
-    font-family:Arial, Helvetica, sans-serif;
     color:white;
     background:linear-gradient(180deg,#020617,#0f172a,#020617);
 }
 
-/* HEADER */
-
-header{
-    padding:40px;
-    text-align:center;
-}
-
-header h1{
-    margin:0;
-    font-size:36px;
-    color:#f472b6;
-}
-
-/* CONTAINER */
+/* Container */
 
 .container{
     max-width:1200px;
     margin:auto;
-    padding:20px 40px 60px 40px;
+    padding:60px 40px;
 }
 
-/* ALERT */
+/* Card phim */
 
-.alert{
-    background:#7f1d1d;
-    padding:15px;
-    border-radius:8px;
-    margin-bottom:25px;
-}
-
-/* HISTORY SECTION */
-
-.user-info{
-    background:#111827;
-    padding:30px;
-    border-radius:16px;
-    box-shadow:0 20px 40px rgba(0,0,0,0.6);
-}
-
-.user-info h2{
-    margin-top:0;
-    color:#f472b6;
-}
-
-/* MOVIE LIST */
-
-.user-info ul{
-    list-style:none;
-    padding:0;
-}
-
-.user-info li{
-
+.movie-card{
     display:flex;
-    gap:20px;
-    align-items:flex-start;
+    gap:60px;
+    background:#111827;
+    padding:50px;
+    border-radius:16px;
+    box-shadow:0 25px 50px rgba(0,0,0,0.6);
+}
 
-    background:#020617;
-    padding:20px;
-    margin-bottom:15px;
+/* Poster */
 
+.poster img{
+    width:320px;
     border-radius:12px;
-
-    border:1px solid #1f2937;
+    box-shadow:0 10px 30px rgba(0,0,0,0.8);
 }
 
-/* POSTER */
+/* Info */
 
-.movie-poster{
-
-    width:110px;
-    height:160px;
-
-    object-fit:cover;
-
-    border-radius:8px;
-
-    box-shadow:0 6px 15px rgba(0,0,0,0.7);
-}
-
-/* MOVIE DETAILS */
-
-.movie-details{
+.info{
     flex:1;
 }
 
-.user-info li h3{
-    margin:0 0 10px 0;
+/* Title */
+
+.movie-title{
+    font-size:42px;
+    font-weight:bold;
+    margin-bottom:20px;
     color:#f472b6;
 }
 
-/* TEXT INFO */
+/* Info text */
 
-.user-info li h4{
-    margin:0 0 8px 0;
-    font-weight:600;
-    color:white;
+.info-item{
+    margin-bottom:20px;
+    font-size:20px;
 }
 
-.user-info li p{
-    margin:4px 0;
-    color:white;
-    font-weight:600;
+.info-item span{
+    color:#9ca3af;
 }
 
-/* BUTTON AREA */
+/* Form */
 
-.action-buttons{
-    text-align:center;
-    margin-top:40px;
+.form-group{
+    margin-top:25px;
 }
 
-.action-buttons a{
-    text-decoration:none;
+label{
+    display:block;
+    margin-bottom:8px;
+    color:#9ca3af;
+    font-size:18px;
 }
 
-.action-buttons button{
-    margin:10px;
-    padding:12px 22px;
-    background:#374151;
+input[type="datetime-local"]{
+    width:260px;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    font-size:16px;
+}
+
+/* Button */
+
+button{
+    margin-top:30px;
+    padding:14px 32px;
+    background:#22c55e;
     border:none;
     border-radius:8px;
     color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#16a34a;
+}
+
+/* Buttons dưới */
+
+.actions{
+    margin-top:50px;
+    text-align:center;
+}
+
+.actions a{
+    text-decoration:none;
+}
+
+.actions button{
+    margin:10px;
+    padding:12px 22px;
+    background:#374151;
+    color:white;
+    border:none;
+    border-radius:8px;
     font-size:16px;
     cursor:pointer;
 }
 
-.action-buttons button:hover{
+.actions button:hover{
     background:#4b5563;
 }
 
-/* LOGOUT BUTTON */
-
-.logout-button{
-    background:#ef4444;
-}
-
-.logout-button:hover{
-    background:#dc2626;
-}
-
-.empty{
-    color:#9ca3af;
-}
-
 </style>
-
 </head>
 
 <body>
 
-<header>
-<h1>🎬 Lịch sử đặt phim của {{ user.username }}</h1>
-</header>
-
 <div class="container">
 
-{% if messages %}
+<div class="movie-card">
 
-<div class="alert">
-{% for message in messages %}
-<p>{{ message }}</p>
-{% endfor %}
-</div>
-{% endif %}
+<!-- Poster -->
+<div class="poster">
 
-<div class="user-info">
-
-{% if booked_movies %}
-
-<h2>Lịch sử đặt phim của bạn</h2>
-
-<ul>
-
-{% for movie in booked_movies %}
-
-<li>
-
-{% if movie.poster %} <img class="movie-poster" src="{{ movie.poster }}" alt="{{ movie.movie_title }}">
-{% endif %}
-
-<div class="movie-details">
-
-<h3>{{ movie.movie_title }}</h3>
-
-<h4>Thể loại: {{ movie.movie_genre }}</h4>
-
-<p><strong>Đặt vào:</strong> {{ movie.date_booked }}</p>
-
-<p><strong>Ngày chiếu:</strong> {{ movie.booking_date }}</p>
-
-</div>
-
-</li>
-
-{% endfor %}
-
-</ul>
-
-{% else %}
-
-<p class="empty">Bạn chưa đặt phim nào.</p>
-
+{% if poster %}
+<img src="{{ poster }}" alt="{{ title }}">
 {% endif %}
 
 </div>
 
-<div class="action-buttons">
+<!-- Info -->
+<div class="info">
+
+<div class="movie-title">
+{{ title }}
+</div>
+
+<div class="info-item">
+<span>Thể loại:</span> {{ genre }}
+</div>
+
+<form method="POST">
+
+{% csrf_token %}
+
+<!-- Hidden fields giữ nguyên logic -->
+<input type="hidden" name="movie_title" value="{{ title }}">
+<input type="hidden" name="movie_genre" value="{{ genre }}">
+
+<div class="form-group">
+
+<label>Thời gian xem</label>
+
+{{ form.booking_date }}
+
+</div>
+
+<button type="submit">
+🎬 Đặt phim
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<a href="{% url 'user_home' %}">
+<button>📜 Xem lịch sử đặt phim</button>
+</a>
 
 <a href="{% url 'home' %}">
 <button>🏠 Trang chủ</button>
 </a>
-
-<form method="POST" action="{% url 'logout' %}" style="display:inline;">
-{% csrf_token %}
-<button type="submit" class="logout-button">
-🚪 Đăng xuất
-</button>
-</form>
 
 </div>
 

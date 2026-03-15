@@ -250,7 +250,7 @@ def recommend_page(request):
 
 def choose_genres(request):
     genres = [
-        'action', 'adult', 'adventure', 'animation', 'biography', 'comedy',
+        'action', 'adventure', 'animation', 'biography', 'comedy',
         'crime', 'documentary', 'drama', 'family', 'fantasy', 'film-noir',
         'game-show', 'history', 'horror', 'music', 'musical', 'mystery',
         'news', 'reality-tv', 'romance', 'sci-fi', 'sport', 'talk-show',
