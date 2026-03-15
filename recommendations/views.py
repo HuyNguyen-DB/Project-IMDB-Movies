@@ -27,7 +27,7 @@ def get_movies():
         'averageRating',
         'startYear',
         'runtimeMinutes',
-        'poster_url',   # 🔥 QUAN TRỌNG
+        'poster_url',   
     )
     return pd.DataFrame(movies_data)
 

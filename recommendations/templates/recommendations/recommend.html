@@ -1,106 +1,150 @@
 <!DOCTYPE html>
-
 <html lang="vi">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Danh sách phim</title>
+<meta charset="UTF-8">
+<title>Danh sách phim</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
 
-    body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background-color: #f4f6f8;
-        color: #333;
-    }
+*{
+    box-sizing:border-box;
+}
 
-    /* ===== HEADER ===== */
-    header {
-        background: #2c2c2c;
-        color: #fff;
-        padding: 24px 10px;
-        text-align: center;
-    }
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    color:white;
+    background:linear-gradient(180deg,#020617,#0f172a,#020617);
+}
 
-    header h1 {
-        margin: 0;
-        font-size: 26px;
-        letter-spacing: 0.5px;
-    }
+/* ===== HEADER ===== */
 
-    /* ===== MAIN ===== */
-    main {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 30px 20px;
-    }
+header{
+    padding:40px;
+    text-align:center;
+}
 
-    /* ===== BUTTON ===== */
-    .action-buttons {
-        text-align: center;
-        margin-bottom: 30px;
-    }
+header h1{
+    margin:0;
+    font-size:36px;
+    color:#f472b6;
+}
 
-    .action-buttons button {
-        padding: 10px 22px;
-        background-color: #4CAF50;
-        border: none;
-        border-radius: 6px;
-        color: #fff;
-        font-size: 15px;
-        cursor: pointer;
-    }
+/* ===== MAIN ===== */
 
-    .action-buttons button:hover {
-        background-color: #43a047;
-    }
+main{
+    max-width:1200px;
+    margin:auto;
+    padding:20px 40px 60px 40px;
+}
 
-    /* ===== MOVIE GRID ===== */
-    .movies-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 25px;
-    }
+/* ===== BUTTON AREA ===== */
 
-    /* ===== MOVIE CARD ===== */
-    .movie-card {
-        background-color: #fff;
-        border-radius: 12px;
-        box-shadow: 0 6px 14px rgba(0,0,0,0.08);
-        padding: 16px;
-        text-align: center;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+.action-buttons{
+    text-align:center;
+    margin-bottom:40px;
+}
 
-    .movie-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-    }
+.action-buttons a{
+    text-decoration:none;
+}
 
-    /* ===== POSTER ===== */
-    .movie-poster {
-        width: 200px;
-        height: 300px;
-        object-fit: cover;
-        border-radius: 10px;
-        display: block;
-        margin: 0 auto 15px;
-    }
+.action-buttons button{
+    margin:10px;
+    padding:12px 22px;
+    background:#374151;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
 
-    /* ===== TEXT ===== */
-    .movie-card h3 {
-        font-size: 18px;
-        margin: 10px 0 6px;
-    }
+.action-buttons button:hover{
+    background:#4b5563;
+}
 
-    .movie-card p {
-        margin: 4px 0;
-        font-size: 14px;
-        color: #555;
-    }
+/* ===== MOVIE GRID ===== */
+
+.movies-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:30px;
+}
+
+/* ===== MOVIE CARD ===== */
+
+.movie-card{
+    background:#111827;
+    border-radius:16px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 20px 40px rgba(0,0,0,0.6);
+    transition:transform 0.2s;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.movie-card:hover{
+    transform:translateY(-6px);
+}
+
+/* ===== POSTER ===== */
+
+.movie-poster{
+    width:200px;
+    height:300px;
+    object-fit:cover;
+    border-radius:10px;
+    margin:auto;
+    display:block;
+    box-shadow:0 10px 25px rgba(0,0,0,0.8);
+}
+
+/* ===== TITLE ===== */
+
+.movie-card h3{
+    margin:16px 0 8px 0;
+    font-size:20px;
+    color:#f472b6;
+}
+
+/* ===== TEXT ===== */
+
+.movie-card p{
+    margin:4px 0;
+    font-size:15px;
+    color:#9ca3af;
+}
+
+/* ===== BOOK BUTTON ===== */
+
+.book-btn{
+    margin-top:14px;
+    padding:10px 18px;
+    background:#22c55e;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.book-btn:hover{
+    background:#16a34a;
+}
+
+/* ===== EMPTY TEXT ===== */
+
+.empty{
+    text-align:center;
+    color:#9ca3af;
+    font-size:18px;
+}
+
 </style>
 
 </head>
@@ -108,48 +152,67 @@
 <body>
 
 <header>
-    <h1>Web đề xuất phim – TLCN</h1>
+<h1>🎬 Web đề xuất phim – TLCN</h1>
 </header>
 
 <main>
 
 <div class="action-buttons">
-    <a href="{% url 'home' %}">
-        <button>Trở về trang chủ</button>
-    </a>
+
+<a href="{% url 'home' %}">
+<button>🏠 Trở về trang chủ</button>
+</a>
+
+{% if user.is_authenticated %}
+<a href="{% url 'user_home' %}">
+<button>📜 Xem lịch sử đặt phim</button>
+</a>
+{% endif %}
+
 </div>
 
 {% if recommendations %}
-    <div class="movies-list">
-        {% for movie in recommendations %}
-            <div class="movie-card">
 
-                {% if movie.poster_url %}
-                    <img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" class="movie-poster">
-                {% else %}
-                    <img src="https://via.placeholder.com/300x450?text=No+Poster" class="movie-poster">
-                {% endif %}
+<div class="movies-list">
 
-                <h3>{{ movie.primaryTitle }}</h3>
-                <p><strong>Thể loại:</strong> {{ movie.genres }}</p>
-                <p><strong>Năm:</strong> {{ movie.startYear }}</p>
-                <p><strong>Thời lượng:</strong> {{ movie.runtimeMinutes }} phút</p>
+{% for movie in recommendations %}
 
-                {% if user.is_authenticated %}
-                <div style="margin-top:10px;">
-                    <a href="{% url 'book_movie' %}?title={{ movie.primaryTitle }}&genre={{ movie.genres }}&poster={{ movie.poster_url }}">
-                        <button style="padding:8px 15px;background:#ff5722;border:none;border-radius:6px;color:white;cursor:pointer;">
-                            Đặt phim
-                        </button>
-                    </a>
-                </div>
-                {% endif %}
+<div class="movie-card">
 
-            </div>
-        {% endfor %}
-    </div>
+{% if movie.poster_url %}
+<img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" class="movie-poster">
 {% else %}
-    <p>Không có phim.</p>
+<img src="https://via.placeholder.com/300x450?text=No+Poster" class="movie-poster">
+{% endif %}
+
+<h3>{{ movie.primaryTitle }}</h3>
+
+<p><strong>Thể loại:</strong> {{ movie.genres }}</p>
+<p><strong>Năm:</strong> {{ movie.startYear }}</p>
+<p><strong>Thời lượng:</strong> {{ movie.runtimeMinutes }} phút</p>
+
+{% if user.is_authenticated %}
+<div>
+<a href="{% url 'book_movie' %}?title={{ movie.primaryTitle }}&genre={{ movie.genres }}&poster={{ movie.poster_url }}">
+<button class="book-btn">
+🎬 Đặt phim
+</button>
+</a>
+</div>
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<p class="empty">
+Không có phim.
+</p>
+
 {% endif %}
 
 </main>

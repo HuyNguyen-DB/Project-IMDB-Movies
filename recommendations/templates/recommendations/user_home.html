@@ -1,174 +1,207 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử đặt phim</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch sử đặt phim</title>
 
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
+<style>
 
-        h1 {
-            font-size: 2.5em;
-            margin: 0;
-        }
+*{
+    box-sizing:border-box;
+}
 
-        .container {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    color:white;
+    background:linear-gradient(180deg,#020617,#0f172a,#020617);
+}
 
-        .alert {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
+/* HEADER */
 
-        .user-info {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
+header{
+    padding:40px;
+    text-align:center;
+}
 
-        .user-info h2 {
-            font-size: 2em;
-            color: #333;
-        }
+header h1{
+    margin:0;
+    font-size:36px;
+    color:#f472b6;
+}
 
-        .user-info ul {
-            list-style: none;
-            padding: 0;
-        }
+/* CONTAINER */
 
-        .user-info li {
-            background-color: #fff;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:20px 40px 60px 40px;
+}
 
-        .user-info li h3 {
-            font-size: 1.5em;
-            color: #333;
-        }
+/* ALERT */
 
-        .action-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 30px;
-        }
+.alert{
+    background:#7f1d1d;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:25px;
+}
 
-        .action-buttons a,
-        .action-buttons button {
-            padding: 10px 20px;
-            font-size: 1.1em;
-            text-decoration: none;
-            color: white;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+/* HISTORY SECTION */
 
-        .action-buttons a:hover,
-        .action-buttons button:hover {
-            background-color: #45a049;
-        }
+.user-info{
+    background:#111827;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.6);
+}
 
-        /* Đổi màu nút đăng xuất thành đỏ */
-        .logout-button {
-            background-color: #f44336; /* Đỏ */
-            color: white;
-            padding: 12px 20px;
-            font-size: 1em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-align: center;
-            display: inline-block;
-            margin-right: 15px;
-            transition: background-color 0.3s, transform 0.3s;
-        }
+.user-info h2{
+    margin-top:0;
+    color:#f472b6;
+}
 
-        .logout-button:hover {
-            background-color: #e53935; /* Đỏ đậm hơn khi hover */
-            transform: translateY(-2px); /* Hiệu ứng nâng lên khi hover */
-        }
+/* MOVIE LIST */
 
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-            margin-top: 40px;
-        }
-    </style>
+.user-info ul{
+    list-style:none;
+    padding:0;
+}
+
+.user-info li{
+    background:#020617;
+    padding:20px;
+    margin-bottom:15px;
+    border-radius:12px;
+    border:1px solid #1f2937;
+}
+
+.user-info li h3{
+    margin:0 0 10px 0;
+    color:#f472b6;
+}
+
+.user-info li h4{
+    margin:0 0 8px 0;
+    font-weight:normal;
+    color:#9ca3af;
+}
+
+.user-info li p{
+    margin:4px 0;
+    color:#9ca3af;
+}
+
+/* BUTTON AREA */
+
+.action-buttons{
+    text-align:center;
+    margin-top:40px;
+}
+
+.action-buttons a{
+    text-decoration:none;
+}
+
+.action-buttons button{
+    margin:10px;
+    padding:12px 22px;
+    background:#374151;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.action-buttons button:hover{
+    background:#4b5563;
+}
+
+/* LOGOUT BUTTON */
+
+.logout-button{
+    background:#ef4444;
+}
+
+.logout-button:hover{
+    background:#dc2626;
+}
+
+.empty{
+    color:#9ca3af;
+}
+
+</style>
 </head>
+
 <body>
-    <header>
-        <h1>Lịch sử đặt phim của {{ user.username }}</h1>
-    </header>
 
-    <div class="container">
-        <!-- Hiển thị thông báo nếu có -->
-        {% if messages %}
-            <div class="alert">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
+<header>
+<h1>🎬 Lịch sử đặt phim của {{ user.username }}</h1>
+</header>
 
-        <div class="user-info">
-            <!-- Hiển thị toàn bộ lịch sử đặt phim -->
-            {% if booked_movies %}
-                <h2>Lịch sử đặt phim của bạn:</h2>
-                <ul>
-                    {% for movie in booked_movies %}
-                        <li>
-                            <h3>{{ movie.movie_title }}</h3>
-                            <h4>Thể loại: {{ movie.movie_genre }}</h4>
-                            <p><strong>Đặt vào:</strong> {{ movie.date_booked }}</p>
-                            <p><strong>Ngày chiếu:</strong> {{ movie.booking_date }}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>Bạn chưa đặt phim nào.</p>
-            {% endif %}
-        </div>
+<div class="container">
 
-        <div class="action-buttons">
-            <!-- Nút quay về trang chủ -->
-            <a href="{% url 'home' %}">Quay về trang chủ</a>
+{% if messages %}
+<div class="alert">
+{% for message in messages %}
+<p>{{ message }}</p>
+{% endfor %}
+</div>
+{% endif %}
 
-            <!-- Nút đăng xuất -->
-            <form method="POST" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <!-- Chuyển nút đăng xuất thành button riêng biệt với class logout-button -->
-                <button type="submit" class="logout-button">Đăng xuất</button>
-            </form>
-        </div>
-    </div>
+<div class="user-info">
+
+{% if booked_movies %}
+
+<h2>Lịch sử đặt phim của bạn</h2>
+
+<ul>
+
+{% for movie in booked_movies %}
+
+<li>
+
+<h3>{{ movie.movie_title }}</h3>
+
+<h4>Thể loại: {{ movie.movie_genre }}</h4>
+
+<p><strong>Đặt vào:</strong> {{ movie.date_booked }}</p>
+
+<p><strong>Ngày chiếu:</strong> {{ movie.booking_date }}</p>
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p class="empty">Bạn chưa đặt phim nào.</p>
+
+{% endif %}
+
+</div>
+
+<div class="action-buttons">
+
+<a href="{% url 'home' %}">
+<button>🏠 Trang chủ</button>
+</a>
+
+<form method="POST" action="{% url 'logout' %}" style="display:inline;">
+{% csrf_token %}
+<button type="submit" class="logout-button">
+🚪 Đăng xuất
+</button>
+</form>
+
+</div>
+
+</div>
+
 </body>
 </html>
