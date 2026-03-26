@@ -2,113 +2,474 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Đặt phim</title>
 
 <style>
+*{
+    box-sizing:border-box;
+}
 
 body{
     font-family: Arial, Helvetica, sans-serif;
     margin:0;
-    color:white;
+    color:#e5e7eb;
     background:linear-gradient(180deg,#020617,#0f172a,#020617);
 }
 
-/* Container */
+/* NAVBAR */
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(2, 6, 23, 0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.nav-container{
+    max-width:1300px;
+    margin:auto;
+    padding:14px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.nav-left{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.logo-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-decoration:none;
+    color:white;
+}
+
+.logo-icon{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    font-size:22px;
+    box-shadow:0 8px 20px rgba(34,197,94,0.25);
+}
+
+.logo-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.2;
+}
+
+.logo-text strong{
+    font-size:16px;
+    color:#ffffff;
+}
+
+.logo-text span{
+    font-size:12px;
+    color:#94a3b8;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.nav-links a{
+    text-decoration:none;
+}
+
+.nav-links button{
+    background:#111827;
+    color:white;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.nav-links button:hover{
+    background:#1f2937;
+    transform:translateY(-1px);
+}
+
+/* USER MENU */
+
+.user-menu{
+    position:relative;
+}
+
+.user-trigger{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:8px 12px;
+    cursor:pointer;
+    min-width:200px;
+    transition:0.2s;
+}
+
+.user-trigger:hover{
+    background:#1f2937;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    color:white;
+    font-size:16px;
+    flex-shrink:0;
+    box-shadow:0 8px 20px rgba(6,182,212,0.2);
+}
+
+.user-info{
+    text-align:left;
+    flex:1;
+    min-width:0;
+}
+
+.user-info strong{
+    display:block;
+    font-size:14px;
+    color:white;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.user-info span{
+    display:block;
+    font-size:12px;
+    color:#9ca3af;
+}
+
+.dropdown-arrow{
+    color:#9ca3af;
+    font-size:13px;
+}
+
+.dropdown-menu{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    width:240px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.4);
+    overflow:hidden;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(10px);
+    transition:0.25s ease;
+}
+
+.user-menu:hover .dropdown-menu{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+
+.dropdown-header{
+    padding:16px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    background:rgba(255,255,255,0.02);
+}
+
+.dropdown-header strong{
+    display:block;
+    margin-bottom:4px;
+    color:white;
+    font-size:15px;
+}
+
+.dropdown-header p{
+    margin:0;
+    color:#94a3b8;
+    font-size:12px;
+}
+
+.dropdown-item{
+    display:block;
+    text-decoration:none;
+    color:white;
+    padding:13px 16px;
+    transition:0.2s;
+    font-size:14px;
+}
+
+.dropdown-item:hover{
+    background:#1f2937;
+}
+
+.dropdown-form{
+    margin:0;
+}
+
+.dropdown-form button{
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    color:#f87171;
+    padding:13px 16px;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.dropdown-form button:hover{
+    background:#1f2937;
+}
+
+/* MAIN */
 
 .container{
-    max-width:1200px;
+    max-width:1300px;
     margin:auto;
-    padding:60px 40px;
+    padding:40px 30px 70px;
 }
 
-/* Card phim */
+/* PAGE HEADER */
 
-.movie-card{
-    display:flex;
-    gap:60px;
+.page-header{
+    margin-bottom:24px;
+}
+
+.page-header h1{
+    margin:0 0 10px 0;
+    font-size:34px;
+    color:white;
+}
+
+.page-header p{
+    margin:0;
+    color:#94a3b8;
+    line-height:1.6;
+}
+
+/* LAYOUT */
+
+.booking-layout{
+    display:grid;
+    grid-template-columns: 380px 1fr;
+    gap:28px;
+    align-items:start;
+}
+
+/* POSTER CARD */
+
+.poster-panel{
     background:#111827;
-    padding:50px;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 20px 45px rgba(0,0,0,0.35);
+    position:sticky;
+    top:90px;
+}
+
+.poster-image{
+    width:100%;
+    height:520px;
+    object-fit:cover;
     border-radius:16px;
-    box-shadow:0 25px 50px rgba(0,0,0,0.6);
+    display:block;
+    box-shadow:0 12px 30px rgba(0,0,0,0.45);
 }
 
-/* Poster */
-
-.poster img{
-    width:320px;
-    border-radius:12px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.8);
+.poster-badge{
+    margin-top:16px;
+    display:inline-block;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(34,197,94,0.15);
+    color:#4ade80;
+    font-size:13px;
+    font-weight:600;
+    border:1px solid rgba(34,197,94,0.25);
 }
 
-/* Info */
+/* INFO CARD */
 
-.info{
-    flex:1;
+.info-panel{
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 20px 45px rgba(0,0,0,0.35);
 }
-
-/* Title */
 
 .movie-title{
-    font-size:42px;
-    font-weight:bold;
-    margin-bottom:20px;
-    color:#f472b6;
+    font-size:38px;
+    font-weight:700;
+    margin:0 0 18px 0;
+    color:#22c55e;
+    line-height:1.2;
 }
 
-/* Info text */
-
-.info-item{
-    margin-bottom:20px;
-    font-size:20px;
+.meta-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(220px,1fr));
+    gap:16px;
+    margin-bottom:28px;
 }
 
-.info-item span{
-    color:#9ca3af;
+.meta-card{
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:16px;
+    padding:16px;
 }
 
-/* Form */
+.meta-label{
+    display:block;
+    color:#94a3b8;
+    font-size:13px;
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+}
+
+.meta-value{
+    color:white;
+    font-size:17px;
+    line-height:1.5;
+    font-weight:600;
+}
+
+/* ACTION SHORTCUTS */
+
+.shortcut-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:28px;
+}
+
+.shortcut-actions a{
+    text-decoration:none;
+}
+
+.shortcut-actions button{
+    background:#1f2937;
+    color:white;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:12px 18px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.shortcut-actions button:hover{
+    background:#374151;
+    transform:translateY(-1px);
+}
+
+/* FORM BOX */
+
+.form-box{
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:18px;
+    padding:24px;
+}
+
+.form-box h2{
+    margin:0 0 10px 0;
+    font-size:22px;
+    color:white;
+}
+
+.form-box p{
+    margin:0 0 22px 0;
+    color:#94a3b8;
+    line-height:1.6;
+}
 
 .form-group{
-    margin-top:25px;
+    margin-bottom:18px;
 }
 
-label{
+.form-group label{
     display:block;
     margin-bottom:8px;
-    color:#9ca3af;
-    font-size:18px;
+    color:#cbd5e1;
+    font-size:15px;
+    font-weight:600;
 }
 
-input[type="datetime-local"]{
-    width:260px;
-    padding:12px;
-    border-radius:8px;
+.form-box input,
+.form-box select,
+.form-box textarea{
+    width:100%;
+    max-width:360px;
+    padding:12px 14px;
     border:none;
-    font-size:16px;
+    outline:none;
+    border-radius:12px;
+    font-size:15px;
+    background:#f8fafc;
+    color:#111827;
 }
 
-/* Button */
+.form-box input:focus,
+.form-box select:focus,
+.form-box textarea:focus{
+    box-shadow:0 0 0 3px rgba(34,197,94,0.25);
+}
 
-button{
-    margin-top:30px;
-    padding:14px 32px;
+/* SUBMIT */
+
+.submit-btn{
+    margin-top:8px;
+    padding:14px 26px;
     background:#22c55e;
     border:none;
-    border-radius:8px;
+    border-radius:12px;
     color:white;
-    font-size:18px;
+    font-size:16px;
+    font-weight:700;
     cursor:pointer;
+    transition:0.2s;
+    box-shadow:0 12px 24px rgba(34,197,94,0.2);
 }
 
-button:hover{
+.submit-btn:hover{
     background:#16a34a;
+    transform:translateY(-2px);
 }
 
-/* Buttons dưới */
+/* BOTTOM ACTIONS */
 
 .actions{
-    margin-top:50px;
-    text-align:center;
+    margin-top:28px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
 }
 
 .actions a{
@@ -116,86 +477,248 @@ button:hover{
 }
 
 .actions button{
-    margin:10px;
-    padding:12px 22px;
+    padding:12px 20px;
     background:#374151;
     color:white;
     border:none;
-    border-radius:8px;
-    font-size:16px;
+    border-radius:12px;
+    font-size:15px;
     cursor:pointer;
+    transition:0.2s;
 }
 
 .actions button:hover{
     background:#4b5563;
 }
 
+/* RESPONSIVE */
+
+@media (max-width: 1024px){
+    .booking-layout{
+        grid-template-columns:1fr;
+    }
+
+    .poster-panel{
+        position:static;
+    }
+
+    .poster-image{
+        max-width:360px;
+        height:auto;
+        margin:auto;
+    }
+}
+
+@media (max-width: 768px){
+    .nav-container{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .nav-left{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .meta-grid{
+        grid-template-columns:1fr;
+    }
+
+    .movie-title{
+        font-size:30px;
+    }
+
+    .container{
+        padding:24px 18px 50px;
+    }
+
+    .info-panel,
+    .poster-panel{
+        padding:20px;
+    }
+}
 </style>
 </head>
 
 <body>
 
+<nav class="navbar">
+    <div class="nav-container">
+
+        <div class="nav-left">
+            <a href="{% url 'home' %}" class="logo-box">
+                <div class="logo-icon">🎬</div>
+                <div class="logo-text">
+                    <strong>Movie Webapp</strong>
+                    <span>Đề xuất phim & đặt phòng</span>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="{% url 'home' %}">
+                    <button>Trang chủ</button>
+                </a>
+                <a href="{% url 'movie_list' %}">
+                    <button>Danh sách phim</button>
+                </a>
+                <a href="{% url 'recommend' %}">
+                    <button>Gợi ý phim</button>
+                </a>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="user-menu">
+            <div class="user-trigger">
+                <div class="avatar">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <div class="user-info">
+                    <strong>{{ user.username }}</strong>
+                    <span>Người dùng đã đăng nhập</span>
+                </div>
+                <div class="dropdown-arrow">▼</div>
+            </div>
+
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <strong>{{ user.username }}</strong>
+                    <p>Quản lý tài khoản và lịch sử đặt phim</p>
+                </div>
+
+                <a href="{% url 'user_home' %}" class="dropdown-item">
+                    📜 Lịch sử đặt phim
+                </a>
+
+                <a href="{% url 'movie_list' %}" class="dropdown-item">
+                    🎥 Danh sách phim
+                </a>
+
+                <form method="POST" action="{% url 'logout' %}" class="dropdown-form">
+                    {% csrf_token %}
+                    <button type="submit">🚪 Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</nav>
+
 <div class="container">
 
-<div class="movie-card">
+    <div class="page-header">
+        <h1>🎟 Xác nhận đặt phim</h1>
+        <p>
+            Kiểm tra lại phim, phòng chiếu và chọn thời gian xem phù hợp trước khi tiếp tục đến bước thanh toán.
+        </p>
+    </div>
 
-<!-- Poster -->
-<div class="poster">
+    <div class="booking-layout">
 
-{% if poster %}
-<img src="{{ poster }}" alt="{{ title }}">
-{% endif %}
+        <div class="poster-panel">
+            {% if movie.poster_url %}
+                <img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" class="poster-image">
+            {% else %}
+                <img src="https://via.placeholder.com/320x460?text=No+Poster" alt="No Poster" class="poster-image">
+            {% endif %}
 
-</div>
+            <div class="poster-badge">Sẵn sàng đặt vé</div>
+        </div>
 
-<!-- Info -->
-<div class="info">
+        <div class="info-panel">
 
-<div class="movie-title">
-{{ title }}
-</div>
+            <h2 class="movie-title">{{ movie.primaryTitle }}</h2>
 
-<div class="info-item">
-<span>Thể loại:</span> {{ genre }}
-</div>
+            <div class="meta-grid">
+                <div class="meta-card">
+                    <span class="meta-label">Thể loại</span>
+                    <div class="meta-value">{{ movie.genres }}</div>
+                </div>
 
-<form method="POST">
+                <div class="meta-card">
+                    <span class="meta-label">Năm phát hành</span>
+                    <div class="meta-value">{{ movie.startYear }}</div>
+                </div>
 
-{% csrf_token %}
+                {% if movie.runtimeMinutes %}
+                <div class="meta-card">
+                    <span class="meta-label">Thời lượng</span>
+                    <div class="meta-value">{{ movie.runtimeMinutes }} phút</div>
+                </div>
+                {% endif %}
 
-<!-- Hidden fields giữ nguyên logic -->
-<input type="hidden" name="movie_title" value="{{ title }}">
-<input type="hidden" name="movie_genre" value="{{ genre }}">
+                {% if movie.averageRating %}
+                <div class="meta-card">
+                    <span class="meta-label">Đánh giá</span>
+                    <div class="meta-value">{{ movie.averageRating }}/10</div>
+                </div>
+                {% endif %}
 
-<div class="form-group">
+                <div class="meta-card">
+                    <span class="meta-label">Phòng đã chọn</span>
+                    <div class="meta-value">{{ room.name }}</div>
+                </div>
 
-<label>Thời gian xem</label>
+                {% if room.status %}
+                <div class="meta-card">
+                    <span class="meta-label">Trạng thái phòng</span>
+                    <div class="meta-value">
+                        {% if room.status == "available" %}
+                            Đang hoạt động
+                        {% elif room.status == "maintenance" %}
+                            Đang bảo trì
+                        {% else %}
+                            Đã đặt
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
 
-{{ form.booking_date }}
+            <div class="shortcut-actions">
+                <a href="{% url 'movie_list' %}">
+                    <button type="button">🎬 Đổi phim</button>
+                </a>
 
-</div>
+                <a href="{% url 'room_list' %}">
+                    <button type="button">🏢 Đổi phòng</button>
+                </a>
+            </div>
 
-<button type="submit">
-🎬 Đặt phim
-</button>
+            <div class="form-box">
+                <h2>Hoàn tất thông tin đặt phim</h2>
+                <p>
+                    Chọn thời gian xem mong muốn rồi xác nhận để chuyển sang bước thanh toán.
+                </p>
 
-</form>
+                <form method="POST">
+                    {% csrf_token %}
 
-</div>
+                    <div class="form-group">
+                        <label for="{{ form.booking_date.id_for_label }}">Thời gian xem</label>
+                        {{ form.booking_date }}
+                    </div>
 
-</div>
+                    <button type="submit" class="submit-btn">
+                        🎬 Xác nhận đặt phim
+                    </button>
+                </form>
+            </div>
 
-<div class="actions">
+            <div class="actions">
+                <a href="{% url 'user_home' %}">
+                    <button type="button">📜 Xem lịch sử đặt phim</button>
+                </a>
 
-<a href="{% url 'user_home' %}">
-<button>📜 Xem lịch sử đặt phim</button>
-</a>
+                <a href="{% url 'home' %}">
+                    <button type="button">🏠 Trang chủ</button>
+                </a>
+            </div>
 
-<a href="{% url 'home' %}">
-<button>🏠 Trang chủ</button>
-</a>
+        </div>
 
-</div>
+    </div>
 
 </div>
 

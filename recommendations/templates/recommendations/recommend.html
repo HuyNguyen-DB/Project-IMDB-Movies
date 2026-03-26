@@ -1,24 +1,61 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
 <meta charset="UTF-8">
-<title>Danh sách phim</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gợi ý phim</title>
 
 <style>
-
-*{
-    box-sizing:border-box;
-}
+*{box-sizing:border-box;}
 
 body{
     margin:0;
     font-family:Arial, Helvetica, sans-serif;
-    color:white;
+    color:#e5e7eb;
     background:linear-gradient(180deg,#020617,#0f172a,#020617);
 }
 
-/* ===== HEADER ===== */
+/* NAVBAR */
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(2,6,23,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.nav-container{
+    max-width:1300px;
+    margin:auto;
+    padding:14px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-weight:bold;
+    font-size:18px;
+}
+
+/* USER */
+
+.user-menu{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.user-menu button{
+    padding:8px 14px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+/* HEADER */
 
 header{
     padding:40px;
@@ -27,19 +64,19 @@ header{
 
 header h1{
     margin:0;
-    font-size:36px;
-    color:#f472b6;
+    font-size:32px;
+    color:#22c55e;
 }
 
-/* ===== MAIN ===== */
+/* MAIN */
 
 main{
     max-width:1200px;
     margin:auto;
-    padding:20px 40px 60px 40px;
+    padding:20px 40px 60px;
 }
 
-/* ===== BUTTON AREA ===== */
+/* ACTION */
 
 .action-buttons{
     text-align:center;
@@ -55,9 +92,8 @@ main{
     padding:12px 22px;
     background:#374151;
     border:none;
-    border-radius:8px;
+    border-radius:10px;
     color:white;
-    font-size:16px;
     cursor:pointer;
 }
 
@@ -65,94 +101,121 @@ main{
     background:#4b5563;
 }
 
-/* ===== MOVIE GRID ===== */
+/* GRID */
 
 .movies-list{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-    gap:30px;
+    gap:28px;
 }
 
-/* ===== MOVIE CARD ===== */
+/* CARD */
 
 .movie-card{
     background:#111827;
-    border-radius:16px;
-    padding:20px;
-    text-align:center;
-    box-shadow:0 20px 40px rgba(0,0,0,0.6);
-    transition:transform 0.2s;
-
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.4);
+    transition:0.25s;
+    overflow:hidden;
 }
 
 .movie-card:hover{
     transform:translateY(-6px);
 }
 
-/* ===== POSTER ===== */
+/* POSTER */
+
+.poster-wrapper{
+    position:relative;
+}
 
 .movie-poster{
-    width:200px;
-    height:300px;
+    width:100%;
+    height:320px;
     object-fit:cover;
-    border-radius:10px;
-    margin:auto;
-    display:block;
-    box-shadow:0 10px 25px rgba(0,0,0,0.8);
+    border-radius:12px;
 }
 
-/* ===== TITLE ===== */
+/* OVERLAY */
 
-.movie-card h3{
-    margin:16px 0 8px 0;
-    font-size:20px;
-    color:#f472b6;
+.overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.65);
+    opacity:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    transition:0.3s;
 }
 
-/* ===== TEXT ===== */
-
-.movie-card p{
-    margin:4px 0;
-    font-size:15px;
-    color:#9ca3af;
+.poster-wrapper:hover .overlay{
+    opacity:1;
 }
 
-/* ===== BOOK BUTTON ===== */
-
-.book-btn{
-    margin-top:14px;
-    padding:10px 18px;
+.overlay button{
     background:#22c55e;
     border:none;
-    border-radius:8px;
+    padding:10px 18px;
+    border-radius:10px;
     color:white;
-    font-size:15px;
     cursor:pointer;
 }
 
-.book-btn:hover{
-    background:#16a34a;
+/* TEXT */
+
+.movie-card h3{
+    margin:12px 0 6px;
+    color:white;
 }
 
-/* ===== EMPTY TEXT ===== */
+.movie-card p{
+    margin:3px 0;
+    color:#9ca3af;
+}
+
+/* EMPTY */
 
 .empty{
     text-align:center;
     color:#9ca3af;
     font-size:18px;
 }
-
 </style>
 
 </head>
 
 <body>
 
+<!-- NAVBAR -->
+<div class="navbar">
+    <div class="nav-container">
+
+        <div class="logo">🎬 Movie Webapp</div>
+
+        {% if user.is_authenticated %}
+        <div class="user-menu">
+            <span>{{ user.username }}</span>
+
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button style="background:#ef4444;color:white;">Logout</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="user-menu">
+            <a href="{% url 'login' %}">
+                <button style="background:#22c55e;color:white;">Login</button>
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
 <header>
-<h1>🎬 Web đề xuất phim – TLCN</h1>
+<h1>🎯 Gợi ý phim cho bạn</h1>
 </header>
 
 <main>
@@ -160,12 +223,12 @@ main{
 <div class="action-buttons">
 
 <a href="{% url 'home' %}">
-<button>🏠 Trở về trang chủ</button>
+<button>🏠 Trang chủ</button>
 </a>
 
 {% if user.is_authenticated %}
 <a href="{% url 'user_home' %}">
-<button>📜 Xem lịch sử đặt phim</button>
+<button>📜 Lịch sử đặt phim</button>
 </a>
 {% endif %}
 
@@ -179,26 +242,35 @@ main{
 
 <div class="movie-card">
 
+<div class="poster-wrapper">
+
 {% if movie.poster_url %}
-<img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" class="movie-poster">
+<img src="{{ movie.poster_url }}" class="movie-poster">
 {% else %}
-<img src="https://via.placeholder.com/300x450?text=No+Poster" class="movie-poster">
+<img src="https://via.placeholder.com/300x450" class="movie-poster">
 {% endif %}
+
+<div class="overlay">
+
+{% if user.is_authenticated %}
+<a href="{% url 'select_movie' movie.tconst %}">
+<button>🎬 Đặt phim</button>
+</a>
+{% else %}
+<button onclick="alert('Vui lòng đăng nhập')">🔒 Login</button>
+{% endif %}
+
+</div>
+
+</div>
 
 <h3>{{ movie.primaryTitle }}</h3>
 
-<p><strong>Thể loại:</strong> {{ movie.genres }}</p>
-<p><strong>Năm:</strong> {{ movie.startYear }}</p>
-<p><strong>Thời lượng:</strong> {{ movie.runtimeMinutes }} phút</p>
+<p>{{ movie.genres }}</p>
+<p>{{ movie.startYear }}</p>
 
-{% if user.is_authenticated %}
-<div>
-<a href="{% url 'book_movie' %}?title={{ movie.primaryTitle }}&genre={{ movie.genres }}&poster={{ movie.poster_url }}">
-<button class="book-btn">
-🎬 Đặt phim
-</button>
-</a>
-</div>
+{% if movie.runtimeMinutes %}
+<p>{{ movie.runtimeMinutes }} phút</p>
 {% endif %}
 
 </div>
@@ -209,9 +281,7 @@ main{
 
 {% else %}
 
-<p class="empty">
-Không có phim.
-</p>
+<p class="empty">Không có phim.</p>
 
 {% endif %}
 

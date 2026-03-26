@@ -28,6 +28,13 @@ urlpatterns = [
     path('book_movie/', views.book_movie, name='book_movie'),
 
     path('room/<str:room_id>/', views.room_detail, name='room_detail'),
+
+    path('movies/', views.movie_list, name='movie_list'),
+
+    path('handle-booking/', views.handle_booking, name='handle_booking'),
+    path('handle-booking/<str:room_id>/', views.handle_booking, name='handle_booking_with_room'),
+
+    path('select-movie/<str:movie_id>/', views.select_movie, name='select_movie'),
 ]
 
 if settings.DEBUG:

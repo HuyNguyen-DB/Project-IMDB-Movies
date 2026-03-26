@@ -1,51 +1,86 @@
 <!DOCTYPE html>
-
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chọn thể loại phim</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
+*{
+    box-sizing:border-box;
+}
 
 body{
     font-family:'Poppins',sans-serif;
     margin:0;
     color:white;
-    background:linear-gradient(180deg,#020617,#020617,#020617);
+    background:linear-gradient(180deg,#020617,#0f172a,#020617);
+}
+
+/* NAVBAR (reuse style home) */
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(2, 6, 23, 0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.nav-container{
+    max-width:1300px;
+    margin:auto;
+    padding:14px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-weight:600;
+    font-size:18px;
+}
+
+/* USER */
+
+.user-box{
+    display:flex;
+    gap:10px;
+}
+
+.user-box button{
+    padding:8px 14px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
 }
 
 /* HEADER */
 
 header{
     text-align:center;
-    padding:50px 20px 20px 20px;
+    padding:40px 20px 10px 20px;
 }
 
 header h1{
     font-size:28px;
-    font-weight:600;
 }
 
 /* CARD */
 
 .genres-container{
-
-    max-width:950px;
-    margin:40px auto;
+    max-width:900px;
+    margin:30px auto;
     padding:50px;
-
     border-radius:20px;
-
-    background:#0f172a;
-
-    box-shadow:
-    0 30px 80px rgba(0,0,0,0.6);
-
+    background:#111827;
+    box-shadow:0 25px 60px rgba(0,0,0,0.6);
 }
 
-/* GENRE GRID */
+/* GRID */
 
 #genreButtons{
     display:flex;
@@ -56,109 +91,97 @@ header h1{
 /* GENRE BUTTON */
 
 .genre-btn{
-
-    padding:12px 24px;
-
-    margin:9px;
-
-    border-radius:30px;
-
+    padding:12px 22px;
+    margin:8px;
+    border-radius:999px;
     border:none;
-
-    background:#22c55e; /* xanh lá */
-
+    background:#1f2937;
     color:white;
-
     font-size:14px;
-
-    font-weight:500;
-
     cursor:pointer;
-
-    transition:all 0.25s ease;
+    transition:0.2s;
 }
 
 /* hover */
 
 .genre-btn:hover{
-
-    background:#16a34a;
-
+    background:#22c55e;
     transform:translateY(-2px);
 }
 
 /* selected */
 
 .genre-btn.selected{
-
-    background:#15803d;
-
+    background:#22c55e;
     box-shadow:0 6px 16px rgba(34,197,94,0.4);
-
 }
 
-/* SUBMIT BUTTON */
+/* SUBMIT */
 
 .submit-btn{
-
     display:block;
-
-    margin:45px auto 0 auto;
-
-    padding:15px 36px;
-
+    margin:40px auto 0;
+    padding:14px 30px;
     font-size:16px;
-
     font-weight:600;
-
-    background:#ef4444; /* đỏ */
-
-    color:white;
-
+    background:#22c55e;
     border:none;
-
     border-radius:10px;
-
     cursor:pointer;
-
-    transition:0.25s;
 }
 
 .submit-btn:hover{
-
-    background:#dc2626;
-
-    transform:translateY(-2px);
+    background:#16a34a;
 }
 
 /* BACK */
 
 .back-btn{
-
     text-align:center;
-
-    margin-top:25px;
+    margin-top:20px;
 }
 
 .back-btn a{
-
-    color:#cbd5f5;
-
+    color:#9ca3af;
     text-decoration:none;
-
-    font-size:14px;
 }
 
 .back-btn a:hover{
-
     color:white;
 }
 
 </style>
-
 </head>
 
 <body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <div class="nav-container">
+
+        <div class="logo">
+            🎬 Movie Webapp
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="user-box">
+            <span>👤 {{ user.username }}</span>
+
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button style="background:#ef4444;color:white;">Logout</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="user-box">
+            <a href="{% url 'login' %}">
+                <button style="background:#22c55e;color:white;">Login</button>
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
 
 <header>
 <h1>🎬 Chọn thể loại phim bạn thích</h1>
@@ -186,7 +209,7 @@ header h1{
 </form>
 
 <div class="back-btn">
-<a href="/">← Quay lại trang chủ</a>
+<a href="{% url 'home' %}">← Quay lại trang chủ</a>
 </div>
 
 </div>

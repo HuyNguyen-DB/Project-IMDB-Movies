@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lịch sử đặt phim</title>
+<title>Danh sách phim</title>
 
 <style>
 *{
@@ -145,13 +145,13 @@ body{
     box-shadow:0 8px 20px rgba(6,182,212,0.2);
 }
 
-.user-info-nav{
+.user-info{
     text-align:left;
     flex:1;
     min-width:0;
 }
 
-.user-info-nav strong{
+.user-info strong{
     display:block;
     font-size:14px;
     color:white;
@@ -160,7 +160,7 @@ body{
     text-overflow:ellipsis;
 }
 
-.user-info-nav span{
+.user-info span{
     display:block;
     font-size:12px;
     color:#9ca3af;
@@ -244,7 +244,47 @@ body{
     background:#1f2937;
 }
 
-/* PAGE HEADER */
+/* GUEST */
+
+.guest-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.guest-actions a{
+    text-decoration:none;
+}
+
+.guest-actions button{
+    padding:10px 18px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.login-btn{
+    background:#22c55e;
+    color:white;
+}
+
+.login-btn:hover{
+    background:#16a34a;
+}
+
+.signup-btn{
+    background:#111827;
+    color:white;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.signup-btn:hover{
+    background:#1f2937;
+}
+
+/* PAGE */
 
 .page-header{
     max-width:1300px;
@@ -264,53 +304,35 @@ body{
     line-height:1.6;
 }
 
-/* MAIN */
-
-.container{
+main{
     max-width:1300px;
     margin:auto;
     padding:20px 30px 70px;
 }
 
-/* ALERT */
-
-.alert{
-    background:linear-gradient(135deg,rgba(127,29,29,0.95),rgba(153,27,27,0.95));
-    border:1px solid rgba(248,113,113,0.25);
-    padding:16px 18px;
-    border-radius:16px;
-    margin-bottom:24px;
-    box-shadow:0 18px 40px rgba(0,0,0,0.25);
-}
-
-.alert p{
-    margin:6px 0;
-    color:#fee2e2;
-}
-
 /* TOP BAR */
 
-.top-actions{
+.top-bar{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    flex-wrap:wrap;
     gap:16px;
-    margin-bottom:24px;
+    flex-wrap:wrap;
+    margin-bottom:26px;
 }
 
-.top-left{
+.top-bar-left{
     color:#94a3b8;
     font-size:15px;
 }
 
-.top-right{
+.top-bar-right{
     display:flex;
     gap:12px;
     flex-wrap:wrap;
 }
 
-.top-right a{
+.top-bar-right a{
     text-decoration:none;
 }
 
@@ -330,145 +352,176 @@ body{
     transform:translateY(-1px);
 }
 
-/* HISTORY PANEL */
+/* GRID */
 
-.history-panel{
+.movies-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:28px;
+}
+
+/* CARD */
+
+.movie-card{
     background:#111827;
-    padding:30px;
-    border-radius:20px;
+    border-radius:18px;
+    padding:16px;
+    text-align:left;
     box-shadow:0 20px 40px rgba(0,0,0,0.35);
+    transition:all .25s;
+    position:relative;
+    overflow:hidden;
     border:1px solid rgba(255,255,255,0.06);
 }
 
-.history-panel h2{
-    margin-top:0;
-    margin-bottom:24px;
-    color:white;
-    font-size:26px;
+.movie-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 28px 48px rgba(0,0,0,0.45);
 }
 
-/* LIST */
-
-.movie-history-list{
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-}
-
-.history-card{
-    display:flex;
-    gap:20px;
-    background:#0f172a;
-    padding:20px;
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,0.05);
-    transition:0.2s;
-}
-
-.history-card:hover{
-    transform:translateY(-2px);
-    box-shadow:0 12px 28px rgba(0,0,0,0.22);
+.poster-wrapper{
+    position:relative;
+    overflow:hidden;
+    border-radius:14px;
 }
 
 .movie-poster{
-    width:115px;
-    height:165px;
-    border-radius:12px;
+    width:100%;
+    height:320px;
     object-fit:cover;
-    flex-shrink:0;
-    box-shadow:0 10px 25px rgba(0,0,0,0.35);
-}
-
-.movie-details{
-    flex:1;
-}
-
-.movie-details h3{
-    margin:0 0 12px 0;
-    color:#22c55e;
-    font-size:22px;
-    line-height:1.4;
-}
-
-.meta-row{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(180px,1fr));
-    gap:14px;
-}
-
-.meta-box{
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.04);
     border-radius:14px;
-    padding:14px 16px;
-}
-
-.meta-label{
     display:block;
-    color:#94a3b8;
-    font-size:12px;
-    text-transform:uppercase;
-    letter-spacing:0.4px;
-    margin-bottom:8px;
 }
 
-.meta-value{
+/* OVERLAY */
+
+.overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(2,6,23,0.72);
+    opacity:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    transition:.3s;
+}
+
+.poster-wrapper:hover .overlay{
+    opacity:1;
+}
+
+.overlay button{
+    background:#22c55e;
+    border:none;
+    padding:12px 20px;
     color:white;
-    font-weight:600;
-    line-height:1.5;
+    border-radius:10px;
     font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.overlay button:hover{
+    background:#16a34a;
+    transform:translateY(-1px);
+}
+
+/* BADGE */
+
+.movie-badge{
+    position:absolute;
+    top:12px;
+    left:12px;
+    background:rgba(34,197,94,0.9);
+    color:white;
+    font-size:12px;
+    font-weight:700;
+    padding:6px 10px;
+    border-radius:999px;
+    z-index:2;
+}
+
+/* INFO */
+
+.movie-info{
+    padding:16px 4px 4px;
+}
+
+.movie-info h3{
+    margin:0 0 10px;
+    font-size:18px;
+    color:white;
+    line-height:1.4;
+    min-height:50px;
+}
+
+.movie-meta{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.movie-meta p{
+    margin:0;
+    font-size:14px;
+    color:#9ca3af;
+    line-height:1.5;
+}
+
+/* PAGINATION */
+
+.pagination{
+    text-align:center;
+    margin-top:42px;
+}
+
+.pagination a,
+.pagination span{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:42px;
+    height:42px;
+    margin:5px;
+    padding:0 14px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px;
+    color:white;
+    text-decoration:none;
+    transition:0.2s;
+}
+
+.pagination a:hover{
+    background:#22c55e;
+    border-color:#22c55e;
+    transform:translateY(-1px);
+}
+
+.active{
+    background:#22c55e !important;
+    color:#04111d !important;
+    font-weight:bold;
+    box-shadow:0 0 18px rgba(34,197,94,0.35);
+    transform:scale(1.06);
 }
 
 /* EMPTY */
 
 .empty-box{
-    background:#0f172a;
-    border:1px solid rgba(255,255,255,0.05);
-    border-radius:18px;
-    padding:40px 20px;
     text-align:center;
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:50px 20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.35);
 }
 
 .empty{
     color:#9ca3af;
     font-size:18px;
     margin:0;
-}
-
-/* ACTION BUTTONS */
-
-.action-buttons{
-    text-align:center;
-    margin-top:34px;
-}
-
-.action-buttons a{
-    text-decoration:none;
-}
-
-.action-buttons button{
-    margin:10px;
-    padding:12px 22px;
-    background:#374151;
-    border:none;
-    border-radius:12px;
-    color:white;
-    font-size:16px;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.action-buttons button:hover{
-    background:#4b5563;
-    transform:translateY(-1px);
-}
-
-.logout-button{
-    background:#ef4444 !important;
-}
-
-.logout-button:hover{
-    background:#dc2626 !important;
 }
 
 /* RESPONSIVE */
@@ -482,6 +535,11 @@ body{
     .nav-left{
         flex-direction:column;
         align-items:flex-start;
+    }
+
+    .guest-actions{
+        width:100%;
+        justify-content:flex-end;
     }
 
     .user-menu{
@@ -498,32 +556,15 @@ body{
         padding:28px 18px 10px;
     }
 
-    .container{
+    main{
         padding:18px 18px 50px;
     }
 
-    .history-card{
-        flex-direction:column;
-        align-items:center;
-        text-align:center;
-    }
-
-    .movie-poster{
-        width:160px;
-        height:230px;
-    }
-
-    .meta-row{
+    .movies-list{
         grid-template-columns:1fr;
-    }
-
-    .top-actions{
-        flex-direction:column;
-        align-items:flex-start;
     }
 }
 </style>
-
 </head>
 
 <body>
@@ -544,8 +585,8 @@ body{
                 <a href="{% url 'home' %}">
                     <button>Trang chủ</button>
                 </a>
-                <a href="{% url 'movie_list' %}">
-                    <button>Danh sách phim</button>
+                <a href="{% url 'choose_genres' %}">
+                    <button>Chọn thể loại</button>
                 </a>
                 <a href="{% url 'recommend' %}">
                     <button>Gợi ý phim</button>
@@ -553,14 +594,15 @@ body{
             </div>
         </div>
 
+        {% if user.is_authenticated %}
         <div class="user-menu">
             <div class="user-trigger">
                 <div class="avatar">
                     {{ user.username|slice:":1"|upper }}
                 </div>
-                <div class="user-info-nav">
+                <div class="user-info">
                     <strong>{{ user.username }}</strong>
-                    <span>Tài khoản của bạn</span>
+                    <span>Người dùng đã đăng nhập</span>
                 </div>
                 <div class="dropdown-arrow">▼</div>
             </div>
@@ -585,119 +627,133 @@ body{
                 </form>
             </div>
         </div>
+        {% else %}
+        <div class="guest-actions">
+            <a href="{% url 'login' %}">
+                <button class="login-btn">Đăng nhập</button>
+            </a>
+            <a href="{% url 'signup' %}">
+                <button class="signup-btn">Đăng ký</button>
+            </a>
+        </div>
+        {% endif %}
 
     </div>
 </nav>
 
 <div class="page-header">
-    <h1>🎬 Lịch sử đặt phim của {{ user.username }}</h1>
+    <h1>🎬 Danh sách phim</h1>
     <p>
-        Xem lại toàn bộ các phim bạn đã đặt, thời gian đặt vé và ngày chiếu để dễ dàng theo dõi lịch sử của mình.
+        Khám phá các bộ phim mới nhất, chọn phim yêu thích và tiếp tục quy trình đặt vé với giao diện trực quan, hiện đại.
     </p>
 </div>
 
-<div class="container">
+<main>
 
-    {% if messages %}
-    <div class="alert">
-        {% for message in messages %}
-        <p>{{ message }}</p>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <div class="top-actions">
-        <div class="top-left">
-            {% if booked_movies %}
-                Tổng số phim đã đặt: <strong>{{ booked_movies|length }}</strong>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            {% if page_obj and page_obj.paginator.count %}
+                Tổng số phim: <strong>{{ page_obj.paginator.count }}</strong>
             {% else %}
-                Bạn chưa có lịch sử đặt phim
+                Chưa có dữ liệu phim
             {% endif %}
         </div>
 
-        <div class="top-right">
+        <div class="top-bar-right">
             <a href="{% url 'home' %}">
                 <button class="top-btn">🏠 Trang chủ</button>
             </a>
 
-            <a href="{% url 'movie_list' %}">
-                <button class="top-btn">🎥 Xem phim</button>
+            <a href="{% url 'recommend' %}">
+                <button class="top-btn">🎯 Gợi ý phim</button>
             </a>
         </div>
     </div>
 
-    <div class="history-panel">
+    {% if page_obj and page_obj.object_list %}
 
-        {% if booked_movies %}
+    <div class="movies-list">
 
-        <h2>Lịch sử đặt phim của bạn</h2>
+        {% for movie in page_obj %}
+        <div class="movie-card">
 
-        <div class="movie-history-list">
+            <div class="poster-wrapper">
+                {% if movie.startYear >= 2020 %}
+                <div class="movie-badge">Mới</div>
+                {% endif %}
 
-            {% for movie in booked_movies %}
-            <div class="history-card">
+                {% if movie.poster_url %}
+                <img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" class="movie-poster">
+                {% else %}
+                <img src="https://via.placeholder.com/300x450?text=No+Poster" alt="No Poster" class="movie-poster">
+                {% endif %}
 
-                <img class="movie-poster"
-                     src="https://via.placeholder.com/115x165.png?text=Movie"
-                     alt="Poster">
-
-                <div class="movie-details">
-                    <h3>{{ movie.movie_title }}</h3>
-
-                    <div class="meta-row">
-                        <div class="meta-box">
-                            <span class="meta-label">Thể loại</span>
-                            <div class="meta-value">{{ movie.movie_genre }}</div>
-                        </div>
-
-                        <div class="meta-box">
-                            <span class="meta-label">Thời điểm đặt</span>
-                            <div class="meta-value">{{ movie.date_booked }}</div>
-                        </div>
-
-                        <div class="meta-box">
-                            <span class="meta-label">Ngày chiếu</span>
-                            <div class="meta-value">{{ movie.booking_date }}</div>
-                        </div>
-
-                        <div class="meta-box">
-                            <span class="meta-label">Trạng thái</span>
-                            <div class="meta-value">Đã đặt thành công</div>
-                        </div>
-                    </div>
+                <div class="overlay">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'select_movie' movie.tconst %}">
+                        <button>🎬 Đặt phim</button>
+                    </a>
+                    {% else %}
+                    <button onclick="alert('Vui lòng đăng nhập')">🔒 Đăng nhập</button>
+                    {% endif %}
                 </div>
-
             </div>
-            {% endfor %}
+
+            <div class="movie-info">
+                <h3>{{ movie.primaryTitle }}</h3>
+
+                <div class="movie-meta">
+                    <p>🎭 {{ movie.genres }}</p>
+                    <p>📅 {{ movie.startYear }}</p>
+
+                    {% if movie.runtimeMinutes %}
+                    <p>⏱ {{ movie.runtimeMinutes }} phút</p>
+                    {% endif %}
+
+                    {% if movie.averageRating %}
+                    <p>⭐ {{ movie.averageRating }}/10 {% if movie.numVotes %}({{ movie.numVotes }} lượt){% endif %}</p>
+                    {% endif %}
+                </div>
+            </div>
 
         </div>
+        {% endfor %}
 
-        {% else %}
+    </div>
 
-        <div class="empty-box">
-            <p class="empty">Bạn chưa đặt phim nào.</p>
-        </div>
+    <div class="pagination">
 
+        {% if page_obj.has_previous %}
+        <a href="?page=1">«</a>
+        <a href="?page={{ page_obj.previous_page_number }}">‹</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                {% if page_obj.number == num %}
+                    <span class="active">{{ num }}</span>
+                {% else %}
+                    <a href="?page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">›</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">»</a>
         {% endif %}
 
     </div>
 
-    <div class="action-buttons">
+    {% else %}
 
-        <a href="{% url 'home' %}">
-            <button>🏠 Trang chủ</button>
-        </a>
-
-        <form method="POST" action="{% url 'logout' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="logout-button">
-                🚪 Đăng xuất
-            </button>
-        </form>
-
+    <div class="empty-box">
+        <p class="empty">Không có phim để hiển thị.</p>
     </div>
 
-</div>
+    {% endif %}
+
+</main>
 
 </body>
 </html>

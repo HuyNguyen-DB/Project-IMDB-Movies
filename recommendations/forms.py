@@ -5,6 +5,9 @@ from django.forms import DateTimeInput
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
+from django.contrib.auth.forms import UserCreationForm
+
+
 class BookMovieForm(forms.ModelForm):
     class Meta:
         model = BookedMovie
@@ -25,3 +28,23 @@ class EmailLoginForm(AuthenticationForm):
         except User.DoesNotExist:
             raise forms.ValidationError("Không tìm thấy tài khoản với email này.")
         return email
+    
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ("username",)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['username'].help_text = (
+            "Tên đăng nhập tối đa 150 ký tự. Chỉ gồm chữ cái, số và @ . + - _"
+        )
+
+        self.fields['password1'].help_text = (
+            "Mật khẩu phải có ít nhất 8 ký tự, không quá đơn giản và không chỉ gồm số."
+        )
+
+        self.fields['password2'].help_text = (
+            "Nhập lại mật khẩu giống phía trên để xác nhận."
+        )

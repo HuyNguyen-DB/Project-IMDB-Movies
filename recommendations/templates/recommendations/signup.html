@@ -1,117 +1,338 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Ký</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng Ký</title>
 
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
+<style>
+*{box-sizing:border-box;}
 
-        h1 {
-            font-size: 2.5em;
-            margin: 0;
-        }
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#e5e7eb;
+    background:linear-gradient(180deg,#020617,#0f172a,#020617);
+}
 
-        .container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+/* NAVBAR */
 
-        .form-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+.navbar{
+    position:sticky;
+    top:0;
+    background:rgba(2,6,23,0.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
 
-        .form-container label {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            display: block;
-        }
+.nav-container{
+    max-width:1200px;
+    margin:auto;
+    padding:14px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
 
-        .form-container input[type="text"],
-        .form-container input[type="email"],
-        .form-container input[type="password"] {
-            padding: 12px;
-            font-size: 1em;
-            margin-bottom: 20px;
-            width: 100%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
+.logo{
+    font-weight:bold;
+    color:white;
+}
 
-        .form-container button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 20px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-        }
+/* MAIN */
 
-        .form-container button:hover {
-            background-color: #45a049;
-        }
+.container{
+    max-width:520px;
+    margin:70px auto;
+    padding:20px;
+}
 
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
-        }
+/* CARD */
 
-        .login-link a {
-            text-decoration: none;
-            color: #007bff;
-            font-size: 1em;
-        }
+.form-card{
+    background:#111827;
+    padding:35px;
+    border-radius:18px;
+    box-shadow:0 25px 60px rgba(0,0,0,0.5);
+    border:1px solid rgba(255,255,255,0.06);
+}
 
-        .login-link a:hover {
-            text-decoration: underline;
-        }
+/* TITLE */
 
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-            margin-top: 40px;
-        }
-    </style>
+.form-title{
+    text-align:center;
+    font-size:30px;
+    margin-bottom:10px;
+    color:#22c55e;
+}
+
+.form-subtitle{
+    text-align:center;
+    color:#94a3b8;
+    font-size:14px;
+    margin-bottom:28px;
+    line-height:1.6;
+}
+
+/* FIELD */
+
+.form-group{
+    margin-bottom:18px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    color:#e5e7eb;
+    font-size:15px;
+    font-weight:600;
+}
+
+.form-card input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:12px;
+    border:none;
+    outline:none;
+    font-size:15px;
+    background:#f8fafc;
+    color:#111827;
+}
+
+.form-card input:focus{
+    box-shadow:0 0 0 3px rgba(34,197,94,0.25);
+}
+
+/* HELP TEXT */
+
+.help-text{
+    margin-top:8px;
+    color:#94a3b8;
+    font-size:13px;
+    line-height:1.6;
+}
+
+.help-text ul{
+    margin:8px 0 0 18px;
+    padding:0;
+}
+
+.help-text li{
+    margin-bottom:4px;
+}
+
+/* PASSWORD GUIDE BOX */
+
+.guide-box{
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:14px;
+    padding:16px 18px;
+    margin-bottom:22px;
+}
+
+.guide-box h3{
+    margin:0 0 10px 0;
+    font-size:15px;
+    color:#22c55e;
+}
+
+.guide-box ul{
+    margin:0;
+    padding-left:18px;
+    color:#cbd5e1;
+    font-size:13px;
+    line-height:1.7;
+}
+
+/* BUTTON */
+
+.submit-btn{
+    width:100%;
+    padding:14px;
+    background:#22c55e;
+    border:none;
+    border-radius:12px;
+    color:white;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:8px;
+    transition:0.2s;
+}
+
+.submit-btn:hover{
+    background:#16a34a;
+}
+
+/* LOGIN LINK */
+
+.login-link{
+    text-align:center;
+    margin-top:20px;
+    color:#cbd5e1;
+}
+
+.login-link a{
+    color:#22c55e;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.login-link a:hover{
+    text-decoration:underline;
+}
+
+/* ERROR */
+
+.errorlist{
+    color:#f87171;
+    margin:0 0 10px 0;
+    list-style:none;
+    padding:0;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.non-field-errors{
+    background:rgba(127,29,29,0.35);
+    border:1px solid rgba(248,113,113,0.2);
+    color:#fecaca;
+    padding:12px 14px;
+    border-radius:12px;
+    margin-bottom:18px;
+    font-size:14px;
+}
+
+/* BACK BUTTON */
+
+.home-btn{
+    background:#374151;
+    color:white;
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.home-btn:hover{
+    background:#4b5563;
+}
+</style>
+
 </head>
+
 <body>
-    <header>
-        <h1>Đăng Ký Tài Khoản</h1>
-    </header>
 
-    <div class="container">
-        <div class="form-container">
-            <form method="POST">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Đăng Ký</button>
-            </form>
-        </div>
+<div class="navbar">
+    <div class="nav-container">
+        <div class="logo">🎬 Movie Webapp</div>
 
-        <div class="login-link">
-            <p>Đã có tài khoản? <a href="{% url 'login' %}">Đăng nhập</a></p>
+        <div>
+            <a href="{% url 'home' %}">
+                <button class="home-btn">Trang chủ</button>
+            </a>
         </div>
     </div>
+</div>
+
+<div class="container">
+    <div class="form-card">
+
+        <div class="form-title">📝 Đăng Ký Tài Khoản</div>
+        <div class="form-subtitle">
+            Tạo tài khoản để lưu lịch sử đặt phim, chọn phòng chiếu và tiếp tục thanh toán dễ dàng hơn.
+        </div>
+
+        <div class="guide-box">
+            <h3>Yêu cầu khi tạo tài khoản</h3>
+            <ul>
+                <li>Tên đăng nhập nên ngắn gọn, dễ nhớ và không trùng với người khác.</li>
+                <li>Mật khẩu không được quá ngắn hoặc quá đơn giản.</li>
+                <li>Không nên dùng mật khẩu giống với thông tin cá nhân dễ đoán.</li>
+                <li>Nên dùng kết hợp chữ cái, số và ký tự đặc biệt để bảo mật tốt hơn.</li>
+            </ul>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Tên đăng nhập</label>
+                {{ form.username.errors }}
+                <input
+                    type="text"
+                    name="{{ form.username.name }}"
+                    id="{{ form.username.id_for_label }}"
+                    value="{{ form.username.value|default:'' }}"
+                    placeholder="Nhập tên đăng nhập"
+                    required
+                >
+                {% if form.username.help_text %}
+                    <div class="help-text">{{ form.username.help_text|safe }}</div>
+                {% else %}
+                    <div class="help-text">
+                        Dùng tên này để đăng nhập vào hệ thống sau khi tạo tài khoản.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">Mật khẩu</label>
+                {{ form.password1.errors }}
+                <input
+                    type="password"
+                    name="{{ form.password1.name }}"
+                    id="{{ form.password1.id_for_label }}"
+                    placeholder="Nhập mật khẩu"
+                    required
+                >
+                {% if form.password1.help_text %}
+                    <div class="help-text">{{ form.password1.help_text|safe }}</div>
+                {% else %}
+                    <div class="help-text">
+                        Mật khẩu nên đủ mạnh và không dễ đoán.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">Nhập lại mật khẩu</label>
+                {{ form.password2.errors }}
+                <input
+                    type="password"
+                    name="{{ form.password2.name }}"
+                    id="{{ form.password2.id_for_label }}"
+                    placeholder="Nhập lại mật khẩu để xác nhận"
+                    required
+                >
+                {% if form.password2.help_text %}
+                    <div class="help-text">{{ form.password2.help_text|safe }}</div>
+                {% else %}
+                    <div class="help-text">
+                        Nhập lại đúng mật khẩu vừa tạo ở phía trên.
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Đăng Ký
+            </button>
+        </form>
+
+        <div class="login-link">
+            Đã có tài khoản?
+            <a href="{% url 'login' %}">Đăng nhập</a>
+        </div>
+
+    </div>
+</div>
+
 </body>
 </html>

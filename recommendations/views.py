@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 
 import numpy as np
 from .models import BookedMovie, Movie, ScreenRoom
-from .forms import EmailLoginForm, BookMovieForm
+from .forms import EmailLoginForm, BookMovieForm, CustomUserCreationForm
 from django.core.paginator import Paginator
 
 import pandas as pd
@@ -90,12 +90,13 @@ def user_home(request):
 # Đăng ký
 def signup(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)  # ✅ dùng form custom
         if form.is_valid():
             form.save()
             return redirect('login')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()  # ✅ dùng form custom
+
     return render(request, 'recommendations/signup.html', {'form': form})
 
 # Đăng nhập
@@ -288,26 +289,32 @@ def build_user_genres_from_history(user):
 # Đặt phim
 @login_required
 def book_movie(request):
+    movie_id = request.session.get('selected_movie')
+    room_id = request.session.get('selected_room')
 
-    title = request.GET.get('title')
-    genre = request.GET.get('genre')
-    poster = request.GET.get('poster')
+    if not movie_id:
+        return redirect('movie_list')
+
+    if not room_id:
+        return redirect('room_list')
+
+    movie = get_object_or_404(Movie, tconst=movie_id)
+    room = get_object_or_404(ScreenRoom, room_id=room_id)
 
     if request.method == 'POST':
         form = BookMovieForm(request.POST)
 
         if form.is_valid():
             booked_movie = form.save(commit=False)
-
             booked_movie.user = request.user
-            booked_movie.movie_title = title
-            booked_movie.movie_genre = genre
+            booked_movie.movie_title = movie.primaryTitle
+            booked_movie.movie_genre = movie.genres
 
             booked_movie.save()
 
-            messages.success(request, "Đặt phim thành công!")
-            return redirect('user_home')
+            request.session['booked_movie_id'] = booked_movie.id
 
+            return redirect('payment')
     else:
         form = BookMovieForm()
 
@@ -316,12 +323,10 @@ def book_movie(request):
         'recommendations/book_movie.html',
         {
             'form': form,
-            'title': title,
-            'genre': genre,
-            'poster': poster
+            'movie': movie,
+            'room': room,
         }
     )
-
 
 # Kiểm tra nếu chưa đăng nhập
 def some_view(request):
@@ -342,3 +347,35 @@ def room_detail(request, room_id):
             'images': images
         }
     )
+
+def movie_list(request):
+    movies = Movie.objects.all().order_by('-startYear')
+
+    paginator = Paginator(movies, 12)  # 12 phim / trang
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'recommendations/movie_list.html', {
+        'page_obj': page_obj
+    })
+
+@login_required
+def handle_booking(request, room_id=None):
+    if room_id:
+        request.session['selected_room'] = room_id
+
+    movie_id = request.session.get('selected_movie')
+    selected_room = request.session.get('selected_room')
+
+    if not movie_id:
+        return redirect('movie_list')
+
+    if not selected_room:
+        return redirect('room_list')
+
+    return redirect('book_movie')
+
+@login_required
+def select_movie(request, movie_id):
+    request.session['selected_movie'] = movie_id
+    return redirect('handle_booking')
