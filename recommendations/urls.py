@@ -35,6 +35,7 @@ urlpatterns = [
     path('handle-booking/<str:room_id>/', views.handle_booking, name='handle_booking_with_room'),
 
     path('select-movie/<str:movie_id>/', views.select_movie, name='select_movie'),
+    path('rooms/', views.room_list, name='room_list'),
 ]
 
 if settings.DEBUG:

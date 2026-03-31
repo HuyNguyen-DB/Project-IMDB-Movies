@@ -35,8 +35,6 @@ def get_movies():
 # Trang chủ cho cả user và guest
 def home(request):
     recommendations = []
-
-    # Chỉ lấy 5 phim nổi bật
     movies = Movie.objects.values(
         'primaryTitle',
         'startYear',
@@ -44,8 +42,8 @@ def home(request):
         'genres',
         'poster_url'
     ).order_by('-numVotes')[:5]
-    # Chỉ lấy phòng đang hoạt động
-    screen_rooms = ScreenRoom.objects.filter(
+
+    available_rooms = ScreenRoom.objects.filter(
         status='available'
     ).only(
         'room_id',
@@ -54,6 +52,18 @@ def home(request):
         'status',
         'image'
     )
+
+    normal_room = available_rooms.filter(name__icontains='Thường').first()
+    vip_room = available_rooms.filter(name__icontains='VIP').first()
+    group_room = available_rooms.filter(name__icontains='Nhóm').first()
+
+    featured_rooms = []
+    if normal_room:
+        featured_rooms.append(normal_room)
+    if vip_room:
+        featured_rooms.append(vip_room)
+    if group_room:
+        featured_rooms.append(group_room)
 
     if request.method == 'POST':
         user_genres = request.POST.get('genres', '').strip()
@@ -66,8 +76,33 @@ def home(request):
         {
             'movies': movies,
             'recommendations': recommendations,
-            'screen_rooms': screen_rooms,
-        })
+            'screen_rooms': featured_rooms,
+        }
+    )
+
+
+def room_list(request):
+    available_rooms = ScreenRoom.objects.filter(status='available').only(
+        'room_id',
+        'name',
+        'description',
+        'status',
+        'image'
+    )
+
+    normal_rooms = available_rooms.filter(name__icontains='Thường')
+    vip_rooms = available_rooms.filter(name__icontains='VIP')
+    group_rooms = available_rooms.filter(name__icontains='Nhóm')
+
+    return render(
+        request,
+        'recommendations/room_list.html',
+        {
+            'normal_rooms': normal_rooms,
+            'vip_rooms': vip_rooms,
+            'group_rooms': group_rooms,
+        }
+    )
 # Trang dành cho user đã đăng nhập
 @login_required
 def user_home(request):

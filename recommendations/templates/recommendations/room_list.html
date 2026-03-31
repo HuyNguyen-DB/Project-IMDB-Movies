@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danh sách phòng</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    margin:0;
+    color:#e5e7eb;
+    background:linear-gradient(180deg,#020617,#0f172a,#020617);
+}
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(2, 6, 23, 0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.nav-container{
+    max-width:1300px;
+    margin:auto;
+    padding:14px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.nav-left{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.logo-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-decoration:none;
+    color:white;
+}
+
+.logo-icon{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    font-size:22px;
+    box-shadow:0 8px 20px rgba(34,197,94,0.25);
+}
+
+.logo-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.2;
+}
+
+.logo-text strong{
+    font-size:16px;
+    color:#ffffff;
+}
+
+.logo-text span{
+    font-size:12px;
+    color:#94a3b8;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.nav-links a{
+    text-decoration:none;
+}
+
+.nav-links button{
+    background:#111827;
+    color:white;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.nav-links button:hover{
+    background:#1f2937;
+    transform:translateY(-1px);
+}
+
+.guest-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.guest-actions a{
+    text-decoration:none;
+}
+
+.guest-actions button{
+    padding:10px 18px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.login-btn{
+    background:#22c55e;
+    color:white;
+}
+
+.login-btn:hover{
+    background:#16a34a;
+}
+
+.signup-btn{
+    background:#111827;
+    color:white;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.signup-btn:hover{
+    background:#1f2937;
+}
+
+.user-menu{
+    position:relative;
+}
+
+.user-trigger{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:8px 12px;
+    min-width:200px;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    color:white;
+    font-size:16px;
+    flex-shrink:0;
+}
+
+.user-info{
+    text-align:left;
+    flex:1;
+    min-width:0;
+}
+
+.user-info strong{
+    display:block;
+    font-size:14px;
+    color:white;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.user-info span{
+    display:block;
+    font-size:12px;
+    color:#9ca3af;
+}
+
+main{
+    max-width:1200px;
+    margin:auto;
+    padding:30px 40px 60px 40px;
+}
+
+.page-header{
+    margin-bottom:30px;
+}
+
+.page-header h1{
+    margin:0 0 10px 0;
+    color:white;
+    font-size:30px;
+}
+
+.page-header p{
+    margin:0;
+    color:#94a3b8;
+    line-height:1.6;
+}
+
+.section-title{
+    margin-top:40px;
+    margin-bottom:18px;
+    font-size:24px;
+    color:white;
+}
+
+.room-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:25px;
+    margin-top:20px;
+}
+
+.room-grid a{
+    text-decoration:none;
+    color:inherit;
+}
+
+.room-card{
+    background:#0f172a;
+    border-radius:16px;
+    overflow:hidden;
+    transition:all 0.25s;
+    border:1px solid rgba(255,255,255,0.05);
+    box-shadow:0 15px 35px rgba(0,0,0,0.25);
+}
+
+.room-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 24px 45px rgba(0,0,0,0.38);
+}
+
+.room-card img{
+    width:100%;
+    height:170px;
+    object-fit:cover;
+    display:block;
+}
+
+.room-card h3{
+    padding:14px 16px 0 16px;
+    margin:0;
+    color:white;
+}
+
+.room-card p{
+    padding:0 16px;
+    color:#9ca3af;
+    margin:10px 0;
+    line-height:1.5;
+}
+
+.room-status{
+    padding:10px 16px 16px 16px;
+    font-weight:600;
+}
+
+.empty-text{
+    color:#94a3b8;
+    font-size:16px;
+    margin-top:10px;
+}
+
+@media (max-width: 900px){
+    .nav-container{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .nav-left{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    main{
+        padding:20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <a href="{% url 'home' %}" class="logo-box">
+                <div class="logo-icon">🎬</div>
+                <div class="logo-text">
+                    <strong>Movie Webapp</strong>
+                    <span>Đề xuất phim & đặt phòng</span>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="{% url 'home' %}"><button>Trang chủ</button></a>
+                <a href="{% url 'movie_list' %}"><button>Danh sách phim</button></a>
+                <a href="{% url 'room_list' %}"><button>Room List</button></a>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="user-menu">
+            <div class="user-trigger">
+                <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+                <div class="user-info">
+                    <strong>{{ user.username }}</strong>
+                    <span>Người dùng đã đăng nhập</span>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="guest-actions">
+            <a href="{% url 'login' %}">
+                <button class="login-btn">Đăng nhập</button>
+            </a>
+            <a href="{% url 'signup' %}">
+                <button class="signup-btn">Đăng ký</button>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</nav>
+
+<main>
+    <div class="page-header">
+        <h1>🏢 Danh sách phòng chiếu</h1>
+        <p>
+            Khám phá toàn bộ phòng chiếu hiện có, được phân loại theo phòng thường,
+            phòng VIP và phòng nhóm để bạn lựa chọn dễ dàng hơn.
+        </p>
+    </div>
+
+    <h2 class="section-title">Phòng Thường</h2>
+    <div class="room-grid">
+        {% for room in normal_rooms %}
+        <a href="{% url 'room_detail' room.room_id %}">
+            <div class="room-card">
+                {% if room.image %}
+                <img src="{{ room.image.url }}" alt="{{ room.name }}">
+                {% endif %}
+                <h3>{{ room.name }}</h3>
+                <p>{{ room.description|truncatewords:20 }}</p>
+                <div class="room-status">
+                    <span style="color:lightgreen;">● Đang hoạt động</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <p class="empty-text">Chưa có phòng thường.</p>
+        {% endfor %}
+    </div>
+
+    <h2 class="section-title">Phòng VIP</h2>
+    <div class="room-grid">
+        {% for room in vip_rooms %}
+        <a href="{% url 'room_detail' room.room_id %}">
+            <div class="room-card">
+                {% if room.image %}
+                <img src="{{ room.image.url }}" alt="{{ room.name }}">
+                {% endif %}
+                <h3>{{ room.name }}</h3>
+                <p>{{ room.description|truncatewords:20 }}</p>
+                <div class="room-status">
+                    <span style="color:lightgreen;">● Đang hoạt động</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <p class="empty-text">Chưa có phòng VIP.</p>
+        {% endfor %}
+    </div>
+
+    <h2 class="section-title">Phòng Nhóm</h2>
+    <div class="room-grid">
+        {% for room in group_rooms %}
+        <a href="{% url 'room_detail' room.room_id %}">
+            <div class="room-card">
+                {% if room.image %}
+                <img src="{{ room.image.url }}" alt="{{ room.name }}">
+                {% endif %}
+                <h3>{{ room.name }}</h3>
+                <p>{{ room.description|truncatewords:20 }}</p>
+                <div class="room-status">
+                    <span style="color:lightgreen;">● Đang hoạt động</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <p class="empty-text">Chưa có phòng nhóm.</p>
+        {% endfor %}
+    </div>
+</main>
+
+</body>
+</html>
