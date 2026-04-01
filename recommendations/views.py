@@ -22,6 +22,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 def get_movies():
     movies_queryset = Movie.objects.all()
     movies_data = movies_queryset.values(
+        'tconst',
         'primaryTitle',
         'genres',
         'averageRating',
@@ -194,7 +195,7 @@ def get_movie_recommendations(user_genres, num_recommendations=20):
     )
 
     return recommended[
-        ['primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
+        ['tconst', 'primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
     ].head(num_recommendations)
 def recommend(request, user_genres=None, user_title=None):
     movies_df = get_movies()
@@ -230,7 +231,7 @@ def recommend(request, user_genres=None, user_title=None):
         )
 
     recommendations = recommendations[
-        ['primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
+        ['tconst', 'primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
     ].drop_duplicates()
 
     return recommendations.to_dict('records')
