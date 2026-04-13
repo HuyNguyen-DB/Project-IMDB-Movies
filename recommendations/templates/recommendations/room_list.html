@@ -229,12 +229,8 @@ main{
     margin-top:20px;
 }
 
-.room-grid a{
-    text-decoration:none;
-    color:inherit;
-}
-
 .room-card{
+    position:relative;
     background:#0f172a;
     border-radius:16px;
     overflow:hidden;
@@ -273,6 +269,59 @@ main{
     font-weight:600;
 }
 
+.room-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(2, 6, 23, 0.60);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    opacity:0;
+    visibility:hidden;
+    transition:all 0.25s ease;
+}
+
+.room-card:hover .room-overlay{
+    opacity:1;
+    visibility:visible;
+}
+
+.overlay-btn{
+    padding:10px 16px;
+    border-radius:10px;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    transition:0.2s;
+    transform:translateY(12px);
+    display:inline-block;
+    min-width:125px;
+    text-align:center;
+}
+
+.room-card:hover .overlay-btn{
+    transform:translateY(0);
+}
+
+.detail-btn{
+    background:#22c55e;
+    color:white;
+}
+
+.detail-btn:hover{
+    background:#16a34a;
+}
+
+.book-btn{
+    background:#2563eb;
+    color:white;
+}
+
+.book-btn:hover{
+    background:#1d4ed8;
+}
+
 .empty-text{
     color:#94a3b8;
     font-size:16px;
@@ -292,6 +341,17 @@ main{
 
     main{
         padding:20px;
+    }
+}
+
+@media (max-width: 600px){
+    .room-overlay{
+        flex-direction:column;
+        gap:10px;
+    }
+
+    .overlay-btn{
+        width:80%;
     }
 }
 </style>
@@ -352,18 +412,22 @@ main{
     <h2 class="section-title">Phòng Thường</h2>
     <div class="room-grid">
         {% for room in normal_rooms %}
-        <a href="{% url 'room_detail' room.room_id %}">
-            <div class="room-card">
-                {% if room.image %}
-                <img src="{{ room.image.url }}" alt="{{ room.name }}">
-                {% endif %}
-                <h3>{{ room.name }}</h3>
-                <p>{{ room.description|truncatewords:20 }}</p>
-                <div class="room-status">
-                    <span style="color:lightgreen;">● Đang hoạt động</span>
-                </div>
+        <div class="room-card">
+            {% if room.image %}
+            <img src="{{ room.image.url }}" alt="{{ room.name }}">
+            {% endif %}
+
+            <div class="room-overlay">
+                <a href="{% url 'room_detail' room.room_id %}" class="overlay-btn detail-btn">Xem chi tiết</a>
+                <a href="{% url 'handle_booking_with_room' room.room_id %}" class="overlay-btn book-btn">Đặt phòng</a>
             </div>
-        </a>
+
+            <h3>{{ room.name }}</h3>
+            <p>{{ room.description|truncatewords:20 }}</p>
+            <div class="room-status">
+                <span style="color:lightgreen;">● Đang hoạt động</span>
+            </div>
+        </div>
         {% empty %}
         <p class="empty-text">Chưa có phòng thường.</p>
         {% endfor %}
@@ -372,18 +436,22 @@ main{
     <h2 class="section-title">Phòng VIP</h2>
     <div class="room-grid">
         {% for room in vip_rooms %}
-        <a href="{% url 'room_detail' room.room_id %}">
-            <div class="room-card">
-                {% if room.image %}
-                <img src="{{ room.image.url }}" alt="{{ room.name }}">
-                {% endif %}
-                <h3>{{ room.name }}</h3>
-                <p>{{ room.description|truncatewords:20 }}</p>
-                <div class="room-status">
-                    <span style="color:lightgreen;">● Đang hoạt động</span>
-                </div>
+        <div class="room-card">
+            {% if room.image %}
+            <img src="{{ room.image.url }}" alt="{{ room.name }}">
+            {% endif %}
+
+            <div class="room-overlay">
+                <a href="{% url 'room_detail' room.room_id %}" class="overlay-btn detail-btn">Xem chi tiết</a>
+                <a href="{% url 'handle_booking_with_room' room.room_id %}" class="overlay-btn book-btn">Đặt phòng</a>
             </div>
-        </a>
+
+            <h3>{{ room.name }}</h3>
+            <p>{{ room.description|truncatewords:20 }}</p>
+            <div class="room-status">
+                <span style="color:lightgreen;">● Đang hoạt động</span>
+            </div>
+        </div>
         {% empty %}
         <p class="empty-text">Chưa có phòng VIP.</p>
         {% endfor %}
@@ -392,18 +460,22 @@ main{
     <h2 class="section-title">Phòng Nhóm</h2>
     <div class="room-grid">
         {% for room in group_rooms %}
-        <a href="{% url 'room_detail' room.room_id %}">
-            <div class="room-card">
-                {% if room.image %}
-                <img src="{{ room.image.url }}" alt="{{ room.name }}">
-                {% endif %}
-                <h3>{{ room.name }}</h3>
-                <p>{{ room.description|truncatewords:20 }}</p>
-                <div class="room-status">
-                    <span style="color:lightgreen;">● Đang hoạt động</span>
-                </div>
+        <div class="room-card">
+            {% if room.image %}
+            <img src="{{ room.image.url }}" alt="{{ room.name }}">
+            {% endif %}
+
+            <div class="room-overlay">
+                <a href="{% url 'room_detail' room.room_id %}" class="overlay-btn detail-btn">Xem chi tiết</a>
+                <a href="{% url 'handle_booking_with_room' room.room_id %}" class="overlay-btn book-btn">Đặt phòng</a>
             </div>
-        </a>
+
+            <h3>{{ room.name }}</h3>
+            <p>{{ room.description|truncatewords:20 }}</p>
+            <div class="room-status">
+                <span style="color:lightgreen;">● Đang hoạt động</span>
+            </div>
+        </div>
         {% empty %}
         <p class="empty-text">Chưa có phòng nhóm.</p>
         {% endfor %}

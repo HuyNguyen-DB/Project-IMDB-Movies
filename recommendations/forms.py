@@ -9,14 +9,14 @@ from django.contrib.auth.forms import UserCreationForm
 
 
 class BookMovieForm(forms.ModelForm):
-    class Meta:
-        model = BookedMovie
-        fields = ['movie_title', 'movie_genre', 'booking_date']  # Thêm trường booking_date
-
     booking_date = forms.DateTimeField(
         widget=DateTimeInput(attrs={'type': 'datetime-local'}),
         input_formats=['%Y-%m-%dT%H:%M']
     )
+
+    class Meta:
+        model = BookedMovie
+        fields = ['booking_date']
 
 class EmailLoginForm(AuthenticationForm):
     username = forms.EmailField(label="Email", max_length=254)

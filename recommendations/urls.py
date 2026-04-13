@@ -36,6 +36,10 @@ urlpatterns = [
 
     path('select-movie/<str:movie_id>/', views.select_movie, name='select_movie'),
     path('rooms/', views.room_list, name='room_list'),
+
+    path('payment/<int:booking_id>/', views.payment_page, name='payment_page'),
+    path('payment/<int:booking_id>/confirm/', views.confirm_payment, name='confirm_payment'),
+    path('invoice/<str:invoice_code>/', views.invoice_detail, name='invoice_detail'),
 ]
 
 if settings.DEBUG:

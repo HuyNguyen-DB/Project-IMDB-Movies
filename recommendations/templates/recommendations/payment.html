@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanh toán đơn đặt phim</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#e5e7eb;
+    background:linear-gradient(180deg,#020617,#0f172a,#020617);
+}
+
+/* NAVBAR */
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(2, 6, 23, 0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.nav-container{
+    max-width:1300px;
+    margin:auto;
+    padding:14px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.nav-left{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.logo-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-decoration:none;
+    color:white;
+}
+
+.logo-icon{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    font-size:22px;
+    box-shadow:0 8px 20px rgba(34,197,94,0.25);
+}
+
+.logo-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.2;
+}
+
+.logo-text strong{
+    font-size:16px;
+    color:#ffffff;
+}
+
+.logo-text span{
+    font-size:12px;
+    color:#94a3b8;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.nav-links a{
+    text-decoration:none;
+}
+
+.nav-links button{
+    background:#111827;
+    color:white;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.nav-links button:hover{
+    background:#1f2937;
+    transform:translateY(-1px);
+}
+
+/* USER MENU */
+
+.user-menu{
+    position:relative;
+}
+
+.user-trigger{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:8px 12px;
+    cursor:pointer;
+    min-width:200px;
+    transition:0.2s;
+}
+
+.user-trigger:hover{
+    background:#1f2937;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    color:white;
+    font-size:16px;
+    flex-shrink:0;
+    box-shadow:0 8px 20px rgba(6,182,212,0.2);
+}
+
+.user-info-nav{
+    text-align:left;
+    flex:1;
+    min-width:0;
+}
+
+.user-info-nav strong{
+    display:block;
+    font-size:14px;
+    color:white;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.user-info-nav span{
+    display:block;
+    font-size:12px;
+    color:#9ca3af;
+}
+
+.dropdown-arrow{
+    color:#9ca3af;
+    font-size:13px;
+}
+
+.dropdown-menu{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    width:240px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.4);
+    overflow:hidden;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(10px);
+    transition:0.25s ease;
+}
+
+.user-menu:hover .dropdown-menu{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+
+.dropdown-header{
+    padding:16px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    background:rgba(255,255,255,0.02);
+}
+
+.dropdown-header strong{
+    display:block;
+    margin-bottom:4px;
+    color:white;
+    font-size:15px;
+}
+
+.dropdown-header p{
+    margin:0;
+    color:#94a3b8;
+    font-size:12px;
+}
+
+.dropdown-item{
+    display:block;
+    text-decoration:none;
+    color:white;
+    padding:13px 16px;
+    transition:0.2s;
+    font-size:14px;
+}
+
+.dropdown-item:hover{
+    background:#1f2937;
+}
+
+.dropdown-form{
+    margin:0;
+}
+
+.dropdown-form button{
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    color:#f87171;
+    padding:13px 16px;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.dropdown-form button:hover{
+    background:#1f2937;
+}
+
+/* PAGE HEADER */
+
+.page-header{
+    max-width:1300px;
+    margin:0 auto;
+    padding:40px 30px 10px;
+}
+
+.page-header h1{
+    margin:0 0 10px 0;
+    font-size:34px;
+    color:white;
+}
+
+.page-header p{
+    margin:0;
+    color:#94a3b8;
+    line-height:1.6;
+}
+
+/* MAIN */
+
+.container{
+    max-width:1300px;
+    margin:auto;
+    padding:20px 30px 70px;
+}
+
+.payment-layout{
+    display:grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap:28px;
+    align-items:start;
+}
+
+.payment-panel,
+.summary-panel{
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:20px;
+    padding:28px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.35);
+}
+
+.panel-title{
+    margin:0 0 22px 0;
+    color:white;
+    font-size:26px;
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(220px,1fr));
+    gap:16px;
+}
+
+.info-card{
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:16px;
+    padding:16px;
+}
+
+.info-label{
+    display:block;
+    color:#94a3b8;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin-bottom:8px;
+}
+
+.info-value{
+    color:white;
+    font-size:16px;
+    font-weight:600;
+    line-height:1.5;
+}
+
+.status-row{
+    margin-top:18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    padding:10px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    border:1px solid transparent;
+}
+
+.badge.pending{
+    background:rgba(250,204,21,0.12);
+    color:#fde68a;
+    border-color:rgba(250,204,21,0.2);
+}
+
+.badge.confirmed{
+    background:rgba(34,197,94,0.12);
+    color:#86efac;
+    border-color:rgba(34,197,94,0.2);
+}
+
+.badge.cancelled{
+    background:rgba(239,68,68,0.12);
+    color:#fca5a5;
+    border-color:rgba(239,68,68,0.2);
+}
+
+.badge.unpaid{
+    background:rgba(59,130,246,0.12);
+    color:#93c5fd;
+    border-color:rgba(59,130,246,0.2);
+}
+
+.badge.paid{
+    background:rgba(34,197,94,0.12);
+    color:#86efac;
+    border-color:rgba(34,197,94,0.2);
+}
+
+.summary-box{
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:18px;
+    padding:22px;
+}
+
+.summary-box + .summary-box{
+    margin-top:18px;
+}
+
+.summary-row{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+.summary-row:last-child{
+    border-bottom:none;
+    padding-bottom:0;
+}
+
+.summary-key{
+    color:#94a3b8;
+}
+
+.summary-value{
+    color:white;
+    font-weight:600;
+    text-align:right;
+}
+
+.total-price{
+    font-size:26px;
+    color:#22c55e;
+    font-weight:700;
+}
+
+.note-box{
+    margin-top:18px;
+    background:rgba(34,197,94,0.08);
+    border:1px solid rgba(34,197,94,0.18);
+    border-radius:16px;
+    padding:16px;
+    color:#d1fae5;
+    line-height:1.6;
+}
+
+.action-form{
+    margin-top:24px;
+}
+
+.confirm-btn{
+    width:100%;
+    background:#22c55e;
+    color:white;
+    border:none;
+    padding:15px 20px;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:700;
+    transition:0.2s;
+    box-shadow:0 12px 24px rgba(34,197,94,0.18);
+}
+
+.confirm-btn:hover{
+    background:#16a34a;
+    transform:translateY(-2px);
+}
+
+.secondary-actions{
+    margin-top:18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.secondary-actions a{
+    text-decoration:none;
+}
+
+.secondary-actions button{
+    background:#374151;
+    color:white;
+    border:none;
+    padding:12px 18px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.secondary-actions button:hover{
+    background:#4b5563;
+}
+
+.paid-box{
+    margin-top:18px;
+    background:rgba(34,197,94,0.08);
+    border:1px solid rgba(34,197,94,0.18);
+    border-radius:16px;
+    padding:18px;
+}
+
+.paid-box p{
+    margin:0 0 14px 0;
+    color:#d1fae5;
+}
+
+.invoice-link button{
+    background:#22c55e;
+    color:white;
+    border:none;
+    padding:12px 18px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:700;
+}
+
+@media (max-width: 1024px){
+    .payment-layout{
+        grid-template-columns:1fr;
+    }
+}
+
+@media (max-width: 900px){
+    .nav-container{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .nav-left{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .user-menu{
+        width:100%;
+    }
+
+    .user-trigger{
+        width:100%;
+    }
+}
+
+@media (max-width: 768px){
+    .page-header{
+        padding:28px 18px 10px;
+    }
+
+    .container{
+        padding:18px 18px 50px;
+    }
+
+    .info-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+
+        <div class="nav-left">
+            <a href="{% url 'home' %}" class="logo-box">
+                <div class="logo-icon">🎬</div>
+                <div class="logo-text">
+                    <strong>Movie Webapp</strong>
+                    <span>Đề xuất phim & đặt phòng</span>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="{% url 'home' %}">
+                    <button>Trang chủ</button>
+                </a>
+                <a href="{% url 'movie_list' %}">
+                    <button>Danh sách phim</button>
+                </a>
+                <a href="{% url 'recommend' %}">
+                    <button>Gợi ý phim</button>
+                </a>
+            </div>
+        </div>
+
+        <div class="user-menu">
+            <div class="user-trigger">
+                <div class="avatar">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <div class="user-info-nav">
+                    <strong>{{ user.username }}</strong>
+                    <span>Tài khoản của bạn</span>
+                </div>
+                <div class="dropdown-arrow">▼</div>
+            </div>
+
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <strong>{{ user.username }}</strong>
+                    <p>Quản lý tài khoản và lịch sử đặt phim</p>
+                </div>
+
+                <a href="{% url 'user_home' %}" class="dropdown-item">
+                    📜 Lịch sử đặt phim
+                </a>
+
+                <a href="{% url 'movie_list' %}" class="dropdown-item">
+                    🎥 Danh sách phim
+                </a>
+
+                <form method="POST" action="{% url 'logout' %}" class="dropdown-form">
+                    {% csrf_token %}
+                    <button type="submit">🚪 Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>💳 Thanh toán đơn đặt phim</h1>
+    <p>
+        Kiểm tra lại thông tin đơn hàng, tổng tiền và xác nhận thanh toán mô phỏng để hoàn tất đặt phim trong hệ thống.
+    </p>
+</div>
+
+<div class="container">
+    <div class="payment-layout">
+
+        <div class="payment-panel">
+            <h2 class="panel-title">Thông tin đơn đặt phim</h2>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <span class="info-label">Mã đơn</span>
+                    <div class="info-value">{{ booking.booking_code }}</div>
+                </div>
+
+                <div class="info-card">
+                    <span class="info-label">Tên phim</span>
+                    <div class="info-value">{{ booking.movie_title }}</div>
+                </div>
+
+                <div class="info-card">
+                    <span class="info-label">Thể loại</span>
+                    <div class="info-value">{{ booking.movie_genre }}</div>
+                </div>
+
+                <div class="info-card">
+                    <span class="info-label">Phòng chiếu</span>
+                    <div class="info-value">{{ booking.room_name }}</div>
+                </div>
+
+                <div class="info-card">
+                    <span class="info-label">Ngày giờ xem</span>
+                    <div class="info-value">{{ booking.booking_date }}</div>
+                </div>
+
+                <div class="info-card">
+                    <span class="info-label">Thời điểm tạo đơn</span>
+                    <div class="info-value">{{ booking.date_booked }}</div>
+                </div>
+
+                <div class="info-card">
+                    <span class="info-label">Thời lượng thuê</span>
+                    <div class="info-value">{{ booking.rental_duration_minutes }} phút</div>
+                </div>
+
+                <div class="info-card">
+                    <span class="info-label">Đơn giá</span>
+                    <div class="info-value">{{ booking.price_per_30min }} VND / 30 phút</div>
+                </div>
+            </div>
+
+            <div class="status-row">
+                <span class="badge {{ booking.status }}">{{ booking.status|upper }}</span>
+                <span class="badge {{ booking.payment_status }}">{{ booking.payment_status|upper }}</span>
+            </div>
+
+            <div class="note-box">
+                Đây là bước thanh toán mô phỏng cho đồ án học tập. Khi bạn bấm xác nhận, hệ thống sẽ chuyển đơn từ trạng thái chờ thanh toán sang đã thanh toán và sinh hóa đơn nội bộ.
+            </div>
+        </div>
+
+        <div class="summary-panel">
+            <h2 class="panel-title">Tóm tắt thanh toán</h2>
+
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span class="summary-key">Mã đơn</span>
+                    <span class="summary-value">{{ booking.booking_code }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-key">Thời lượng thuê</span>
+                    <span class="summary-value">{{ booking.rental_duration_minutes }} phút</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-key">Giá mỗi 30 phút</span>
+                    <span class="summary-value">{{ booking.price_per_30min }} VND</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-key">Tổng thanh toán</span>
+                    <span class="summary-value total-price">{{ booking.total_price }} VND</span>
+                </div>
+            </div>
+
+            {% if booking.payment_status == 'unpaid' %}
+            <form method="POST" action="{% url 'confirm_payment' booking.id %}" class="action-form">
+                {% csrf_token %}
+                <button type="submit" class="confirm-btn">✅ Xác nhận đã thanh toán</button>
+            </form>
+            {% else %}
+            <div class="paid-box">
+                <p>Đơn này đã được thanh toán thành công. Bạn có thể xem hóa đơn nội bộ ngay bên dưới.</p>
+                <a href="{% url 'invoice_detail' booking.invoice.invoice_code %}" class="invoice-link">
+                    <button type="button">🧾 Xem hóa đơn</button>
+                </a>
+            </div>
+            {% endif %}
+
+            <div class="secondary-actions">
+                <a href="{% url 'user_home' %}">
+                    <button type="button">📜 Lịch sử đặt phim</button>
+                </a>
+
+                <a href="{% url 'home' %}">
+                    <button type="button">🏠 Trang chủ</button>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

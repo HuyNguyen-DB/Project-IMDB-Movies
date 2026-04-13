@@ -10,13 +10,15 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
 import numpy as np
-from .models import BookedMovie, Movie, ScreenRoom
+from .models import BookedMovie, Movie, ScreenRoom, Invoice
 from .forms import EmailLoginForm, BookMovieForm, CustomUserCreationForm
 from django.core.paginator import Paginator
 
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
+from django.utils import timezone
 
 # Lấy tất cả dữ liệu phim từ MongoDB và chuyển đổi thành DataFrame
 def get_movies():
@@ -114,14 +116,12 @@ def user_home(request):
         user_title = request.POST.get('title', '').strip()
         recommendations = recommend(request, user_genres, user_title)
 
-    # Lấy toàn bộ các phim đã đặt của người dùng
     booked_movies = BookedMovie.objects.filter(user=request.user).order_by('-date_booked')
 
     return render(request, 'recommendations/user_home.html', {
         'recommendations': recommendations,
-        'booked_movies': booked_movies,  # Truyền toàn bộ lịch sử đặt phim
+        'booked_movies': booked_movies,
     })
-
 
 # Đăng ký
 def signup(request):
@@ -197,6 +197,7 @@ def get_movie_recommendations(user_genres, num_recommendations=20):
     return recommended[
         ['tconst', 'primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
     ].head(num_recommendations)
+
 def recommend(request, user_genres=None, user_title=None):
     movies_df = get_movies()
 
@@ -269,7 +270,7 @@ def recommend_page(request):
     if request.user.is_authenticated and recommendations:
         booked_titles = set(
             BookedMovie.objects
-            .filter(user=request.user)
+            .filter(user=request.user, payment_status='paid')
             .values_list('movie_title', flat=True)
         )
 
@@ -337,20 +338,36 @@ def book_movie(request):
     movie = get_object_or_404(Movie, tconst=movie_id)
     room = get_object_or_404(ScreenRoom, room_id=room_id)
 
+    runtime = movie.runtimeMinutes or 90
+    base_duration = round_to_30_minutes(runtime)
+
+    extra_time = int(request.POST.get('extra_time', 0))
+    total_duration = base_duration + extra_time
+
+    blocks = total_duration // 30
+    total_price = blocks * room.price_per_30min
+
     if request.method == 'POST':
         form = BookMovieForm(request.POST)
 
         if form.is_valid():
             booked_movie = form.save(commit=False)
+
             booked_movie.user = request.user
             booked_movie.movie_title = movie.primaryTitle
             booked_movie.movie_genre = movie.genres
+            booked_movie.room_name = room.name
+            booked_movie.rental_duration_minutes = total_duration
+            booked_movie.price_per_30min = room.price_per_30min
+            booked_movie.total_price = total_price
+
+            # NEW
+            booked_movie.status = 'pending'
+            booked_movie.payment_status = 'unpaid'
 
             booked_movie.save()
 
-            request.session['booked_movie_id'] = booked_movie.id
-
-            return redirect('payment')
+            return redirect('payment_page', booking_id=booked_movie.id)
     else:
         form = BookMovieForm()
 
@@ -361,8 +378,64 @@ def book_movie(request):
             'form': form,
             'movie': movie,
             'room': room,
+            'base_duration': base_duration,
+            'total_duration': total_duration,
+            'total_price': total_price,
         }
     )
+
+@login_required
+def payment_page(request, booking_id):
+    booking = get_object_or_404(BookedMovie, id=booking_id, user=request.user)
+
+    return render(
+        request,
+        'recommendations/payment.html',
+        {'booking': booking}
+    )
+
+@login_required
+def confirm_payment(request, booking_id):
+    booking = get_object_or_404(BookedMovie, id=booking_id, user=request.user)
+
+    if request.method != 'POST':
+        return redirect('payment_page', booking_id=booking.id)
+
+    if booking.payment_status == 'paid':
+        messages.warning(request, "Đơn này đã được thanh toán trước đó.")
+        if hasattr(booking, 'invoice') and booking.invoice and booking.invoice.invoice_code:
+            return redirect('invoice_detail', invoice_code=booking.invoice.invoice_code)
+        return redirect('user_home')
+
+    booking.payment_status = 'paid'
+    booking.status = 'confirmed'
+    booking.paid_at = timezone.now()
+    booking.save()
+
+    invoice, created = Invoice.objects.get_or_create(
+        booking=booking,
+        defaults={
+            'user': request.user,
+            'amount': booking.total_price
+        }
+    )
+
+    return redirect('invoice_detail', invoice_code=invoice.invoice_code)
+
+@login_required
+def invoice_detail(request, invoice_code):
+    invoice = get_object_or_404(
+        Invoice,
+        invoice_code=invoice_code,
+        user=request.user
+    )
+
+    return render(
+        request,
+        'recommendations/invoice_detail.html',
+        {'invoice': invoice}
+    )
+
 
 # Kiểm tra nếu chưa đăng nhập
 def some_view(request):
@@ -415,3 +488,15 @@ def handle_booking(request, room_id=None):
 def select_movie(request, movie_id):
     request.session['selected_movie'] = movie_id
     return redirect('handle_booking')
+
+import math
+
+def round_to_30_minutes(minutes):
+    try:
+        minutes = int(minutes)
+        if minutes <= 0:
+            minutes = 90
+    except (TypeError, ValueError):
+        minutes = 90
+
+    return int(math.ceil(minutes / 30.0) * 30)

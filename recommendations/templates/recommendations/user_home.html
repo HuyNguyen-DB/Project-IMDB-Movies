@@ -419,6 +419,93 @@ body{
     font-size:15px;
 }
 
+.status-badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    padding:9px 13px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    border:1px solid transparent;
+}
+
+.badge.pending{
+    background:rgba(250,204,21,0.12);
+    color:#fde68a;
+    border-color:rgba(250,204,21,0.2);
+}
+
+.badge.confirmed{
+    background:rgba(34,197,94,0.12);
+    color:#86efac;
+    border-color:rgba(34,197,94,0.2);
+}
+
+.badge.cancelled{
+    background:rgba(239,68,68,0.12);
+    color:#fca5a5;
+    border-color:rgba(239,68,68,0.2);
+}
+
+.badge.expired{
+    background:rgba(148,163,184,0.12);
+    color:#cbd5e1;
+    border-color:rgba(148,163,184,0.2);
+}
+
+.badge.unpaid{
+    background:rgba(59,130,246,0.12);
+    color:#93c5fd;
+    border-color:rgba(59,130,246,0.2);
+}
+
+.badge.paid{
+    background:rgba(34,197,94,0.12);
+    color:#86efac;
+    border-color:rgba(34,197,94,0.2);
+}
+
+.card-actions{
+    margin-top:16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.card-actions a{
+    text-decoration:none;
+}
+
+.card-actions button{
+    padding:10px 14px;
+    background:#374151;
+    border:none;
+    border-radius:12px;
+    color:white;
+    font-size:14px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.card-actions button:hover{
+    background:#4b5563;
+}
+
+.pay-btn{
+    background:#22c55e !important;
+}
+
+.pay-btn:hover{
+    background:#16a34a !important;
+}
+
 /* EMPTY */
 
 .empty-box{
@@ -521,6 +608,11 @@ body{
         flex-direction:column;
         align-items:flex-start;
     }
+
+    .status-badges,
+    .card-actions{
+        justify-content:center;
+    }
 }
 </style>
 
@@ -592,7 +684,7 @@ body{
 <div class="page-header">
     <h1>🎬 Lịch sử đặt phim của {{ user.username }}</h1>
     <p>
-        Xem lại toàn bộ các phim bạn đã đặt, thời gian đặt vé và ngày chiếu để dễ dàng theo dõi lịch sử của mình.
+        Theo dõi toàn bộ đơn đặt phim của bạn, bao gồm đơn chờ thanh toán, đơn đã xác nhận và hóa đơn nội bộ sau khi thanh toán thành công.
     </p>
 </div>
 
@@ -609,7 +701,7 @@ body{
     <div class="top-actions">
         <div class="top-left">
             {% if booked_movies %}
-                Tổng số phim đã đặt: <strong>{{ booked_movies|length }}</strong>
+                Tổng số đơn đặt phim: <strong>{{ booked_movies|length }}</strong>
             {% else %}
                 Bạn chưa có lịch sử đặt phim
             {% endif %}
@@ -630,7 +722,7 @@ body{
 
         {% if booked_movies %}
 
-        <h2>Lịch sử đặt phim của bạn</h2>
+        <h2>Lịch sử đơn đặt phim của bạn</h2>
 
         <div class="movie-history-list">
 
@@ -646,24 +738,74 @@ body{
 
                     <div class="meta-row">
                         <div class="meta-box">
+                            <span class="meta-label">Mã đơn</span>
+                            <div class="meta-value">{{ movie.booking_code }}</div>
+                        </div>
+
+                        <div class="meta-box">
                             <span class="meta-label">Thể loại</span>
                             <div class="meta-value">{{ movie.movie_genre }}</div>
                         </div>
 
                         <div class="meta-box">
-                            <span class="meta-label">Thời điểm đặt</span>
+                            <span class="meta-label">Phòng chiếu</span>
+                            <div class="meta-value">{{ movie.room_name }}</div>
+                        </div>
+
+                        <div class="meta-box">
+                            <span class="meta-label">Thời điểm tạo đơn</span>
                             <div class="meta-value">{{ movie.date_booked }}</div>
                         </div>
 
                         <div class="meta-box">
-                            <span class="meta-label">Ngày chiếu</span>
+                            <span class="meta-label">Ngày giờ xem</span>
                             <div class="meta-value">{{ movie.booking_date }}</div>
                         </div>
 
                         <div class="meta-box">
-                            <span class="meta-label">Trạng thái</span>
-                            <div class="meta-value">Đã đặt thành công</div>
+                            <span class="meta-label">Tổng tiền</span>
+                            <div class="meta-value">{{ movie.total_price }} VND</div>
                         </div>
+                    </div>
+
+                    <div class="status-badges">
+                        <span class="badge {{ movie.status }}">
+                            {% if movie.status == 'pending' %}
+                                CHỜ THANH TOÁN
+                            {% elif movie.status == 'confirmed' %}
+                                ĐÃ XÁC NHẬN
+                            {% elif movie.status == 'cancelled' %}
+                                ĐÃ HỦY
+                            {% elif movie.status == 'expired' %}
+                                HẾT HẠN
+                            {% else %}
+                                {{ movie.status|upper }}
+                            {% endif %}
+                        </span>
+
+                        <span class="badge {{ movie.payment_status }}">
+                            {% if movie.payment_status == 'unpaid' %}
+                                CHƯA THANH TOÁN
+                            {% elif movie.payment_status == 'paid' %}
+                                ĐÃ THANH TOÁN
+                            {% else %}
+                                {{ movie.payment_status|upper }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="card-actions">
+                        {% if movie.payment_status == 'unpaid' %}
+                            <a href="{% url 'payment_page' movie.id %}">
+                                <button class="pay-btn">💳 Đi đến thanh toán</button>
+                            </a>
+                        {% endif %}
+
+                        {% if movie.payment_status == 'paid' and movie.invoice and movie.invoice.invoice_code %}
+                            <a href="{% url 'invoice_detail' movie.invoice.invoice_code %}">
+                                <button>🧾 Xem hóa đơn</button>
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
 

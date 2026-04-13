@@ -676,6 +676,20 @@ body{
                 {% endif %}
             </div>
 
+            <div class="meta-card">
+                <span class="meta-label">Giá phòng</span>
+                <div class="meta-value">
+                    {{ room.price_per_30min }} VND / 30 phút
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <span class="meta-label">Thời lượng gợi ý</span>
+                <div class="meta-value">
+                    {{ base_duration }} phút
+                </div>
+            </div>
+
             <div class="shortcut-actions">
                 <a href="{% url 'movie_list' %}">
                     <button type="button">🎬 Đổi phim</button>
@@ -699,7 +713,26 @@ body{
                         <label for="{{ form.booking_date.id_for_label }}">Thời gian xem</label>
                         {{ form.booking_date }}
                     </div>
+                    <div class="form-group">
+                        <label>Chọn thêm thời gian</label>
+                        <select name="extra_time">
+                            <option value="0">Không thêm</option>
+                            <option value="30">+30 phút</option>
+                            <option value="60">+60 phút</option>
+                            <option value="90">+90 phút</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tổng thời gian thuê</label>
+                        <div class="meta-value">{{ total_duration }} phút</div>
+                    </div>
 
+                    <div class="form-group">
+                        <label>Tổng tiền</label>
+                        <div class="meta-value" style="color:#22c55e; font-size:20px;">
+                            {{ total_price }} VND
+                        </div>
+                    </div>
                     <button type="submit" class="submit-btn">
                         🎬 Xác nhận đặt phim
                     </button>
