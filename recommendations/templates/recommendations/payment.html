@@ -634,12 +634,12 @@ body{
 
                 <div class="info-card">
                     <span class="info-label">Ngày giờ xem</span>
-                    <div class="info-value">{{ booking.booking_date }}</div>
+                    <div class="info-value">{{ booking.booking_date|date:"H:i, d/m/Y" }}</div>
                 </div>
 
                 <div class="info-card">
                     <span class="info-label">Thời điểm tạo đơn</span>
-                    <div class="info-value">{{ booking.date_booked }}</div>
+                    <div class="info-value">{{ booking.date_booked|date:"H:i, d/m/Y" }}</div>
                 </div>
 
                 <div class="info-card">
@@ -659,7 +659,7 @@ body{
             </div>
 
             <div class="note-box">
-                Đây là bước thanh toán mô phỏng cho đồ án học tập. Khi bạn bấm xác nhận, hệ thống sẽ chuyển đơn từ trạng thái chờ thanh toán sang đã thanh toán và sinh hóa đơn nội bộ.
+                Hãy kiểm tra kỹ thông tin trước khi thanh toán. Khi bấm xác nhận, hệ thống sẽ chuyển đơn từ trạng thái chờ thanh toán sang đã thanh toán và sinh hóa đơn nội bộ.
             </div>
         </div>
 

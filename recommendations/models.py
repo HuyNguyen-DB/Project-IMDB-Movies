@@ -54,7 +54,12 @@ class BookedMovie(models.Model):
 
 
 class Invoice(models.Model):
-    invoice_code = models.CharField(max_length=50, unique=True, blank=True)
+    invoice_code = models.CharField(
+        max_length=50,
+        primary_key=True,
+        unique=True,
+        blank=True
+    )
     booking = models.OneToOneField(
         BookedMovie,
         on_delete=models.CASCADE,

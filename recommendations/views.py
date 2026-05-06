@@ -11,6 +11,7 @@ from django.urls import reverse_lazy
 
 import numpy as np
 from .models import BookedMovie, Movie, ScreenRoom, Invoice
+from django.db.models import Case, When, IntegerField
 from .forms import EmailLoginForm, BookMovieForm, CustomUserCreationForm
 from django.core.paginator import Paginator
 
@@ -19,7 +20,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from django.utils import timezone
-
+from datetime import timedelta
 # Lấy tất cả dữ liệu phim từ MongoDB và chuyển đổi thành DataFrame
 def get_movies():
     movies_queryset = Movie.objects.all()
@@ -116,12 +117,54 @@ def user_home(request):
         user_title = request.POST.get('title', '').strip()
         recommendations = recommend(request, user_genres, user_title)
 
-    booked_movies = BookedMovie.objects.filter(user=request.user).order_by('-date_booked')
+    booked_movies = list(
+        BookedMovie.objects.filter(user=request.user)
+    )
 
-    return render(request, 'recommendations/user_home.html', {
-        'recommendations': recommendations,
-        'booked_movies': booked_movies,
-    })
+    now = timezone.now()
+
+    today = timezone.localtime(now).date()
+    tomorrow = today + timedelta(days=1)
+
+    def get_local_date(dt):
+        if timezone.is_aware(dt):
+            return timezone.localtime(dt).date()
+        return dt.date()
+
+    for movie in booked_movies:
+        booking_local_date = get_local_date(movie.booking_date)
+
+        movie.is_today = booking_local_date == today
+        movie.is_tomorrow = booking_local_date == tomorrow
+
+    # Sắp xếp theo thời gian gần hiện tại nhất
+    booked_movies.sort(
+        key=lambda movie: abs(
+            (movie.booking_date - now).total_seconds()
+        )
+    )
+
+    paid_movies = [
+        movie for movie in booked_movies
+        if movie.payment_status == 'paid'
+    ]
+
+    unpaid_movies = [
+        movie for movie in booked_movies
+        if movie.payment_status == 'unpaid'
+    ]
+
+    return render(
+        request,
+        'recommendations/user_home.html',
+        {
+            'recommendations': recommendations,
+            'booked_movies': booked_movies,
+            'paid_movies': paid_movies,
+            'unpaid_movies': unpaid_movies,
+            'total_bookings': len(booked_movies),
+        }
+    )
 
 # Đăng ký
 def signup(request):

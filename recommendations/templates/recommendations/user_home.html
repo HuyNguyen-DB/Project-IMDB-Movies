@@ -17,8 +17,6 @@ body{
     background:linear-gradient(180deg,#020617,#0f172a,#020617);
 }
 
-/* NAVBAR */
-
 .navbar{
     position:sticky;
     top:0;
@@ -106,8 +104,6 @@ body{
     background:#1f2937;
     transform:translateY(-1px);
 }
-
-/* USER MENU */
 
 .user-menu{
     position:relative;
@@ -244,8 +240,6 @@ body{
     background:#1f2937;
 }
 
-/* PAGE HEADER */
-
 .page-header{
     max-width:1300px;
     margin:0 auto;
@@ -264,15 +258,11 @@ body{
     line-height:1.6;
 }
 
-/* MAIN */
-
 .container{
     max-width:1300px;
     margin:auto;
     padding:20px 30px 70px;
 }
-
-/* ALERT */
 
 .alert{
     background:linear-gradient(135deg,rgba(127,29,29,0.95),rgba(153,27,27,0.95));
@@ -287,8 +277,6 @@ body{
     margin:6px 0;
     color:#fee2e2;
 }
-
-/* TOP BAR */
 
 .top-actions{
     display:flex;
@@ -330,8 +318,6 @@ body{
     transform:translateY(-1px);
 }
 
-/* HISTORY PANEL */
-
 .history-panel{
     background:#111827;
     padding:30px;
@@ -340,14 +326,75 @@ body{
     border:1px solid rgba(255,255,255,0.06);
 }
 
-.history-panel h2{
-    margin-top:0;
-    margin-bottom:24px;
-    color:white;
-    font-size:26px;
+.booking-columns{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:24px;
+    align-items:start;
 }
 
-/* LIST */
+.paid-section,
+.unpaid-section{
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:20px;
+}
+
+.unpaid-section{
+    border:1px solid rgba(250,204,21,0.35);
+    box-shadow:0 0 0 1px rgba(250,204,21,0.08),
+               0 16px 35px rgba(250,204,21,0.08);
+}
+
+.section-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.section-title h2{
+    margin:0;
+    font-size:24px;
+}
+
+.paid-section .section-title h2{
+    color:#86efac;
+}
+
+.unpaid-section .section-title h2{
+    color:#fde68a;
+}
+
+.section-count{
+    background:#111827;
+    color:#e5e7eb;
+    padding:7px 11px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.section-note{
+    margin:0 0 18px 0;
+    color:#94a3b8;
+    line-height:1.6;
+    font-size:14px;
+}
+
+.unpaid-warning{
+    background:rgba(250,204,21,0.10);
+    border:1px solid rgba(250,204,21,0.22);
+    color:#fde68a;
+    padding:13px 14px;
+    border-radius:14px;
+    line-height:1.5;
+    font-size:14px;
+    margin-bottom:18px;
+}
 
 .movie-history-list{
     display:flex;
@@ -358,7 +405,7 @@ body{
 .history-card{
     display:flex;
     gap:20px;
-    background:#0f172a;
+    background:#111827;
     padding:20px;
     border-radius:18px;
     border:1px solid rgba(255,255,255,0.05);
@@ -368,6 +415,51 @@ body{
 .history-card:hover{
     transform:translateY(-2px);
     box-shadow:0 12px 28px rgba(0,0,0,0.22);
+}
+
+.unpaid-section .history-card{
+    background:rgba(15,23,42,0.96);
+    border-color:rgba(250,204,21,0.18);
+}
+
+.history-card.today-highlight{
+    border:2px solid rgba(249,115,22,0.95);
+    background:linear-gradient(135deg,rgba(127,29,29,0.28),#111827 58%);
+    box-shadow:
+        0 0 0 1px rgba(251,146,60,0.55),
+        0 0 28px rgba(249,115,22,0.28),
+        0 18px 38px rgba(239,68,68,0.16);
+}
+
+.history-card.tomorrow-highlight{
+    border-color:rgba(34,197,94,0.75);
+    box-shadow:0 0 0 1px rgba(34,197,94,0.35),
+               0 18px 35px rgba(34,197,94,0.12);
+}
+
+.today-label{
+    display:inline-block;
+    margin-bottom:10px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:linear-gradient(135deg,rgba(239,68,68,0.32),rgba(249,115,22,0.24));
+    color:#fed7aa;
+    font-size:12px;
+    font-weight:800;
+    border:1px solid rgba(251,146,60,0.55);
+    box-shadow:0 0 18px rgba(249,115,22,0.18);
+}
+
+.tomorrow-label{
+    display:inline-block;
+    margin-bottom:10px;
+    padding:7px 11px;
+    border-radius:999px;
+    background:rgba(34,197,94,0.15);
+    color:#86efac;
+    font-size:12px;
+    font-weight:700;
+    border:1px solid rgba(34,197,94,0.2);
 }
 
 .movie-poster{
@@ -394,6 +486,10 @@ body{
     display:grid;
     grid-template-columns:repeat(2,minmax(180px,1fr));
     gap:14px;
+}
+
+.unpaid-section .meta-row{
+    grid-template-columns:1fr;
 }
 
 .meta-box{
@@ -461,9 +557,9 @@ body{
 }
 
 .badge.unpaid{
-    background:rgba(59,130,246,0.12);
-    color:#93c5fd;
-    border-color:rgba(59,130,246,0.2);
+    background:rgba(250,204,21,0.14);
+    color:#fde68a;
+    border-color:rgba(250,204,21,0.28);
 }
 
 .badge.paid{
@@ -506,23 +602,19 @@ body{
     background:#16a34a !important;
 }
 
-/* EMPTY */
-
 .empty-box{
-    background:#0f172a;
+    background:#111827;
     border:1px solid rgba(255,255,255,0.05);
     border-radius:18px;
-    padding:40px 20px;
+    padding:34px 20px;
     text-align:center;
 }
 
 .empty{
     color:#9ca3af;
-    font-size:18px;
+    font-size:16px;
     margin:0;
 }
-
-/* ACTION BUTTONS */
 
 .action-buttons{
     text-align:center;
@@ -558,7 +650,15 @@ body{
     background:#dc2626 !important;
 }
 
-/* RESPONSIVE */
+@media (max-width: 1100px){
+    .booking-columns{
+        grid-template-columns:1fr;
+    }
+
+    .unpaid-section .meta-row{
+        grid-template-columns:repeat(2,minmax(180px,1fr));
+    }
+}
 
 @media (max-width: 900px){
     .nav-container{
@@ -600,7 +700,8 @@ body{
         height:230px;
     }
 
-    .meta-row{
+    .meta-row,
+    .unpaid-section .meta-row{
         grid-template-columns:1fr;
     }
 
@@ -700,8 +801,8 @@ body{
 
     <div class="top-actions">
         <div class="top-left">
-            {% if booked_movies %}
-                Tổng số đơn đặt phim: <strong>{{ booked_movies|length }}</strong>
+            {% if total_bookings %}
+                Tổng số đơn đặt phim: <strong>{{ total_bookings }}</strong>
             {% else %}
                 Bạn chưa có lịch sử đặt phim
             {% endif %}
@@ -720,97 +821,209 @@ body{
 
     <div class="history-panel">
 
-        {% if booked_movies %}
+        {% if total_bookings %}
 
-        <h2>Lịch sử đơn đặt phim của bạn</h2>
+        <div class="booking-columns">
 
-        <div class="movie-history-list">
-
-            {% for movie in booked_movies %}
-            <div class="history-card">
-
-                <img class="movie-poster"
-                     src="https://via.placeholder.com/115x165.png?text=Movie"
-                     alt="Poster">
-
-                <div class="movie-details">
-                    <h3>{{ movie.movie_title }}</h3>
-
-                    <div class="meta-row">
-                        <div class="meta-box">
-                            <span class="meta-label">Mã đơn</span>
-                            <div class="meta-value">{{ movie.booking_code }}</div>
-                        </div>
-
-                        <div class="meta-box">
-                            <span class="meta-label">Thể loại</span>
-                            <div class="meta-value">{{ movie.movie_genre }}</div>
-                        </div>
-
-                        <div class="meta-box">
-                            <span class="meta-label">Phòng chiếu</span>
-                            <div class="meta-value">{{ movie.room_name }}</div>
-                        </div>
-
-                        <div class="meta-box">
-                            <span class="meta-label">Thời điểm tạo đơn</span>
-                            <div class="meta-value">{{ movie.date_booked }}</div>
-                        </div>
-
-                        <div class="meta-box">
-                            <span class="meta-label">Ngày giờ xem</span>
-                            <div class="meta-value">{{ movie.booking_date }}</div>
-                        </div>
-
-                        <div class="meta-box">
-                            <span class="meta-label">Tổng tiền</span>
-                            <div class="meta-value">{{ movie.total_price }} VND</div>
-                        </div>
-                    </div>
-
-                    <div class="status-badges">
-                        <span class="badge {{ movie.status }}">
-                            {% if movie.status == 'pending' %}
-                                CHỜ THANH TOÁN
-                            {% elif movie.status == 'confirmed' %}
-                                ĐÃ XÁC NHẬN
-                            {% elif movie.status == 'cancelled' %}
-                                ĐÃ HỦY
-                            {% elif movie.status == 'expired' %}
-                                HẾT HẠN
-                            {% else %}
-                                {{ movie.status|upper }}
-                            {% endif %}
-                        </span>
-
-                        <span class="badge {{ movie.payment_status }}">
-                            {% if movie.payment_status == 'unpaid' %}
-                                CHƯA THANH TOÁN
-                            {% elif movie.payment_status == 'paid' %}
-                                ĐÃ THANH TOÁN
-                            {% else %}
-                                {{ movie.payment_status|upper }}
-                            {% endif %}
-                        </span>
-                    </div>
-
-                    <div class="card-actions">
-                        {% if movie.payment_status == 'unpaid' %}
-                            <a href="{% url 'payment_page' movie.id %}">
-                                <button class="pay-btn">💳 Đi đến thanh toán</button>
-                            </a>
-                        {% endif %}
-
-                        {% if movie.payment_status == 'paid' and movie.invoice and movie.invoice.invoice_code %}
-                            <a href="{% url 'invoice_detail' movie.invoice.invoice_code %}">
-                                <button>🧾 Xem hóa đơn</button>
-                            </a>
-                        {% endif %}
-                    </div>
+            <section class="paid-section">
+                <div class="section-title">
+                    <h2>✅ Đơn đã thanh toán</h2>
+                    <span class="section-count">{{ paid_movies|length }} đơn</span>
                 </div>
 
-            </div>
-            {% endfor %}
+                <p class="section-note">
+                    Đây là các đơn đã hoàn tất thanh toán. Lịch chiếu hôm nay và ngày mai sẽ được đánh dấu nổi bật.
+                </p>
+
+                <div class="movie-history-list">
+
+                    {% for movie in paid_movies %}
+                    <div class="history-card {% if movie.is_today %}today-highlight{% elif movie.is_tomorrow %}tomorrow-highlight{% endif %}">
+
+                        <img class="movie-poster"
+                             src="https://via.placeholder.com/115x165.png?text=Movie"
+                             alt="Poster">
+
+                        <div class="movie-details">
+
+                            {% if movie.is_today %}
+                                <span class="today-label">🔥 Lịch chiếu hôm nay</span>
+                            {% elif movie.is_tomorrow %}
+                                <span class="tomorrow-label">📌 Lịch xem ngày mai</span>
+                            {% endif %}
+
+                            <h3>{{ movie.movie_title }}</h3>
+
+                            <div class="meta-row">
+                                <div class="meta-box">
+                                    <span class="meta-label">Mã đơn</span>
+                                    <div class="meta-value">{{ movie.booking_code }}</div>
+                                </div>
+
+                                <div class="meta-box">
+                                    <span class="meta-label">Thể loại</span>
+                                    <div class="meta-value">{{ movie.movie_genre }}</div>
+                                </div>
+
+                                <div class="meta-box">
+                                    <span class="meta-label">Phòng chiếu</span>
+                                    <div class="meta-value">{{ movie.room_name }}</div>
+                                </div>
+
+                                <div class="meta-box">
+                                    <span class="meta-label">Thời điểm tạo đơn</span>
+                                    <div class="meta-value">{{ movie.date_booked|date:"H:i, d/m/Y" }}</div>
+                                </div>
+
+                                <div class="meta-box">
+                                    <span class="meta-label">Ngày giờ xem</span>
+                                    <div class="meta-value">{{ movie.booking_date|date:"H:i, d/m/Y" }}</div>
+                                </div>
+
+                                <div class="meta-box">
+                                    <span class="meta-label">Tổng tiền</span>
+                                    <div class="meta-value">{{ movie.total_price }} VND</div>
+                                </div>
+                            </div>
+
+                            <div class="status-badges">
+                                <span class="badge {{ movie.status }}">
+                                    {% if movie.status == 'pending' %}
+                                        CHỜ THANH TOÁN
+                                    {% elif movie.status == 'confirmed' %}
+                                        ĐÃ XÁC NHẬN
+                                    {% elif movie.status == 'cancelled' %}
+                                        ĐÃ HỦY
+                                    {% elif movie.status == 'expired' %}
+                                        HẾT HẠN
+                                    {% else %}
+                                        {{ movie.status|upper }}
+                                    {% endif %}
+                                </span>
+
+                                <span class="badge {{ movie.payment_status }}">
+                                    {% if movie.payment_status == 'unpaid' %}
+                                        CHƯA THANH TOÁN
+                                    {% elif movie.payment_status == 'paid' %}
+                                        ĐÃ THANH TOÁN
+                                    {% else %}
+                                        {{ movie.payment_status|upper }}
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="card-actions">
+                                {% if movie.invoice and movie.invoice.invoice_code %}
+                                    <a href="{% url 'invoice_detail' movie.invoice.invoice_code %}">
+                                        <button>🧾 Xem hóa đơn</button>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                    {% empty %}
+                    <div class="empty-box">
+                        <p class="empty">Bạn chưa có đơn đã thanh toán.</p>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </section>
+
+            <aside class="unpaid-section">
+                <div class="section-title">
+                    <h2>⚠️ Chưa thanh toán</h2>
+                    <span class="section-count">{{ unpaid_movies|length }} đơn</span>
+                </div>
+
+                <div class="unpaid-warning">
+                    Các đơn bên dưới vẫn chưa thanh toán. Vui lòng hoàn tất để xác nhận lịch đặt phim.
+                </div>
+
+                <div class="movie-history-list">
+
+                    {% for movie in unpaid_movies %}
+                    <div class="history-card {% if movie.is_today %}today-highlight{% elif movie.is_tomorrow %}tomorrow-highlight{% endif %}">
+
+                        <img class="movie-poster"
+                             src="https://via.placeholder.com/115x165.png?text=Movie"
+                             alt="Poster">
+
+                        <div class="movie-details">
+
+                            {% if movie.is_today %}
+                                <span class="today-label">🔥 Lịch chiếu hôm nay</span>
+                            {% elif movie.is_tomorrow %}
+                                <span class="tomorrow-label">📌 Lịch xem ngày mai</span>
+                            {% endif %}
+
+                            <h3>{{ movie.movie_title }}</h3>
+
+                            <div class="meta-row">
+                                <div class="meta-box">
+                                    <span class="meta-label">Mã đơn</span>
+                                    <div class="meta-value">{{ movie.booking_code }}</div>
+                                </div>
+
+                                <div class="meta-box">
+                                    <span class="meta-label">Phòng chiếu</span>
+                                    <div class="meta-value">{{ movie.room_name }}</div>
+                                </div>
+
+                                <div class="meta-box">
+                                    <span class="meta-label">Ngày giờ xem</span>
+                                    <div class="meta-value">{{ movie.booking_date|date:"H:i, d/m/Y" }}</div>
+                                </div>
+
+                                <div class="meta-box">
+                                    <span class="meta-label">Tổng tiền</span>
+                                    <div class="meta-value">{{ movie.total_price }} VND</div>
+                                </div>
+                            </div>
+
+                            <div class="status-badges">
+                                <span class="badge {{ movie.status }}">
+                                    {% if movie.status == 'pending' %}
+                                        CHỜ THANH TOÁN
+                                    {% elif movie.status == 'confirmed' %}
+                                        ĐÃ XÁC NHẬN
+                                    {% elif movie.status == 'cancelled' %}
+                                        ĐÃ HỦY
+                                    {% elif movie.status == 'expired' %}
+                                        HẾT HẠN
+                                    {% else %}
+                                        {{ movie.status|upper }}
+                                    {% endif %}
+                                </span>
+
+                                <span class="badge {{ movie.payment_status }}">
+                                    {% if movie.payment_status == 'unpaid' %}
+                                        CHƯA THANH TOÁN
+                                    {% elif movie.payment_status == 'paid' %}
+                                        ĐÃ THANH TOÁN
+                                    {% else %}
+                                        {{ movie.payment_status|upper }}
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="card-actions">
+                                <a href="{% url 'payment_page' movie.id %}">
+                                    <button class="pay-btn">💳 Đi đến thanh toán</button>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                    {% empty %}
+                    <div class="empty-box">
+                        <p class="empty">Không có đơn chờ thanh toán.</p>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </aside>
 
         </div>
 

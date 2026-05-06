@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}
+Quản trị Movie Webapp
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin_custom/admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div class="custom-admin-brand">
+    <div class="custom-admin-logo">🎬</div>
+    <div>
+        <h1 id="site-name">
+            <a href="{% url 'admin:index' %}">Quản trị Movie Webapp</a>
+        </h1>
+        <p>Quản lý phim, phòng chiếu, đơn đặt phim, hóa đơn và người dùng</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
