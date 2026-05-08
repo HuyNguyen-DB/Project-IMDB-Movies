@@ -3,13 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>
-    {% if query %}
-        Kết quả tìm kiếm: {{ query }}
-    {% else %}
-        Danh sách phim
-    {% endif %}
-</title>
+<title>Danh sách phòng</title>
 
 <style>
 *{
@@ -17,13 +11,11 @@
 }
 
 body{
+    font-family: Arial, Helvetica, sans-serif;
     margin:0;
-    font-family:Arial, Helvetica, sans-serif;
     color:#e5e7eb;
     background:linear-gradient(180deg,#020617,#0f172a,#020617);
 }
-
-/* NAVBAR */
 
 .navbar{
     position:sticky;
@@ -113,145 +105,6 @@ body{
     transform:translateY(-1px);
 }
 
-/* USER MENU */
-
-.user-menu{
-    position:relative;
-}
-
-.user-trigger{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:14px;
-    padding:8px 12px;
-    cursor:pointer;
-    min-width:200px;
-    transition:0.2s;
-}
-
-.user-trigger:hover{
-    background:#1f2937;
-}
-
-.avatar{
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    background:linear-gradient(135deg,#22c55e,#06b6d4);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    color:white;
-    font-size:16px;
-    flex-shrink:0;
-    box-shadow:0 8px 20px rgba(6,182,212,0.2);
-}
-
-.user-info{
-    text-align:left;
-    flex:1;
-    min-width:0;
-}
-
-.user-info strong{
-    display:block;
-    font-size:14px;
-    color:white;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.user-info span{
-    display:block;
-    font-size:12px;
-    color:#9ca3af;
-}
-
-.dropdown-arrow{
-    color:#9ca3af;
-    font-size:13px;
-}
-
-.dropdown-menu{
-    position:absolute;
-    top:calc(100% + 10px);
-    right:0;
-    width:240px;
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:14px;
-    box-shadow:0 18px 40px rgba(0,0,0,0.4);
-    overflow:hidden;
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(10px);
-    transition:0.25s ease;
-}
-
-.user-menu:hover .dropdown-menu{
-    opacity:1;
-    visibility:visible;
-    transform:translateY(0);
-}
-
-.dropdown-header{
-    padding:16px;
-    border-bottom:1px solid rgba(255,255,255,0.06);
-    background:rgba(255,255,255,0.02);
-}
-
-.dropdown-header strong{
-    display:block;
-    margin-bottom:4px;
-    color:white;
-    font-size:15px;
-}
-
-.dropdown-header p{
-    margin:0;
-    color:#94a3b8;
-    font-size:12px;
-}
-
-.dropdown-item{
-    display:block;
-    text-decoration:none;
-    color:white;
-    padding:13px 16px;
-    transition:0.2s;
-    font-size:14px;
-}
-
-.dropdown-item:hover{
-    background:#1f2937;
-}
-
-.dropdown-form{
-    margin:0;
-}
-
-.dropdown-form button{
-    width:100%;
-    text-align:left;
-    background:none;
-    border:none;
-    color:#f87171;
-    padding:13px 16px;
-    cursor:pointer;
-    font-size:14px;
-}
-
-.dropdown-form button:hover{
-    background:#1f2937;
-}
-
-/* GUEST */
-
 .guest-actions{
     display:flex;
     align-items:center;
@@ -290,18 +143,70 @@ body{
     background:#1f2937;
 }
 
-/* PAGE */
+.user-menu{
+    position:relative;
+}
+
+.user-trigger{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:8px 12px;
+    min-width:200px;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    color:white;
+    font-size:16px;
+    flex-shrink:0;
+}
+
+.user-info{
+    text-align:left;
+    flex:1;
+    min-width:0;
+}
+
+.user-info strong{
+    display:block;
+    font-size:14px;
+    color:white;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.user-info span{
+    display:block;
+    font-size:12px;
+    color:#9ca3af;
+}
+
+main{
+    max-width:1200px;
+    margin:auto;
+    padding:30px 40px 60px 40px;
+}
 
 .page-header{
-    max-width:1300px;
-    margin:0 auto;
-    padding:40px 30px 10px;
+    margin-bottom:30px;
 }
 
 .page-header h1{
     margin:0 0 10px 0;
-    font-size:34px;
     color:white;
+    font-size:30px;
 }
 
 .page-header p{
@@ -310,294 +215,118 @@ body{
     line-height:1.6;
 }
 
-main{
-    max-width:1300px;
-    margin:auto;
-    padding:20px 30px 70px;
-}
-
-/* TOP BAR */
-
-.top-bar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:16px;
-    flex-wrap:wrap;
-    margin-bottom:22px;
-}
-
-.top-bar-left{
-    color:#94a3b8;
-    font-size:15px;
-    line-height:1.6;
-}
-
-.top-bar-right{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-}
-
-.top-bar-right a{
-    text-decoration:none;
-}
-
-.top-btn{
-    background:#111827;
+.section-title{
+    margin-top:40px;
+    margin-bottom:18px;
+    font-size:24px;
     color:white;
-    border:1px solid rgba(255,255,255,0.06);
-    padding:11px 16px;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:14px;
-    transition:0.2s;
 }
 
-.top-btn:hover{
-    background:#1f2937;
-    transform:translateY(-1px);
-}
-
-/* SEARCH BAR */
-
-.search-panel{
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.06);
-    border-radius:18px;
-    padding:18px;
-    margin-bottom:28px;
-    box-shadow:0 20px 40px rgba(0,0,0,0.25);
-}
-
-.search-form{
-    display:flex;
-    gap:12px;
-    align-items:center;
-}
-
-.search-form input{
-    width:100%;
-    border:none;
-    outline:none;
-    border-radius:14px;
-    padding:15px 17px;
-    background:#f8fafc;
-    color:#111827;
-    font-size:15px;
-}
-
-.search-form button{
-    min-width:120px;
-    border:none;
-    border-radius:14px;
-    padding:15px 18px;
-    background:#22c55e;
-    color:white;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.search-form button:hover{
-    background:#16a34a;
-    transform:translateY(-1px);
-}
-
-.clear-search{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-width:110px;
-    border-radius:14px;
-    padding:15px 18px;
-    background:#1f2937;
-    color:white;
-    font-size:14px;
-    font-weight:700;
-    transition:0.2s;
-    text-decoration:none;
-}
-
-.clear-search:hover{
-    background:#374151;
-    transform:translateY(-1px);
-}
-
-/* GRID */
-
-.movies-list{
+.room-grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-    gap:28px;
+    gap:25px;
+    margin-top:20px;
 }
 
-/* CARD */
-
-.movie-card{
-    background:#111827;
-    border-radius:18px;
-    padding:16px;
-    text-align:left;
-    box-shadow:0 20px 40px rgba(0,0,0,0.35);
-    transition:all .25s;
+.room-card{
     position:relative;
+    background:#0f172a;
+    border-radius:16px;
     overflow:hidden;
-    border:1px solid rgba(255,255,255,0.06);
+    transition:all 0.25s;
+    border:1px solid rgba(255,255,255,0.05);
+    box-shadow:0 15px 35px rgba(0,0,0,0.25);
 }
 
-.movie-card:hover{
+.room-card:hover{
     transform:translateY(-8px);
-    box-shadow:0 28px 48px rgba(0,0,0,0.45);
+    box-shadow:0 24px 45px rgba(0,0,0,0.38);
 }
 
-.poster-wrapper{
-    position:relative;
-    overflow:hidden;
-    border-radius:14px;
-}
-
-.movie-poster{
+.room-card img{
     width:100%;
-    height:320px;
+    height:170px;
     object-fit:cover;
-    border-radius:14px;
     display:block;
 }
 
-/* OVERLAY */
-
-.overlay{
-    position:absolute;
-    inset:0;
-    background:rgba(2,6,23,0.72);
-    opacity:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    transition:.3s;
-}
-
-.poster-wrapper:hover .overlay{
-    opacity:1;
-}
-
-.overlay button{
-    background:#22c55e;
-    border:none;
-    padding:12px 20px;
-    color:white;
-    border-radius:10px;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.overlay button:hover{
-    background:#16a34a;
-    transform:translateY(-1px);
-}
-
-/* BADGE */
-
-.movie-badge{
-    position:absolute;
-    top:12px;
-    left:12px;
-    background:rgba(34,197,94,0.9);
-    color:white;
-    font-size:12px;
-    font-weight:700;
-    padding:6px 10px;
-    border-radius:999px;
-    z-index:2;
-}
-
-/* INFO */
-
-.movie-info{
-    padding:16px 4px 4px;
-}
-
-.movie-info h3{
-    margin:0 0 10px;
-    font-size:18px;
-    color:white;
-    line-height:1.4;
-    min-height:50px;
-}
-
-.movie-meta{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-
-.movie-meta p{
+.room-card h3{
+    padding:14px 16px 0 16px;
     margin:0;
-    font-size:14px;
+    color:white;
+}
+
+.room-card p{
+    padding:0 16px;
     color:#9ca3af;
+    margin:10px 0;
     line-height:1.5;
 }
 
-/* PAGINATION */
-
-.pagination{
-    text-align:center;
-    margin-top:42px;
+.room-status{
+    padding:10px 16px 16px 16px;
+    font-weight:600;
 }
 
-.pagination a,
-.pagination span{
-    display:inline-flex;
+.room-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(2, 6, 23, 0.60);
+    display:flex;
     align-items:center;
     justify-content:center;
-    min-width:42px;
-    height:42px;
-    margin:5px;
-    padding:0 14px;
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.06);
-    border-radius:12px;
-    color:white;
+    gap:12px;
+    opacity:0;
+    visibility:hidden;
+    transition:all 0.25s ease;
+}
+
+.room-card:hover .room-overlay{
+    opacity:1;
+    visibility:visible;
+}
+
+.overlay-btn{
+    padding:10px 16px;
+    border-radius:10px;
     text-decoration:none;
+    font-size:14px;
+    font-weight:600;
     transition:0.2s;
-}
-
-.pagination a:hover{
-    background:#22c55e;
-    border-color:#22c55e;
-    transform:translateY(-1px);
-}
-
-.active{
-    background:#22c55e !important;
-    color:#04111d !important;
-    font-weight:bold;
-    box-shadow:0 0 18px rgba(34,197,94,0.35);
-    transform:scale(1.06);
-}
-
-/* EMPTY */
-
-.empty-box{
+    transform:translateY(12px);
+    display:inline-block;
+    min-width:125px;
     text-align:center;
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.06);
-    border-radius:18px;
-    padding:50px 20px;
-    box-shadow:0 20px 40px rgba(0,0,0,0.35);
 }
 
-.empty{
-    color:#9ca3af;
-    font-size:18px;
-    margin:0 0 18px;
+.room-card:hover .overlay-btn{
+    transform:translateY(0);
 }
 
-/* RESPONSIVE */
+.detail-btn{
+    background:#22c55e;
+    color:white;
+}
+
+.detail-btn:hover{
+    background:#16a34a;
+}
+
+.book-btn{
+    background:#2563eb;
+    color:white;
+}
+
+.book-btn:hover{
+    background:#1d4ed8;
+}
+
+.empty-text{
+    color:#94a3b8;
+    font-size:16px;
+    margin-top:10px;
+}
 
 @media (max-width: 900px){
     .nav-container{
@@ -610,40 +339,19 @@ main{
         align-items:flex-start;
     }
 
-    .guest-actions{
-        width:100%;
-        justify-content:flex-end;
-    }
-
-    .user-menu{
-        width:100%;
-    }
-
-    .user-trigger{
-        width:100%;
-    }
-
-    .search-form{
-        flex-direction:column;
-    }
-
-    .search-form button,
-    .clear-search{
-        width:100%;
+    main{
+        padding:20px;
     }
 }
 
-@media (max-width: 768px){
-    .page-header{
-        padding:28px 18px 10px;
+@media (max-width: 600px){
+    .room-overlay{
+        flex-direction:column;
+        gap:10px;
     }
 
-    main{
-        padding:18px 18px 50px;
-    }
-
-    .movies-list{
-        grid-template-columns:1fr;
+    .overlay-btn{
+        width:80%;
     }
 }
 </style>
@@ -653,7 +361,6 @@ main{
 
 <nav class="navbar">
     <div class="nav-container">
-
         <div class="nav-left">
             <a href="{% url 'home' %}" class="logo-box">
                 <div class="logo-icon">🎬</div>
@@ -664,49 +371,20 @@ main{
             </a>
 
             <div class="nav-links">
-                <a href="{% url 'home' %}">
-                    <button>Trang chủ</button>
-                </a>
-                <a href="{% url 'choose_genres' %}">
-                    <button>Chọn thể loại</button>
-                </a>
-                <a href="{% url 'recommend' %}">
-                    <button>Gợi ý phim</button>
-                </a>
+                <a href="{% url 'home' %}"><button>Trang chủ</button></a>
+                <a href="{% url 'movie_list' %}"><button>Danh sách phim</button></a>
+                <a href="{% url 'room_list' %}"><button>Room List</button></a>
             </div>
         </div>
 
         {% if user.is_authenticated %}
         <div class="user-menu">
             <div class="user-trigger">
-                <div class="avatar">
-                    {{ user.username|slice:":1"|upper }}
-                </div>
+                <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
                 <div class="user-info">
                     <strong>{{ user.username }}</strong>
                     <span>Người dùng đã đăng nhập</span>
                 </div>
-                <div class="dropdown-arrow">▼</div>
-            </div>
-
-            <div class="dropdown-menu">
-                <div class="dropdown-header">
-                    <strong>{{ user.username }}</strong>
-                    <p>Quản lý tài khoản và lịch sử đặt phim</p>
-                </div>
-
-                <a href="{% url 'user_home' %}" class="dropdown-item">
-                    📜 Lịch sử đặt phim
-                </a>
-
-                <a href="{% url 'movie_list' %}" class="dropdown-item">
-                    🎥 Danh sách phim
-                </a>
-
-                <form method="POST" action="{% url 'logout' %}" class="dropdown-form">
-                    {% csrf_token %}
-                    <button type="submit">🚪 Đăng xuất</button>
-                </form>
             </div>
         </div>
         {% else %}
@@ -719,182 +397,89 @@ main{
             </a>
         </div>
         {% endif %}
-
     </div>
 </nav>
 
-<div class="page-header">
-    <h1>
-        {% if query %}
-            🔎 Kết quả tìm kiếm: "{{ query }}"
-        {% else %}
-            🎬 Danh sách phim
-        {% endif %}
-    </h1>
-    <p>
-        {% if query %}
-            Kết quả bên dưới được lọc theo tên phim bạn đã nhập. Bạn có thể tiếp tục tìm kiếm hoặc xóa bộ lọc để xem toàn bộ danh sách phim.
-        {% else %}
-            Khám phá các bộ phim mới nhất, chọn phim yêu thích và tiếp tục quy trình đặt vé với giao diện trực quan, hiện đại.
-        {% endif %}
-    </p>
-</div>
-
 <main>
-
-    <div class="top-bar">
-        <div class="top-bar-left">
-            {% if page_obj and page_obj.paginator.count %}
-                {% if query %}
-                    Tìm thấy <strong>{{ page_obj.paginator.count }}</strong> phim phù hợp với từ khóa "<strong>{{ query }}</strong>"
-                {% else %}
-                    Tổng số phim: <strong>{{ page_obj.paginator.count }}</strong>
-                {% endif %}
-            {% else %}
-                {% if query %}
-                    Không tìm thấy phim phù hợp với từ khóa "<strong>{{ query }}</strong>"
-                {% else %}
-                    Chưa có dữ liệu phim
-                {% endif %}
-            {% endif %}
-        </div>
-
-        <div class="top-bar-right">
-            <a href="{% url 'home' %}">
-                <button class="top-btn">🏠 Trang chủ</button>
-            </a>
-
-            <a href="{% url 'recommend' %}">
-                <button class="top-btn">🎯 Gợi ý phim</button>
-            </a>
-        </div>
+    <div class="page-header">
+        <h1>🏢 Danh sách phòng chiếu</h1>
+        <p>
+            Khám phá toàn bộ phòng chiếu hiện có, được phân loại theo phòng thường,
+            phòng VIP và phòng nhóm để bạn lựa chọn dễ dàng hơn.
+        </p>
     </div>
 
-    <div class="search-panel">
-        <form method="GET" action="{% url 'movie_list' %}" class="search-form">
-            <input
-                type="text"
-                name="q"
-                placeholder="Nhập tên phim cần tìm..."
-                value="{{ query|default:'' }}"
-            >
-
-            <button type="submit">Tìm kiếm</button>
-
-            {% if query %}
-            <a href="{% url 'movie_list' %}" class="clear-search">
-                Xóa tìm kiếm
-            </a>
+    <h2 class="section-title">Phòng Thường</h2>
+    <div class="room-grid">
+        {% for room in normal_rooms %}
+        <div class="room-card">
+            {% if room.image %}
+            <img src="{{ room.image.url }}" alt="{{ room.name }}">
             {% endif %}
-        </form>
-    </div>
 
-    {% if page_obj and page_obj.object_list %}
-
-    <div class="movies-list">
-
-        {% for movie in page_obj %}
-        <div class="movie-card">
-
-            <div class="poster-wrapper">
-                {% if movie.startYear >= 2020 %}
-                <div class="movie-badge">Mới</div>
-                {% endif %}
-
-                {% if movie.poster_url %}
-                <img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" class="movie-poster">
-                {% else %}
-                <img src="https://via.placeholder.com/300x450?text=No+Poster" alt="No Poster" class="movie-poster">
-                {% endif %}
-
-                <div class="overlay">
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'select_movie' movie.tconst %}">
-                        <button>🎬 Đặt phim</button>
-                    </a>
-                    {% else %}
-                    <button onclick="alert('Vui lòng đăng nhập để đặt phim')">🔒 Đăng nhập</button>
-                    {% endif %}
-                </div>
+            <div class="room-overlay">
+                <a href="{% url 'room_detail' room.room_id %}" class="overlay-btn detail-btn">Xem chi tiết</a>
+                <a href="{% url 'handle_booking_with_room' room.room_id %}" class="overlay-btn book-btn">Đặt phòng</a>
             </div>
 
-            <div class="movie-info">
-                <h3>{{ movie.primaryTitle }}</h3>
+            <h3>{{ room.name }}</h3>
+            <p>{{ room.description|truncatewords:20 }}</p>
+            <div class="room-status">
+                <span style="color:lightgreen;">● Đang hoạt động</span>
+            </div>
+        </div>
+        {% empty %}
+        <p class="empty-text">Chưa có phòng thường.</p>
+        {% endfor %}
+    </div>
 
-                <div class="movie-meta">
-                    {% if movie.genres %}
-                    <p>🎭 {{ movie.genres }}</p>
-                    {% endif %}
+    <h2 class="section-title">Phòng VIP</h2>
+    <div class="room-grid">
+        {% for room in vip_rooms %}
+        <div class="room-card">
+            {% if room.image %}
+            <img src="{{ room.image.url }}" alt="{{ room.name }}">
+            {% endif %}
 
-                    {% if movie.startYear %}
-                    <p>📅 {{ movie.startYear }}</p>
-                    {% endif %}
-
-                    {% if movie.runtimeMinutes %}
-                    <p>⏱ {{ movie.runtimeMinutes }} phút</p>
-                    {% endif %}
-
-                    {% if movie.averageRating %}
-                    <p>
-                        ⭐ {{ movie.averageRating }}/10
-                        {% if movie.numVotes %}
-                            ({{ movie.numVotes }} lượt)
-                        {% endif %}
-                    </p>
-                    {% endif %}
-                </div>
+            <div class="room-overlay">
+                <a href="{% url 'room_detail' room.room_id %}" class="overlay-btn detail-btn">Xem chi tiết</a>
+                <a href="{% url 'handle_booking_with_room' room.room_id %}" class="overlay-btn book-btn">Đặt phòng</a>
             </div>
 
+            <h3>{{ room.name }}</h3>
+            <p>{{ room.description|truncatewords:20 }}</p>
+            <div class="room-status">
+                <span style="color:lightgreen;">● Đang hoạt động</span>
+            </div>
         </div>
+        {% empty %}
+        <p class="empty-text">Chưa có phòng VIP.</p>
         {% endfor %}
-
     </div>
 
-    {% if page_obj.paginator.num_pages > 1 %}
-    <div class="pagination">
-
-        {% if page_obj.has_previous %}
-            <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page=1">«</a>
-            <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">‹</a>
-        {% else %}
-            <span>«</span>
-            <span>‹</span>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-                <span class="active">{{ num }}</span>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
+    <h2 class="section-title">Phòng Nhóm</h2>
+    <div class="room-grid">
+        {% for room in group_rooms %}
+        <div class="room-card">
+            {% if room.image %}
+            <img src="{{ room.image.url }}" alt="{{ room.name }}">
             {% endif %}
+
+            <div class="room-overlay">
+                <a href="{% url 'room_detail' room.room_id %}" class="overlay-btn detail-btn">Xem chi tiết</a>
+                <a href="{% url 'handle_booking_with_room' room.room_id %}" class="overlay-btn book-btn">Đặt phòng</a>
+            </div>
+
+            <h3>{{ room.name }}</h3>
+            <p>{{ room.description|truncatewords:20 }}</p>
+            <div class="room-status">
+                <span style="color:lightgreen;">● Đang hoạt động</span>
+            </div>
+        </div>
+        {% empty %}
+        <p class="empty-text">Chưa có phòng nhóm.</p>
         {% endfor %}
-
-        {% if page_obj.has_next %}
-            <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">›</a>
-            <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}">»</a>
-        {% else %}
-            <span>›</span>
-            <span>»</span>
-        {% endif %}
-
     </div>
-    {% endif %}
-
-    {% else %}
-
-    <div class="empty-box">
-        {% if query %}
-            <p class="empty">Không tìm thấy phim nào có tên gần giống "{{ query }}".</p>
-            <a href="{% url 'movie_list' %}">
-                <button class="top-btn">Xem lại toàn bộ phim</button>
-            </a>
-        {% else %}
-            <p class="empty">Không có phim nào trong hệ thống.</p>
-        {% endif %}
-    </div>
-
-    {% endif %}
-
 </main>
 
 </body>
