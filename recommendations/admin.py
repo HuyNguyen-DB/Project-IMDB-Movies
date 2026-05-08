@@ -262,7 +262,7 @@ class CustomUserAdmin(UserAdmin):
     )
 
     ordering = (
-        "username",
+        "-date_joined",
     )
 
     readonly_fields = (
@@ -513,6 +513,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
     )
 
     ordering = (
+        "-booking_date",
         "-date_booked",
     )
 
@@ -840,6 +841,7 @@ class MovieAdmin(admin.ModelAdmin):
     ordering = (
         "-startYear",
         "-averageRating",
+        "primaryTitle",
     )
 
     list_per_page = 30

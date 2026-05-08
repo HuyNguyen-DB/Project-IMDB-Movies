@@ -21,6 +21,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from django.utils import timezone
 from datetime import timedelta
+
+
 # Lấy tất cả dữ liệu phim từ MongoDB và chuyển đổi thành DataFrame
 def get_movies():
     movies_queryset = Movie.objects.all()
@@ -31,7 +33,7 @@ def get_movies():
         'averageRating',
         'startYear',
         'runtimeMinutes',
-        'poster_url',   
+        'poster_url',
     )
     return pd.DataFrame(movies_data)
 
@@ -107,10 +109,23 @@ def room_list(request):
             'group_rooms': group_rooms,
         }
     )
+
+
 # Trang dành cho user đã đăng nhập
 @login_required
 def user_home(request):
     recommendations = []
+    now = timezone.now()
+
+    # Tự động chuyển đơn chưa thanh toán đã quá ngày giờ xem sang hết hạn.
+    BookedMovie.objects.filter(
+        user=request.user,
+        payment_status='unpaid',
+        status='pending',
+        booking_date__lt=now
+    ).update(
+        status='expired'
+    )
 
     if request.method == 'POST':
         user_genres = request.POST.get('genres', '').strip()
@@ -120,8 +135,6 @@ def user_home(request):
     booked_movies = list(
         BookedMovie.objects.filter(user=request.user)
     )
-
-    now = timezone.now()
 
     today = timezone.localtime(now).date()
     tomorrow = today + timedelta(days=1)
@@ -133,69 +146,126 @@ def user_home(request):
 
     for movie in booked_movies:
         booking_local_date = get_local_date(movie.booking_date)
-
         movie.is_today = booking_local_date == today
         movie.is_tomorrow = booking_local_date == tomorrow
-
-    # Sắp xếp theo thời gian gần hiện tại nhất
-    booked_movies.sort(
-        key=lambda movie: abs(
-            (movie.booking_date - now).total_seconds()
-        )
-    )
 
     paid_movies = [
         movie for movie in booked_movies
         if movie.payment_status == 'paid'
+        and movie.status not in ['cancelled', 'expired']
     ]
 
     unpaid_movies = [
         movie for movie in booked_movies
         if movie.payment_status == 'unpaid'
+        and movie.status == 'pending'
+        and movie.booking_date >= now
     ]
+
+    cancelled_expired_movies = [
+        movie for movie in booked_movies
+        if movie.status in ['cancelled', 'expired']
+    ]
+
+    sort_option = request.GET.get('sort', 'closest')
+
+    def sort_movies(movie_list):
+        if sort_option == 'newest':
+            return sorted(
+                movie_list,
+                key=lambda movie: movie.booking_date,
+                reverse=True
+            )
+
+        if sort_option == 'oldest':
+            return sorted(
+                movie_list,
+                key=lambda movie: movie.booking_date
+            )
+
+        if sort_option == 'price_desc':
+            return sorted(
+                movie_list,
+                key=lambda movie: movie.total_price or 0,
+                reverse=True
+            )
+
+        if sort_option == 'price_asc':
+            return sorted(
+                movie_list,
+                key=lambda movie: movie.total_price or 0
+            )
+
+        # Mặc định: lịch gần hôm nay nhất.
+        return sorted(
+            movie_list,
+            key=lambda movie: abs((movie.booking_date - now).total_seconds())
+        )
+
+    paid_movies = sort_movies(paid_movies)
+    unpaid_movies = sort_movies(unpaid_movies)
+    cancelled_expired_movies = sort_movies(cancelled_expired_movies)
+
+    paid_paginator = Paginator(paid_movies, 4)
+    unpaid_paginator = Paginator(unpaid_movies, 3)
+    expired_paginator = Paginator(cancelled_expired_movies, 4)
+
+    paid_page_obj = paid_paginator.get_page(request.GET.get('paid_page'))
+    unpaid_page_obj = unpaid_paginator.get_page(request.GET.get('unpaid_page'))
+    expired_page_obj = expired_paginator.get_page(request.GET.get('expired_page'))
 
     return render(
         request,
         'recommendations/user_home.html',
         {
             'recommendations': recommendations,
-            'booked_movies': booked_movies,
-            'paid_movies': paid_movies,
-            'unpaid_movies': unpaid_movies,
+
+            'paid_movies': paid_page_obj,
+            'unpaid_movies': unpaid_page_obj,
+            'cancelled_expired_movies': expired_page_obj,
+
+            'paid_total': len(paid_movies),
+            'unpaid_total': len(unpaid_movies),
+            'expired_total': len(cancelled_expired_movies),
+
             'total_bookings': len(booked_movies),
+            'sort_option': sort_option,
         }
     )
-
 # Đăng ký
 def signup(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)  # ✅ dùng form custom
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('login')
     else:
-        form = CustomUserCreationForm()  # ✅ dùng form custom
+        form = CustomUserCreationForm()
 
     return render(request, 'recommendations/signup.html', {'form': form})
+
 
 # Đăng nhập
 class CustomLoginView(LoginView):
     template_name = 'recommendations/login.html'
+
     def get_success_url(self):
         """
         Chuyển hướng người dùng đến trang admin nếu là admin,
         hoặc đến trang home nếu là user.
         """
         if self.request.user.is_staff:
-            return reverse_lazy('admin:index')  # Chuyển tới trang admin nếu là admin
+            return reverse_lazy('admin:index')
         else:
-            return reverse_lazy('home')  # Chuyển tới trang chủ nếu là người dùng bình thường
+            return reverse_lazy('home')
+
 
 # Đăng xuất
 def custom_logout(request):
     logout(request)
     messages.success(request, "Bạn đã đăng xuất thành công!")
-    return redirect('login')  # Chuyển hướng về trang đăng nhập
+    return redirect('login')
+
 
 def custom_login(request):
     if request.method == "POST":
@@ -203,10 +273,12 @@ def custom_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('home')  # Redirect về trang chủ sau khi đăng nhập thành công
+            return redirect('home')
     else:
         form = EmailLoginForm()
+
     return render(request, 'recommendations/login.html', {'form': form})
+
 
 # Hàm recommend gợi ý phim cho cả guest và user
 def get_movie_recommendations(user_genres, num_recommendations=20):
@@ -238,8 +310,17 @@ def get_movie_recommendations(user_genres, num_recommendations=20):
     )
 
     return recommended[
-        ['tconst', 'primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
+        [
+            'tconst',
+            'primaryTitle',
+            'genres',
+            'averageRating',
+            'startYear',
+            'runtimeMinutes',
+            'poster_url'
+        ]
     ].head(num_recommendations)
+
 
 def recommend(request, user_genres=None, user_title=None):
     movies_df = get_movies()
@@ -275,10 +356,19 @@ def recommend(request, user_genres=None, user_title=None):
         )
 
     recommendations = recommendations[
-        ['tconst', 'primaryTitle', 'genres', 'averageRating', 'startYear', 'runtimeMinutes','poster_url']
+        [
+            'tconst',
+            'primaryTitle',
+            'genres',
+            'averageRating',
+            'startYear',
+            'runtimeMinutes',
+            'poster_url'
+        ]
     ].drop_duplicates()
 
     return recommendations.to_dict('records')
+
 
 # Trang gợi ý phim cho cả guest và user
 def recommend_page(request):
@@ -286,30 +376,25 @@ def recommend_page(request):
     user_title = None
     recommendations = []
 
-    # 1️⃣ Lấy dữ liệu từ form (nếu có)
     if request.method == 'POST':
         user_genres = request.POST.get('genres')
         user_title = request.POST.get('title')
 
-    # 2️⃣ Nếu KHÔNG có title và genres → thử gợi ý theo lịch sử
     if not user_genres and not user_title:
         if request.user.is_authenticated:
             user_genres = build_user_genres_from_history(request.user)
 
-            # Nếu user đăng nhập nhưng CHƯA có lịch sử
             if not user_genres:
                 return redirect('choose_genres')
         else:
             return redirect('choose_genres')
 
-    # 3️⃣ Gọi thuật toán gợi ý hiện có
     recommendations = recommend(
         request,
         user_genres=user_genres,
         user_title=user_title
     )
 
-    # 4️⃣ Nếu có recommendations → loại bỏ phim đã đặt
     if request.user.is_authenticated and recommendations:
         booked_titles = set(
             BookedMovie.objects
@@ -344,9 +429,10 @@ def choose_genres(request):
         {'genres': genres}
     )
 
+
 def build_user_genres_from_history(user):
     """
-    Tạo chuỗi genres từ lịch sử đặt phim của user
+    Tạo chuỗi genres từ lịch sử đặt phim của user.
     Ví dụ: 'action,thriller,drama'
     """
     booked_movies = BookedMovie.objects.filter(user=user)
@@ -363,9 +449,10 @@ def build_user_genres_from_history(user):
     if not genres:
         return None
 
-    # Loại trùng
     unique_genres = list(set(genres))
     return ','.join(unique_genres)
+
+
 # Đặt phim
 @login_required
 def book_movie(request):
@@ -404,7 +491,6 @@ def book_movie(request):
             booked_movie.price_per_30min = room.price_per_30min
             booked_movie.total_price = total_price
 
-            # NEW
             booked_movie.status = 'pending'
             booked_movie.payment_status = 'unpaid'
 
@@ -427,9 +513,41 @@ def book_movie(request):
         }
     )
 
+
 @login_required
 def payment_page(request, booking_id):
     booking = get_object_or_404(BookedMovie, id=booking_id, user=request.user)
+    now = timezone.now()
+
+    if (
+        booking.payment_status == 'unpaid'
+        and booking.status == 'pending'
+        and booking.booking_date < now
+    ):
+        booking.status = 'expired'
+        booking.save()
+
+    if booking.status == 'expired':
+        messages.error(
+            request,
+            "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
+        )
+        return redirect('user_home')
+
+    if booking.status == 'cancelled':
+        messages.error(
+            request,
+            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
+        )
+        return redirect('user_home')
+
+    if booking.payment_status == 'paid':
+        messages.warning(request, "Đơn này đã được thanh toán trước đó.")
+
+        if hasattr(booking, 'invoice') and booking.invoice and booking.invoice.invoice_code:
+            return redirect('invoice_detail', invoice_code=booking.invoice.invoice_code)
+
+        return redirect('user_home')
 
     return render(
         request,
@@ -437,17 +555,49 @@ def payment_page(request, booking_id):
         {'booking': booking}
     )
 
+
 @login_required
 def confirm_payment(request, booking_id):
     booking = get_object_or_404(BookedMovie, id=booking_id, user=request.user)
+    now = timezone.now()
 
     if request.method != 'POST':
         return redirect('payment_page', booking_id=booking.id)
 
+    if (
+        booking.payment_status == 'unpaid'
+        and booking.status == 'pending'
+        and booking.booking_date < now
+    ):
+        booking.status = 'expired'
+        booking.save()
+
+        messages.error(
+            request,
+            "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
+        )
+        return redirect('user_home')
+
+    if booking.status == 'expired':
+        messages.error(
+            request,
+            "Đơn đặt phim này đã hết hạn nên không thể thanh toán."
+        )
+        return redirect('user_home')
+
+    if booking.status == 'cancelled':
+        messages.error(
+            request,
+            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
+        )
+        return redirect('user_home')
+
     if booking.payment_status == 'paid':
         messages.warning(request, "Đơn này đã được thanh toán trước đó.")
+
         if hasattr(booking, 'invoice') and booking.invoice and booking.invoice.invoice_code:
             return redirect('invoice_detail', invoice_code=booking.invoice.invoice_code)
+
         return redirect('user_home')
 
     booking.payment_status = 'paid'
@@ -464,6 +614,7 @@ def confirm_payment(request, booking_id):
     )
 
     return redirect('invoice_detail', invoice_code=invoice.invoice_code)
+
 
 @login_required
 def invoice_detail(request, invoice_code):
@@ -500,16 +651,18 @@ def room_detail(request, room_id):
         }
     )
 
+
 def movie_list(request):
     movies = Movie.objects.all().order_by('-startYear')
 
-    paginator = Paginator(movies, 12)  # 12 phim / trang
+    paginator = Paginator(movies, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'recommendations/movie_list.html', {
         'page_obj': page_obj
     })
+
 
 @login_required
 def handle_booking(request, room_id=None):
@@ -527,12 +680,15 @@ def handle_booking(request, room_id=None):
 
     return redirect('book_movie')
 
+
 @login_required
 def select_movie(request, movie_id):
     request.session['selected_movie'] = movie_id
     return redirect('handle_booking')
 
+
 import math
+
 
 def round_to_30_minutes(minutes):
     try:

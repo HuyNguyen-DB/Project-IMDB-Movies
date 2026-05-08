@@ -32,6 +32,7 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = 'Thông tin người dùng'
         verbose_name_plural = 'Thông tin người dùng'
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"Thông tin người dùng - {self.user.username}"
@@ -123,7 +124,7 @@ class BookedMovie(models.Model):
     class Meta:
         verbose_name = 'Đơn đặt phim'
         verbose_name_plural = 'Đơn đặt phim'
-        ordering = ['-date_booked']
+        ordering = ['-booking_date', '-date_booked']
 
     def save(self, *args, **kwargs):
         if not self.booking_code:
@@ -227,7 +228,7 @@ class Movie(models.Model):
     class Meta:
         verbose_name = 'Phim'
         verbose_name_plural = 'Phim'
-        ordering = ['-startYear', '-averageRating']
+        ordering = ['-startYear', '-averageRating', 'primaryTitle']
 
     def __str__(self):
         return self.primaryTitle
@@ -305,6 +306,7 @@ class RoomImage(models.Model):
     class Meta:
         verbose_name = 'Ảnh phụ phòng chiếu'
         verbose_name_plural = 'Ảnh phụ phòng chiếu'
+        ordering = ['id']
 
     def __str__(self):
         return f"{self.room.name} - {self.image.name}"

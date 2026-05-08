@@ -326,6 +326,41 @@ body{
     border:1px solid rgba(255,255,255,0.06);
 }
 
+.sort-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:22px;
+}
+
+.sort-toolbar label{
+    color:#cbd5e1;
+    font-size:14px;
+    font-weight:700;
+}
+
+.sort-toolbar select{
+    background:#111827;
+    color:white;
+    border:1px solid rgba(255,255,255,0.10);
+    border-radius:12px;
+    padding:11px 14px;
+    font-size:14px;
+    outline:none;
+    cursor:pointer;
+}
+
+.sort-toolbar select:focus{
+    border-color:#22c55e;
+    box-shadow:0 0 0 3px rgba(34,197,94,0.18);
+}
+
 .booking-columns{
     display:grid;
     grid-template-columns:2fr 1fr;
@@ -334,7 +369,8 @@ body{
 }
 
 .paid-section,
-.unpaid-section{
+.unpaid-section,
+.expired-section{
     background:#0f172a;
     border:1px solid rgba(255,255,255,0.06);
     border-radius:18px;
@@ -345,6 +381,13 @@ body{
     border:1px solid rgba(250,204,21,0.35);
     box-shadow:0 0 0 1px rgba(250,204,21,0.08),
                0 16px 35px rgba(250,204,21,0.08);
+}
+
+.expired-section{
+    margin-top:24px;
+    border:1px solid rgba(148,163,184,0.26);
+    box-shadow:0 0 0 1px rgba(148,163,184,0.06),
+               0 16px 35px rgba(15,23,42,0.16);
 }
 
 .section-title{
@@ -368,6 +411,10 @@ body{
     color:#fde68a;
 }
 
+.expired-section .section-title h2{
+    color:#cbd5e1;
+}
+
 .section-count{
     background:#111827;
     color:#e5e7eb;
@@ -389,6 +436,17 @@ body{
     background:rgba(250,204,21,0.10);
     border:1px solid rgba(250,204,21,0.22);
     color:#fde68a;
+    padding:13px 14px;
+    border-radius:14px;
+    line-height:1.5;
+    font-size:14px;
+    margin-bottom:18px;
+}
+
+.expired-note{
+    background:rgba(148,163,184,0.10);
+    border:1px solid rgba(148,163,184,0.20);
+    color:#cbd5e1;
     padding:13px 14px;
     border-radius:14px;
     line-height:1.5;
@@ -420,6 +478,16 @@ body{
 .unpaid-section .history-card{
     background:rgba(15,23,42,0.96);
     border-color:rgba(250,204,21,0.18);
+}
+
+.expired-section .history-card{
+    background:rgba(15,23,42,0.88);
+    border-color:rgba(148,163,184,0.18);
+    opacity:0.92;
+}
+
+.expired-section .movie-details h3{
+    color:#cbd5e1;
 }
 
 .history-card.today-highlight{
@@ -616,6 +684,52 @@ body{
     margin:0;
 }
 
+.pagination{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:22px;
+}
+
+.pagination a,
+.pagination span{
+    min-width:38px;
+    height:38px;
+    padding:0 12px;
+    border-radius:10px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:700;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.pagination a{
+    background:#111827;
+    color:#e5e7eb;
+}
+
+.pagination a:hover{
+    background:#1f2937;
+    transform:translateY(-1px);
+}
+
+.pagination .current{
+    background:#22c55e;
+    color:white;
+    border-color:#22c55e;
+}
+
+.pagination .disabled{
+    background:#0f172a;
+    color:#64748b;
+    cursor:not-allowed;
+}
+
 .action-buttons{
     text-align:center;
     margin-top:34px;
@@ -687,6 +801,14 @@ body{
 
     .container{
         padding:18px 18px 50px;
+    }
+
+    .history-panel{
+        padding:20px;
+    }
+
+    .sort-toolbar{
+        align-items:flex-start;
     }
 
     .history-card{
@@ -785,7 +907,8 @@ body{
 <div class="page-header">
     <h1>🎬 Lịch sử đặt phim của {{ user.username }}</h1>
     <p>
-        Theo dõi toàn bộ đơn đặt phim của bạn, bao gồm đơn chờ thanh toán, đơn đã xác nhận và hóa đơn nội bộ sau khi thanh toán thành công.
+        Theo dõi toàn bộ đơn đặt phim của bạn, bao gồm đơn chờ thanh toán, đơn đã xác nhận,
+        hóa đơn nội bộ và các đơn đã hủy hoặc hết hạn.
     </p>
 </div>
 
@@ -821,6 +944,36 @@ body{
 
     <div class="history-panel">
 
+        <form method="GET" class="sort-toolbar">
+            <div>
+                <label for="sort">Sắp xếp đơn đặt phim</label>
+            </div>
+
+            <div>
+                <select name="sort" id="sort" onchange="this.form.submit()">
+                    <option value="closest" {% if sort_option == 'closest' %}selected{% endif %}>
+                        Gần hôm nay nhất
+                    </option>
+
+                    <option value="newest" {% if sort_option == 'newest' %}selected{% endif %}>
+                        Ngày xem mới nhất
+                    </option>
+
+                    <option value="oldest" {% if sort_option == 'oldest' %}selected{% endif %}>
+                        Ngày xem cũ nhất
+                    </option>
+
+                    <option value="price_desc" {% if sort_option == 'price_desc' %}selected{% endif %}>
+                        Tổng tiền cao nhất
+                    </option>
+
+                    <option value="price_asc" {% if sort_option == 'price_asc' %}selected{% endif %}>
+                        Tổng tiền thấp nhất
+                    </option>
+                </select>
+            </div>
+        </form>
+
         {% if total_bookings %}
 
         <div class="booking-columns">
@@ -828,7 +981,7 @@ body{
             <section class="paid-section">
                 <div class="section-title">
                     <h2>✅ Đơn đã thanh toán</h2>
-                    <span class="section-count">{{ paid_movies|length }} đơn</span>
+                    <span class="section-count">{{ paid_total }} đơn</span>
                 </div>
 
                 <p class="section-note">
@@ -928,17 +1081,41 @@ body{
                     </div>
                     {% endfor %}
 
+                    {% if paid_movies.paginator.num_pages > 1 %}
+                    <div class="pagination">
+                        {% if paid_movies.has_previous %}
+                            <a href="?sort={{ sort_option }}&paid_page={{ paid_movies.previous_page_number }}">‹</a>
+                        {% else %}
+                            <span class="disabled">‹</span>
+                        {% endif %}
+
+                        {% for num in paid_movies.paginator.page_range %}
+                            {% if paid_movies.number == num %}
+                                <span class="current">{{ num }}</span>
+                            {% else %}
+                                <a href="?sort={{ sort_option }}&paid_page={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if paid_movies.has_next %}
+                            <a href="?sort={{ sort_option }}&paid_page={{ paid_movies.next_page_number }}">›</a>
+                        {% else %}
+                            <span class="disabled">›</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
                 </div>
             </section>
 
             <aside class="unpaid-section">
                 <div class="section-title">
                     <h2>⚠️ Chưa thanh toán</h2>
-                    <span class="section-count">{{ unpaid_movies|length }} đơn</span>
+                    <span class="section-count">{{ unpaid_total }} đơn</span>
                 </div>
 
                 <div class="unpaid-warning">
-                    Các đơn bên dưới vẫn chưa thanh toán. Vui lòng hoàn tất để xác nhận lịch đặt phim.
+                    Các đơn bên dưới vẫn chưa thanh toán. Vui lòng hoàn tất trước ngày giờ xem để xác nhận lịch đặt phim.
                 </div>
 
                 <div class="movie-history-list">
@@ -1022,10 +1199,145 @@ body{
                     </div>
                     {% endfor %}
 
+                    {% if unpaid_movies.paginator.num_pages > 1 %}
+                    <div class="pagination">
+                        {% if unpaid_movies.has_previous %}
+                            <a href="?sort={{ sort_option }}&unpaid_page={{ unpaid_movies.previous_page_number }}">‹</a>
+                        {% else %}
+                            <span class="disabled">‹</span>
+                        {% endif %}
+
+                        {% for num in unpaid_movies.paginator.page_range %}
+                            {% if unpaid_movies.number == num %}
+                                <span class="current">{{ num }}</span>
+                            {% else %}
+                                <a href="?sort={{ sort_option }}&unpaid_page={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if unpaid_movies.has_next %}
+                            <a href="?sort={{ sort_option }}&unpaid_page={{ unpaid_movies.next_page_number }}">›</a>
+                        {% else %}
+                            <span class="disabled">›</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
                 </div>
             </aside>
 
         </div>
+
+        <section class="expired-section">
+            <div class="section-title">
+                <h2>🕓 Đơn đã hủy / hết hạn</h2>
+                <span class="section-count">{{ expired_total }} đơn</span>
+            </div>
+
+            <div class="expired-note">
+                Các đơn bên dưới đã bị hủy hoặc đã hết hạn vì quá ngày giờ xem nhưng chưa thanh toán.
+            </div>
+
+            <div class="movie-history-list">
+
+                {% for movie in cancelled_expired_movies %}
+                <div class="history-card">
+
+                    <img class="movie-poster"
+                         src="https://via.placeholder.com/115x165.png?text=Movie"
+                         alt="Poster">
+
+                    <div class="movie-details">
+                        <h3>{{ movie.movie_title }}</h3>
+
+                        <div class="meta-row">
+                            <div class="meta-box">
+                                <span class="meta-label">Mã đơn</span>
+                                <div class="meta-value">{{ movie.booking_code }}</div>
+                            </div>
+
+                            <div class="meta-box">
+                                <span class="meta-label">Thể loại</span>
+                                <div class="meta-value">{{ movie.movie_genre }}</div>
+                            </div>
+
+                            <div class="meta-box">
+                                <span class="meta-label">Phòng chiếu</span>
+                                <div class="meta-value">{{ movie.room_name }}</div>
+                            </div>
+
+                            <div class="meta-box">
+                                <span class="meta-label">Ngày giờ xem</span>
+                                <div class="meta-value">{{ movie.booking_date|date:"H:i, d/m/Y" }}</div>
+                            </div>
+
+                            <div class="meta-box">
+                                <span class="meta-label">Tổng tiền</span>
+                                <div class="meta-value">{{ movie.total_price }} VND</div>
+                            </div>
+
+                            <div class="meta-box">
+                                <span class="meta-label">Thời điểm tạo đơn</span>
+                                <div class="meta-value">{{ movie.date_booked|date:"H:i, d/m/Y" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="status-badges">
+                            <span class="badge {{ movie.status }}">
+                                {% if movie.status == 'cancelled' %}
+                                    ĐÃ HỦY
+                                {% elif movie.status == 'expired' %}
+                                    HẾT HẠN
+                                {% else %}
+                                    {{ movie.status|upper }}
+                                {% endif %}
+                            </span>
+
+                            <span class="badge {{ movie.payment_status }}">
+                                {% if movie.payment_status == 'unpaid' %}
+                                    CHƯA THANH TOÁN
+                                {% elif movie.payment_status == 'paid' %}
+                                    ĐÃ THANH TOÁN
+                                {% else %}
+                                    {{ movie.payment_status|upper }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+                {% empty %}
+                <div class="empty-box">
+                    <p class="empty">Không có đơn đã hủy hoặc hết hạn.</p>
+                </div>
+                {% endfor %}
+
+                {% if cancelled_expired_movies.paginator.num_pages > 1 %}
+                <div class="pagination">
+                    {% if cancelled_expired_movies.has_previous %}
+                        <a href="?sort={{ sort_option }}&expired_page={{ cancelled_expired_movies.previous_page_number }}">‹</a>
+                    {% else %}
+                        <span class="disabled">‹</span>
+                    {% endif %}
+
+                    {% for num in cancelled_expired_movies.paginator.page_range %}
+                        {% if cancelled_expired_movies.number == num %}
+                            <span class="current">{{ num }}</span>
+                        {% else %}
+                            <a href="?sort={{ sort_option }}&expired_page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if cancelled_expired_movies.has_next %}
+                        <a href="?sort={{ sort_option }}&expired_page={{ cancelled_expired_movies.next_page_number }}">›</a>
+                    {% else %}
+                        <span class="disabled">›</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            </div>
+        </section>
 
         {% else %}
 
