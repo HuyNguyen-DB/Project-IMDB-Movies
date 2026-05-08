@@ -46,35 +46,49 @@ def get_movies():
 # Trang chủ cho cả user và guest
 def home(request):
     recommendations = []
-    movies = Movie.objects.values(
-        'primaryTitle',
-        'startYear',
-        'runtimeMinutes',
-        'genres',
-        'poster_url'
-    ).order_by('-numVotes')[:5]
 
-    available_rooms = ScreenRoom.objects.filter(
-        status='available'
-    ).only(
-        'room_id',
-        'name',
-        'description',
-        'status',
-        'image'
+    movies = list(
+        Movie.objects.values(
+            'primaryTitle',
+            'startYear',
+            'runtimeMinutes',
+            'genres',
+            'averageRating',
+            'poster_url'
+        ).order_by('-numVotes')[:8]
     )
 
-    normal_room = available_rooms.filter(name__icontains='Thường').first()
-    vip_room = available_rooms.filter(name__icontains='VIP').first()
-    group_room = available_rooms.filter(name__icontains='Nhóm').first()
+    screen_rooms = list(
+        ScreenRoom.objects.filter(
+            status='available'
+        ).only(
+            'room_id',
+            'name',
+            'description',
+            'status',
+            'image',
+            'price_per_30min'
+        ).order_by('room_id')[:8]
+    )
 
-    featured_rooms = []
-    if normal_room:
-        featured_rooms.append(normal_room)
-    if vip_room:
-        featured_rooms.append(vip_room)
-    if group_room:
-        featured_rooms.append(group_room)
+    # Ưu tiên hiển thị phòng VIP trước, sau đó phòng nhóm, phòng thường.
+    def room_priority(room):
+        name = (room.name or '').lower()
+
+        if 'vip' in name:
+            return 0
+
+        if 'nhóm' in name or 'nhom' in name or 'group' in name:
+            return 1
+
+        if 'thường' in name or 'thuong' in name:
+            return 2
+
+        return 3
+
+    screen_rooms.sort(
+        key=lambda room: (room_priority(room), room.room_id)
+    )
 
     if request.method == 'POST':
         user_genres = request.POST.get('genres', '').strip()
@@ -87,10 +101,11 @@ def home(request):
         {
             'movies': movies,
             'recommendations': recommendations,
-            'screen_rooms': featured_rooms,
+            'screen_rooms': screen_rooms,
+            'featured_movie_count': len(movies),
+            'featured_room_count': len(screen_rooms),
         }
     )
-
 
 def room_list(request):
     available_rooms = ScreenRoom.objects.filter(status='available').only(
@@ -658,15 +673,79 @@ def room_detail(request, room_id):
 
 
 def movie_list(request):
-    movies = Movie.objects.all().order_by('-startYear')
+    query = request.GET.get('q', '').strip()
+    genre = request.GET.get('genre', '').strip()
+    year_from = request.GET.get('year_from', '').strip()
+    year_to = request.GET.get('year_to', '').strip()
+    sort = request.GET.get('sort', 'newest').strip()
+
+    movies = Movie.objects.all()
+
+    if query:
+        movies = movies.filter(primaryTitle__icontains=query)
+
+    if genre:
+        movies = movies.filter(genres__icontains=genre)
+
+    if year_from:
+        try:
+            movies = movies.filter(startYear__gte=int(year_from))
+        except ValueError:
+            year_from = ''
+
+    if year_to:
+        try:
+            movies = movies.filter(startYear__lte=int(year_to))
+        except ValueError:
+            year_to = ''
+
+    sort_options = {
+        'newest': '-startYear',
+        'oldest': 'startYear',
+        'rating_desc': '-averageRating',
+        'votes_desc': '-numVotes',
+        'title_asc': 'primaryTitle',
+    }
+
+    movies = movies.order_by(sort_options.get(sort, '-startYear'))
 
     paginator = Paginator(movies, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'recommendations/movie_list.html', {
-        'page_obj': page_obj
-    })
+    genres = [
+        'Action',
+        'Adventure',
+        'Animation',
+        'Biography',
+        'Comedy',
+        'Crime',
+        'Drama',
+        'Family',
+        'Fantasy',
+        'History',
+        'Horror',
+        'Mystery',
+        'Romance',
+        'Sci-Fi',
+        'Thriller',
+        'War',
+    ]
+
+    return render(
+        request,
+        'recommendations/movie_list.html',
+        {
+            'page_obj': page_obj,
+            'query': query,
+            'genre': genre,
+            'year_from': year_from,
+            'year_to': year_to,
+            'sort': sort,
+            'genres': genres,
+            'total_results': paginator.count,
+        }
+    )
 
 
 @login_required
