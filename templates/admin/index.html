@@ -71,63 +71,63 @@
         <div class="admin-model-grid">
             {% for app in app_list %}
                 {% for model in app.models %}
-                    <div class="admin-model-card">
-                        <div class="model-icon">
-                            {% if model.object_name == "Movie" %}
-                                🎥
-                            {% elif model.object_name == "ScreenRoom" %}
-                                🏠
-                            {% elif model.object_name == "BookedMovie" %}
-                                📋
-                            {% elif model.object_name == "Invoice" %}
-                                🧾
-                            {% elif model.object_name == "RoomImage" %}
-                                🖼️
-                            {% elif model.object_name == "User" %}
-                                👤
-                            {% else %}
-                                ⚙️
-                            {% endif %}
-                        </div>
 
-                        <div class="model-content">
-                            <h3>
-                                {% if model.admin_url %}
-                                    <a href="{{ model.admin_url }}">{{ model.name }}</a>
-                                {% else %}
-                                    {{ model.name }}
-                                {% endif %}
-                            </h3>
-
-                            <p>
+                    {% if model.object_name != "RoomImage" and model.object_name != "Group" and model.object_name != "UserProfile" %}
+                        <div class="admin-model-card">
+                            <div class="model-icon">
                                 {% if model.object_name == "Movie" %}
-                                    Quản lý danh sách phim, thể loại, năm phát hành và điểm đánh giá.
+                                    🎥
                                 {% elif model.object_name == "ScreenRoom" %}
-                                    Quản lý phòng chiếu, trạng thái phòng và đơn giá thuê.
+                                    🏠
                                 {% elif model.object_name == "BookedMovie" %}
-                                    Theo dõi đơn đặt phim, trạng thái đơn và trạng thái thanh toán.
+                                    📋
                                 {% elif model.object_name == "Invoice" %}
-                                    Quản lý hóa đơn đã sinh sau khi người dùng thanh toán.
-                                {% elif model.object_name == "RoomImage" %}
-                                    Quản lý hình ảnh phụ của từng phòng chiếu.
+                                    🧾
                                 {% elif model.object_name == "User" %}
-                                    Quản lý tài khoản người dùng và quyền truy cập admin.
+                                    👤
                                 {% else %}
-                                    Quản lý dữ liệu hệ thống.
-                                {% endif %}
-                            </p>
-
-                            <div class="model-actions">
-                                {% if model.admin_url %}
-                                    <a href="{{ model.admin_url }}" class="btn-view">Quản lý</a>
-                                {% endif %}
-
-                                {% if model.add_url %}
-                                    <a href="{{ model.add_url }}" class="btn-add">Thêm mới</a>
+                                    ⚙️
                                 {% endif %}
                             </div>
+
+                            <div class="model-content">
+                                <h3>
+                                    {% if model.admin_url %}
+                                        <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                                    {% else %}
+                                        {{ model.name }}
+                                    {% endif %}
+                                </h3>
+
+                                <p>
+                                    {% if model.object_name == "Movie" %}
+                                        Quản lý danh sách phim, thể loại, năm phát hành, thời lượng và điểm đánh giá.
+                                    {% elif model.object_name == "ScreenRoom" %}
+                                        Quản lý phòng chiếu, trạng thái phòng, giá thuê, ảnh chính và ảnh phụ của phòng.
+                                    {% elif model.object_name == "BookedMovie" %}
+                                        Theo dõi đơn đặt phim, lịch chiếu, trạng thái đơn và trạng thái thanh toán.
+                                    {% elif model.object_name == "Invoice" %}
+                                        Quản lý hóa đơn được tạo sau khi người dùng hoàn tất thanh toán.
+                                    {% elif model.object_name == "User" %}
+                                        Quản lý tài khoản người dùng, thông tin liên hệ và quyền truy cập trang quản trị.
+                                    {% else %}
+                                        Quản lý dữ liệu hệ thống.
+                                    {% endif %}
+                                </p>
+
+                                <div class="model-actions">
+                                    {% if model.admin_url %}
+                                        <a href="{{ model.admin_url }}" class="btn-view">Quản lý</a>
+                                    {% endif %}
+
+                                    {% if model.add_url %}
+                                        <a href="{{ model.add_url }}" class="btn-add">Thêm mới</a>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
+
                 {% endfor %}
             {% endfor %}
         </div>
