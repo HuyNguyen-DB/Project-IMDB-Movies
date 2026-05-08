@@ -40,6 +40,8 @@ urlpatterns = [
     path('payment/<int:booking_id>/', views.payment_page, name='payment_page'),
     path('payment/<int:booking_id>/confirm/', views.confirm_payment, name='confirm_payment'),
     path('invoice/<str:invoice_code>/', views.invoice_detail, name='invoice_detail'),
+
+    path("chatbot/", views.chatbot_api, name="chatbot_api"),
 ]
 
 if settings.DEBUG:

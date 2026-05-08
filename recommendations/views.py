@@ -22,6 +22,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 from django.utils import timezone
 from datetime import timedelta
 # Lấy tất cả dữ liệu phim từ MongoDB và chuyển đổi thành DataFrame
+
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
 def get_movies():
     movies_queryset = Movie.objects.all()
     movies_data = movies_queryset.values(
@@ -543,3 +548,28 @@ def round_to_30_minutes(minutes):
         minutes = 90
 
     return int(math.ceil(minutes / 30.0) * 30)
+
+
+@csrf_exempt
+def chatbot_api(request):
+
+    if request.method == "POST":
+
+        user_message = request.POST.get("message")
+
+        response = requests.post(
+            "https://baton-sweat-levers.ngrok-free.dev/chat",
+            json={
+                "message": user_message
+            }
+        )
+
+        data = response.json()
+
+        return JsonResponse({
+            "reply": data["response"]
+        })
+
+    return JsonResponse({
+        "reply": "Invalid request"
+    })
