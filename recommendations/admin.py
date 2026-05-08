@@ -1,21 +1,30 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.html import format_html
 from django.utils import timezone
-from django.contrib import messages
-from django.contrib.auth.models import Group
+from django.urls import reverse
 
-from .models import BookedMovie, Movie, ScreenRoom, RoomImage, Invoice
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.admin import UserAdmin
+from django import forms
+
+from .models import (
+    UserProfile,
+    BookedMovie,
+    Movie,
+    ScreenRoom,
+    RoomImage,
+    Invoice,
+)
 
 
-admin.site.site_header = "Movie Webapp Admin"
+admin.site.site_header = "Quản trị Movie Webapp"
 admin.site.site_title = "Movie Webapp Admin"
 admin.site.index_title = "Bảng điều khiển quản trị"
 
-try:
-    admin.site.unregister(Group)
-except admin.sites.NotRegistered:
-    pass
 
+# =========================================================
+# HELPER FUNCTIONS
+# =========================================================
 
 def format_money(value):
     if value is None:
@@ -35,14 +44,24 @@ def format_datetime_vi(value):
     return value.strftime("%H:%M, %d/%m/%Y")
 
 
+def format_date_vi(value):
+    if not value:
+        return "Chưa có"
+
+    try:
+        return value.strftime("%d/%m/%Y")
+    except Exception:
+        return value
+
+
 def badge(text, color):
     color_map = {
-        "green": ("rgba(34,197,94,0.14)", "#86efac", "rgba(34,197,94,0.35)"),
-        "yellow": ("rgba(250,204,21,0.14)", "#fde68a", "rgba(250,204,21,0.35)"),
-        "red": ("rgba(239,68,68,0.14)", "#fca5a5", "rgba(239,68,68,0.35)"),
-        "blue": ("rgba(59,130,246,0.14)", "#93c5fd", "rgba(59,130,246,0.35)"),
-        "gray": ("rgba(148,163,184,0.14)", "#cbd5e1", "rgba(148,163,184,0.35)"),
-        "orange": ("rgba(249,115,22,0.14)", "#fdba74", "rgba(249,115,22,0.35)"),
+        "green": ("#dcfce7", "#166534", "#86efac"),
+        "yellow": ("#fef9c3", "#854d0e", "#fde68a"),
+        "red": ("#fee2e2", "#991b1b", "#fca5a5"),
+        "blue": ("#dbeafe", "#1d4ed8", "#93c5fd"),
+        "gray": ("#f1f5f9", "#475569", "#cbd5e1"),
+        "orange": ("#ffedd5", "#9a3412", "#fdba74"),
     }
 
     bg, text_color, border = color_map.get(color, color_map["gray"])
@@ -58,23 +77,402 @@ def badge(text, color):
     )
 
 
-class RoomImageInline(admin.TabularInline):
+# =========================================================
+# HIDE GROUPS
+# =========================================================
+
+try:
+    admin.site.unregister(Group)
+except admin.sites.NotRegistered:
+    pass
+
+
+# =========================================================
+# CUSTOM USER CHANGE FORM
+# =========================================================
+
+class CustomUserChangeForm(forms.ModelForm):
+    phone_number = forms.CharField(
+        label="Số điện thoại",
+        max_length=20,
+        required=False,
+    )
+
+    date_of_birth = forms.DateField(
+        label="Ngày sinh",
+        required=False,
+        widget=forms.DateInput(attrs={
+            "type": "date"
+        }),
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        user = self.instance
+
+        if user and user.pk:
+            try:
+                profile = user.profile
+                self.fields["phone_number"].initial = profile.phone_number
+                self.fields["date_of_birth"].initial = profile.date_of_birth
+            except UserProfile.DoesNotExist:
+                pass
+            except Exception:
+                pass
+
+        self.fields["username"].label = "Tên đăng nhập"
+        self.fields["first_name"].label = "Họ"
+        self.fields["last_name"].label = "Tên"
+        self.fields["email"].label = "Email"
+
+        self.fields["is_active"].label = "Kích hoạt tài khoản"
+        self.fields["is_staff"].label = "Cho phép vào trang quản trị"
+        self.fields["is_superuser"].label = "Toàn quyền quản trị"
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get("phone_number", "").strip()
+
+        if not phone_number:
+            return phone_number
+
+        if not phone_number.isdigit():
+            raise forms.ValidationError("Số điện thoại chỉ được chứa chữ số.")
+
+        if len(phone_number) < 9 or len(phone_number) > 11:
+            raise forms.ValidationError("Số điện thoại phải có từ 9 đến 11 chữ số.")
+
+        existing_profile = UserProfile.objects.filter(
+            phone_number=phone_number
+        ).exclude(
+            user=self.instance
+        ).first()
+
+        if existing_profile:
+            raise forms.ValidationError("Số điện thoại này đã được sử dụng.")
+
+        return phone_number
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+
+        if commit:
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.phone_number = self.cleaned_data.get("phone_number", "")
+            profile.date_of_birth = self.cleaned_data.get("date_of_birth")
+            profile.save()
+
+        return user
+
+
+# =========================================================
+# CUSTOM USER FILTERS
+# =========================================================
+
+class AccountTypeFilter(admin.SimpleListFilter):
+    title = "Loại tài khoản"
+    parameter_name = "account_type"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("normal", "Người dùng"),
+            ("staff", "Nhân viên admin"),
+            ("superuser", "Toàn quyền quản trị"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "normal":
+            return queryset.filter(is_staff=False, is_superuser=False)
+
+        if self.value() == "staff":
+            return queryset.filter(is_staff=True, is_superuser=False)
+
+        if self.value() == "superuser":
+            return queryset.filter(is_superuser=True)
+
+        return queryset
+
+
+class AccountStatusFilter(admin.SimpleListFilter):
+    title = "Trạng thái tài khoản"
+    parameter_name = "account_status"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("active", "Đang hoạt động"),
+            ("locked", "Đã khóa"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "active":
+            return queryset.filter(is_active=True)
+
+        if self.value() == "locked":
+            return queryset.filter(is_active=False)
+
+        return queryset
+
+
+# =========================================================
+# CUSTOM USER ADMIN
+# =========================================================
+
+class CustomUserAdmin(UserAdmin):
+    form = CustomUserChangeForm
+
+    list_display = (
+        "username",
+        "email",
+        "full_name_display",
+        "phone_number_display",
+        "date_of_birth_display",
+        "account_type_display",
+        "is_active_display",
+    )
+
+    list_display_links = (
+        "username",
+        "email",
+    )
+
+    search_fields = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "profile__phone_number",
+    )
+
+    list_filter = (
+        AccountStatusFilter,
+        AccountTypeFilter,
+        "date_joined",
+    )
+
+    ordering = (
+        "username",
+    )
+
+    readonly_fields = (
+        "password_change_link",
+        "last_login",
+        "date_joined",
+    )
+
+    fieldsets = (
+        (
+            "Thông tin tài khoản",
+            {
+                "fields": (
+                    "username",
+                    "password_change_link",
+                )
+            },
+        ),
+        (
+            "Thông tin cá nhân",
+            {
+                "fields": (
+                    "first_name",
+                    "last_name",
+                    "date_of_birth",
+                )
+            },
+        ),
+        (
+            "Thông tin liên hệ",
+            {
+                "fields": (
+                    "email",
+                    "phone_number",
+                )
+            },
+        ),
+        (
+            "Trạng thái và quyền truy cập",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                ),
+                "description": (
+                    "Bật 'Cho phép vào trang quản trị' cho tài khoản được phép truy cập admin. "
+                    "Bật 'Toàn quyền quản trị' chỉ cho tài khoản quản trị chính."
+                ),
+            },
+        ),
+        (
+            "Thời gian hệ thống",
+            {
+                "fields": (
+                    "last_login",
+                    "date_joined",
+                ),
+                "classes": (
+                    "collapse",
+                ),
+            },
+        ),
+    )
+
+    add_fieldsets = (
+        (
+            "Tạo người dùng mới",
+            {
+                "classes": (
+                    "wide",
+                ),
+                "fields": (
+                    "username",
+                    "password1",
+                    "password2",
+                ),
+            },
+        ),
+    )
+
+    def password_change_link(self, obj):
+        if not obj or not obj.pk:
+            return "Lưu người dùng trước khi đổi mật khẩu."
+
+        url = reverse("admin:auth_user_password_change", args=[obj.pk])
+
+        return format_html(
+            '<a class="button" href="{}" '
+            'style="background:#2563eb;color:white;padding:8px 12px;'
+            'border-radius:8px;text-decoration:none;font-weight:700;">'
+            'Đổi mật khẩu</a>',
+            url,
+        )
+
+    password_change_link.short_description = "Mật khẩu"
+
+    def full_name_display(self, obj):
+        full_name = f"{obj.first_name} {obj.last_name}".strip()
+
+        if full_name:
+            return full_name
+
+        return "Chưa có"
+
+    full_name_display.short_description = "Họ tên"
+
+    def phone_number_display(self, obj):
+        try:
+            if obj.profile and obj.profile.phone_number:
+                return obj.profile.phone_number
+        except Exception:
+            pass
+
+        return "Chưa có"
+
+    phone_number_display.short_description = "Số điện thoại"
+
+    def date_of_birth_display(self, obj):
+        try:
+            if obj.profile and obj.profile.date_of_birth:
+                return format_date_vi(obj.profile.date_of_birth)
+        except Exception:
+            pass
+
+        return "Chưa có"
+
+    date_of_birth_display.short_description = "Ngày sinh"
+
+    def account_type_display(self, obj):
+        if obj.is_superuser:
+            return badge("Toàn quyền quản trị", "red")
+
+        if obj.is_staff:
+            return badge("Nhân viên admin", "blue")
+
+        return badge("Người dùng", "gray")
+
+    account_type_display.short_description = "Loại tài khoản"
+
+    def is_active_display(self, obj):
+        if obj.is_active:
+            return badge("Đang hoạt động", "green")
+
+        return badge("Đã khóa", "red")
+
+    is_active_display.short_description = "Trạng thái"
+
+
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+
+admin.site.register(User, CustomUserAdmin)
+
+
+# =========================================================
+# ROOM IMAGE INLINE
+# RoomImage được quản lý trực tiếp trong ScreenRoomAdmin.
+# Không đăng ký RoomImageAdmin riêng.
+# =========================================================
+
+class RoomImageInline(admin.StackedInline):
     model = RoomImage
     extra = 1
-    fields = ("image", "preview_image")
-    readonly_fields = ("preview_image",)
+    max_num = 8
+    can_delete = True
+
+    fields = (
+        "preview_image",
+        "image",
+    )
+
+    readonly_fields = (
+        "preview_image",
+    )
+
+    verbose_name = "Ảnh phụ"
+    verbose_name_plural = "Ảnh phụ của phòng"
 
     def preview_image(self, obj):
-        if obj.image:
+        if obj and obj.image:
             return format_html(
-                '<img src="{}" style="width:90px;height:60px;object-fit:cover;'
-                'border-radius:8px;border:1px solid rgba(255,255,255,0.12);" />',
-                obj.image.url
+                '<div style="display:flex;align-items:center;gap:16px;">'
+                '<img src="{}" style="width:220px;height:140px;object-fit:cover;'
+                'border-radius:14px;border:1px solid #dbe3ef;'
+                'box-shadow:0 8px 20px rgba(15,23,42,0.14);" />'
+                '<div style="color:#64748b;font-size:13px;line-height:1.5;">'
+                '<strong style="color:#334155;">Ảnh hiện tại</strong><br>'
+                '{}'
+                '</div>'
+                '</div>',
+                obj.image.url,
+                obj.image.name,
             )
-        return "Chưa có ảnh"
+
+        return format_html(
+            '<div style="width:220px;height:140px;border-radius:14px;'
+            'background:#f8fafc;border:1px dashed #cbd5e1;'
+            'display:flex;align-items:center;justify-content:center;'
+            'color:#64748b;font-weight:700;">Chưa có ảnh</div>'
+        )
 
     preview_image.short_description = "Xem trước"
 
+
+# =========================================================
+# BOOKED MOVIE ADMIN
+# =========================================================
 
 @admin.register(BookedMovie)
 class BookedMovieAdmin(admin.ModelAdmin):
@@ -90,10 +488,11 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "payment_badge",
         "invoice_badge",
     )
-    def has_add_permission(self, request):
-        return False
 
-    list_display_links = ("booking_code", "movie_title")
+    list_display_links = (
+        "booking_code",
+        "movie_title",
+    )
 
     list_filter = (
         "status",
@@ -113,7 +512,10 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "room_name",
     )
 
-    ordering = ("-date_booked",)
+    ordering = (
+        "-date_booked",
+    )
+
     list_per_page = 25
     save_on_top = True
     date_hierarchy = "booking_date"
@@ -126,35 +528,47 @@ class BookedMovieAdmin(admin.ModelAdmin):
     )
 
     fieldsets = (
-        ("Thông tin đơn", {
-            "fields": (
-                "booking_code",
-                "user",
-                "status",
-                "payment_status",
-            )
-        }),
-        ("Thông tin phim", {
-            "fields": (
-                "movie_title",
-                "movie_genre",
-            )
-        }),
-        ("Thông tin phòng chiếu", {
-            "fields": (
-                "room_name",
-                "rental_duration_minutes",
-                "price_per_30min",
-                "total_price",
-            )
-        }),
-        ("Thời gian", {
-            "fields": (
-                "booking_date",
-                "date_booked",
-                "paid_at",
-            )
-        }),
+        (
+            "Thông tin đơn",
+            {
+                "fields": (
+                    "booking_code",
+                    "user",
+                    "status",
+                    "payment_status",
+                )
+            },
+        ),
+        (
+            "Thông tin phim",
+            {
+                "fields": (
+                    "movie_title",
+                    "movie_genre",
+                )
+            },
+        ),
+        (
+            "Thông tin phòng chiếu",
+            {
+                "fields": (
+                    "room_name",
+                    "rental_duration_minutes",
+                    "price_per_30min",
+                    "total_price",
+                )
+            },
+        ),
+        (
+            "Thời gian",
+            {
+                "fields": (
+                    "booking_date",
+                    "date_booked",
+                    "paid_at",
+                )
+            },
+        ),
     )
 
     actions = (
@@ -163,6 +577,9 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "confirm_bookings",
         "cancel_bookings",
     )
+
+    def has_add_permission(self, request):
+        return False
 
     def booking_date_vi(self, obj):
         return format_datetime_vi(obj.booking_date)
@@ -192,8 +609,10 @@ class BookedMovieAdmin(admin.ModelAdmin):
     def payment_badge(self, obj):
         if obj.payment_status == "paid":
             return badge("Đã thanh toán", "green")
+
         if obj.payment_status == "unpaid":
             return badge("Chưa thanh toán", "orange")
+
         return badge(obj.payment_status, "gray")
 
     payment_badge.short_description = "Thanh toán"
@@ -229,7 +648,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
                 defaults={
                     "user": booking.user,
                     "amount": booking.total_price,
-                }
+                },
             )
 
             if created:
@@ -237,45 +656,67 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
         self.message_user(
             request,
-            f"Đã chuyển {updated} đơn sang đã thanh toán. Đã tạo {created_invoice} hóa đơn mới.",
-            messages.SUCCESS
+            f"Đã chuyển {updated} đơn sang đã thanh toán. "
+            f"Đã tạo {created_invoice} hóa đơn mới.",
+            messages.SUCCESS,
         )
 
     mark_as_paid.short_description = "Xác nhận đã thanh toán và tạo hóa đơn"
 
     def mark_as_unpaid(self, request, queryset):
-        updated = queryset.update(payment_status="unpaid", status="pending", paid_at=None)
+        updated = 0
+
+        for booking in queryset:
+            booking.payment_status = "unpaid"
+            booking.status = "pending"
+            booking.paid_at = None
+            booking.save()
+            updated += 1
 
         self.message_user(
             request,
             f"Đã chuyển {updated} đơn sang chưa thanh toán.",
-            messages.WARNING
+            messages.WARNING,
         )
 
     mark_as_unpaid.short_description = "Chuyển về chưa thanh toán"
 
     def confirm_bookings(self, request, queryset):
-        updated = queryset.update(status="confirmed")
+        updated = 0
+
+        for booking in queryset:
+            booking.status = "confirmed"
+            booking.save()
+            updated += 1
 
         self.message_user(
             request,
             f"Đã xác nhận {updated} đơn đặt phim.",
-            messages.SUCCESS
+            messages.SUCCESS,
         )
 
     confirm_bookings.short_description = "Xác nhận đơn"
 
     def cancel_bookings(self, request, queryset):
-        updated = queryset.update(status="cancelled")
+        updated = 0
+
+        for booking in queryset:
+            booking.status = "cancelled"
+            booking.save()
+            updated += 1
 
         self.message_user(
             request,
             f"Đã hủy {updated} đơn đặt phim.",
-            messages.WARNING
+            messages.WARNING,
         )
 
     cancel_bookings.short_description = "Hủy đơn"
 
+
+# =========================================================
+# INVOICE ADMIN
+# =========================================================
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
@@ -288,10 +729,10 @@ class InvoiceAdmin(admin.ModelAdmin):
         "created_at_vi",
     )
 
-    def has_add_permission(self, request):
-        return False
+    list_display_links = (
+        "invoice_code",
+    )
 
-    list_display_links = ("invoice_code",)
     search_fields = (
         "invoice_code",
         "user__username",
@@ -305,7 +746,10 @@ class InvoiceAdmin(admin.ModelAdmin):
         "user",
     )
 
-    ordering = ("-created_at",)
+    ordering = (
+        "-created_at",
+    )
+
     list_per_page = 25
     date_hierarchy = "created_at"
 
@@ -318,16 +762,22 @@ class InvoiceAdmin(admin.ModelAdmin):
     )
 
     fieldsets = (
-        ("Thông tin hóa đơn", {
-            "fields": (
-                "invoice_code",
-                "booking",
-                "user",
-                "amount",
-                "created_at",
-            )
-        }),
+        (
+            "Thông tin hóa đơn",
+            {
+                "fields": (
+                    "invoice_code",
+                    "booking",
+                    "user",
+                    "amount",
+                    "created_at",
+                )
+            },
+        ),
     )
+
+    def has_add_permission(self, request):
+        return False
 
     def booking_code_display(self, obj):
         if obj.booking:
@@ -356,6 +806,10 @@ class InvoiceAdmin(admin.ModelAdmin):
     created_at_vi.admin_order_field = "created_at"
 
 
+# =========================================================
+# MOVIE ADMIN
+# =========================================================
+
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
     list_display = (
@@ -368,7 +822,10 @@ class MovieAdmin(admin.ModelAdmin):
         "numVotes",
     )
 
-    list_display_links = ("primaryTitle",)
+    list_display_links = (
+        "primaryTitle",
+    )
+
     search_fields = (
         "tconst",
         "primaryTitle",
@@ -380,44 +837,57 @@ class MovieAdmin(admin.ModelAdmin):
         "startYear",
     )
 
-    ordering = ("-startYear", "-averageRating")
+    ordering = (
+        "-startYear",
+        "-averageRating",
+    )
+
     list_per_page = 30
 
     fieldsets = (
-        ("Thông tin phim", {
-            "fields": (
-                "tconst",
-                "primaryTitle",
-                "startYear",
-                "runtimeMinutes",
-                "genres",
-            )
-        }),
-        ("Đánh giá", {
-            "fields": (
-                "averageRating",
-                "numVotes",
-            )
-        }),
-        ("Poster", {
-            "fields": (
-                "poster_url",
-            )
-        }),
+        (
+            "Thông tin phim",
+            {
+                "fields": (
+                    "tconst",
+                    "primaryTitle",
+                    "startYear",
+                    "runtimeMinutes",
+                    "genres",
+                )
+            },
+        ),
+        (
+            "Đánh giá",
+            {
+                "fields": (
+                    "averageRating",
+                    "numVotes",
+                )
+            },
+        ),
+        (
+            "Poster",
+            {
+                "fields": (
+                    "poster_url",
+                )
+            },
+        ),
     )
 
     def poster_preview(self, obj):
         if obj.poster_url:
             return format_html(
                 '<img src="{}" style="width:46px;height:68px;object-fit:cover;'
-                'border-radius:8px;border:1px solid rgba(255,255,255,0.12);" />',
-                obj.poster_url
+                'border-radius:8px;border:1px solid #dbe3ef;" />',
+                obj.poster_url,
             )
 
         return format_html(
-            '<div style="width:46px;height:68px;border-radius:8px;background:#111827;'
-            'display:flex;align-items:center;justify-content:center;color:#94a3b8;'
-            'border:1px solid rgba(255,255,255,0.12);font-size:18px;">🎬</div>'
+            '<div style="width:46px;height:68px;border-radius:8px;background:#f1f5f9;'
+            'display:flex;align-items:center;justify-content:center;color:#64748b;'
+            'border:1px solid #dbe3ef;font-size:18px;">🎬</div>'
         )
 
     poster_preview.short_description = "Poster"
@@ -426,17 +896,26 @@ class MovieAdmin(admin.ModelAdmin):
         if obj.averageRating is None:
             return badge("Chưa có", "gray")
 
-        if obj.averageRating >= 8:
+        try:
+            rating = float(obj.averageRating)
+        except Exception:
+            return badge(obj.averageRating, "gray")
+
+        if rating >= 8:
             return badge(obj.averageRating, "green")
 
-        if obj.averageRating >= 6:
+        if rating >= 6:
             return badge(obj.averageRating, "yellow")
 
         return badge(obj.averageRating, "red")
 
-    rating_badge.short_description = "Rating"
+    rating_badge.short_description = "Điểm"
     rating_badge.admin_order_field = "averageRating"
 
+
+# =========================================================
+# SCREEN ROOM ADMIN
+# =========================================================
 
 @admin.register(ScreenRoom)
 class ScreenRoomAdmin(admin.ModelAdmin):
@@ -450,7 +929,10 @@ class ScreenRoomAdmin(admin.ModelAdmin):
         "created_at_vi",
     )
 
-    list_display_links = ("room_id", "name")
+    list_display_links = (
+        "room_id",
+        "name",
+    )
 
     search_fields = (
         "room_id",
@@ -463,14 +945,20 @@ class ScreenRoomAdmin(admin.ModelAdmin):
         "created_at",
     )
 
-    ordering = ("room_id",)
+    ordering = (
+        "room_id",
+    )
+
     readonly_fields = (
         "created_at",
         "image_preview_large",
     )
 
     list_per_page = 25
-    inlines = [RoomImageInline]
+
+    inlines = [
+        RoomImageInline,
+    ]
 
     actions = (
         "set_available",
@@ -482,44 +970,56 @@ class ScreenRoomAdmin(admin.ModelAdmin):
     )
 
     fieldsets = (
-        ("Thông tin phòng", {
-            "fields": (
-                "room_id",
-                "name",
-                "description",
-                "status",
-            )
-        }),
-        ("Giá thuê", {
-            "fields": (
-                "price_per_30min",
-            )
-        }),
-        ("Hình ảnh", {
-            "fields": (
-                "image",
-                "image_preview_large",
-            )
-        }),
-        ("Thời gian", {
-            "fields": (
-                "created_at",
-            )
-        }),
+        (
+            "Thông tin phòng",
+            {
+                "fields": (
+                    "room_id",
+                    "name",
+                    "description",
+                    "status",
+                )
+            },
+        ),
+        (
+            "Giá thuê",
+            {
+                "fields": (
+                    "price_per_30min",
+                )
+            },
+        ),
+        (
+            "Hình ảnh chính",
+            {
+                "fields": (
+                    "image",
+                    "image_preview_large",
+                )
+            },
+        ),
+        (
+            "Thời gian",
+            {
+                "fields": (
+                    "created_at",
+                )
+            },
+        ),
     )
 
     def image_preview(self, obj):
         if obj.image:
             return format_html(
                 '<img src="{}" style="width:70px;height:48px;object-fit:cover;'
-                'border-radius:8px;border:1px solid rgba(255,255,255,0.12);" />',
-                obj.image.url
+                'border-radius:8px;border:1px solid #dbe3ef;" />',
+                obj.image.url,
             )
 
         return format_html(
-            '<div style="width:70px;height:48px;border-radius:8px;background:#111827;'
-            'display:flex;align-items:center;justify-content:center;color:#94a3b8;'
-            'border:1px solid rgba(255,255,255,0.12);">🏠</div>'
+            '<div style="width:70px;height:48px;border-radius:8px;background:#f1f5f9;'
+            'display:flex;align-items:center;justify-content:center;color:#64748b;'
+            'border:1px solid #dbe3ef;">🏠</div>'
         )
 
     image_preview.short_description = "Ảnh"
@@ -528,8 +1028,8 @@ class ScreenRoomAdmin(admin.ModelAdmin):
         if obj.image:
             return format_html(
                 '<img src="{}" style="max-width:260px;height:auto;border-radius:14px;'
-                'border:1px solid rgba(255,255,255,0.12);" />',
-                obj.image.url
+                'border:1px solid #dbe3ef;" />',
+                obj.image.url,
             )
 
         return "Chưa có ảnh"
@@ -577,69 +1077,97 @@ class ScreenRoomAdmin(admin.ModelAdmin):
     created_at_vi.admin_order_field = "created_at"
 
     def set_available(self, request, queryset):
-        updated = queryset.update(status="available")
-        self.message_user(request, f"Đã chuyển {updated} phòng sang sẵn sàng.", messages.SUCCESS)
+        updated = 0
+
+        for room in queryset:
+            room.status = "available"
+            room.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            f"Đã chuyển {updated} phòng sang sẵn sàng.",
+            messages.SUCCESS,
+        )
 
     set_available.short_description = "Chuyển trạng thái: Sẵn sàng"
 
     def set_maintenance(self, request, queryset):
-        updated = queryset.update(status="maintenance")
-        self.message_user(request, f"Đã chuyển {updated} phòng sang bảo trì.", messages.WARNING)
+        updated = 0
+
+        for room in queryset:
+            room.status = "maintenance"
+            room.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            f"Đã chuyển {updated} phòng sang bảo trì.",
+            messages.WARNING,
+        )
 
     set_maintenance.short_description = "Chuyển trạng thái: Bảo trì"
 
     def set_booked(self, request, queryset):
-        updated = queryset.update(status="booked")
-        self.message_user(request, f"Đã chuyển {updated} phòng sang đã đặt.", messages.WARNING)
+        updated = 0
+
+        for room in queryset:
+            room.status = "booked"
+            room.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            f"Đã chuyển {updated} phòng sang đã đặt.",
+            messages.WARNING,
+        )
 
     set_booked.short_description = "Chuyển trạng thái: Đã đặt"
 
     def set_price_normal(self, request, queryset):
-        updated = queryset.update(price_per_30min=40000)
-        self.message_user(request, f"Đã cập nhật {updated} phòng thành 40,000 VND / 30 phút.")
+        updated = 0
+
+        for room in queryset:
+            room.price_per_30min = 40000
+            room.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            f"Đã cập nhật {updated} phòng thành 40,000 VND / 30 phút.",
+            messages.SUCCESS,
+        )
 
     set_price_normal.short_description = "Đặt giá phòng thường = 40,000 / 30 phút"
 
     def set_price_vip(self, request, queryset):
-        updated = queryset.update(price_per_30min=60000)
-        self.message_user(request, f"Đã cập nhật {updated} phòng thành 60,000 VND / 30 phút.")
+        updated = 0
+
+        for room in queryset:
+            room.price_per_30min = 60000
+            room.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            f"Đã cập nhật {updated} phòng thành 60,000 VND / 30 phút.",
+            messages.SUCCESS,
+        )
 
     set_price_vip.short_description = "Đặt giá phòng VIP = 60,000 / 30 phút"
 
     def set_price_group(self, request, queryset):
-        updated = queryset.update(price_per_30min=90000)
-        self.message_user(request, f"Đã cập nhật {updated} phòng thành 90,000 VND / 30 phút.")
+        updated = 0
+
+        for room in queryset:
+            room.price_per_30min = 90000
+            room.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            f"Đã cập nhật {updated} phòng thành 90,000 VND / 30 phút.",
+            messages.SUCCESS,
+        )
 
     set_price_group.short_description = "Đặt giá phòng nhóm = 90,000 / 30 phút"
-
-
-@admin.register(RoomImage)
-class RoomImageAdmin(admin.ModelAdmin):
-    list_display = (
-        "preview_image",
-        "room",
-        "image",
-    )
-
-    list_filter = (
-        "room",
-    )
-
-    search_fields = (
-        "room__room_id",
-        "room__name",
-    )
-
-    list_per_page = 25
-
-    def preview_image(self, obj):
-        if obj.image:
-            return format_html(
-                '<img src="{}" style="width:90px;height:60px;object-fit:cover;'
-                'border-radius:8px;border:1px solid rgba(255,255,255,0.12);" />',
-                obj.image.url
-            )
-
-        return "Chưa có ảnh"
-
-    preview_image.short_description = "Xem trước"

@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đăng Ký</title>
+<title>Đăng Ký Tài Khoản</title>
 
 <style>
-*{box-sizing:border-box;}
+*{
+    box-sizing:border-box;
+}
 
 body{
     margin:0;
@@ -20,64 +22,225 @@ body{
 .navbar{
     position:sticky;
     top:0;
-    background:rgba(2,6,23,0.9);
+    z-index:1000;
+    background:rgba(2,6,23,0.94);
     backdrop-filter:blur(10px);
     border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
 .nav-container{
-    max-width:1200px;
+    max-width:1300px;
     margin:auto;
     padding:14px 30px;
     display:flex;
     justify-content:space-between;
     align-items:center;
+    gap:20px;
 }
 
 .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
     font-weight:bold;
     color:white;
+    font-size:18px;
+}
+
+.logo-icon{
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    box-shadow:0 10px 22px rgba(34,197,94,0.18);
+}
+
+.home-btn{
+    background:#374151;
+    color:white;
+    border:none;
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.home-btn:hover{
+    background:#4b5563;
 }
 
 /* MAIN */
 
-.container{
-    max-width:520px;
-    margin:70px auto;
-    padding:20px;
+.page-wrap{
+    max-width:1300px;
+    margin:auto;
+    padding:42px 30px 70px;
 }
 
-/* CARD */
+.signup-layout{
+    display:grid;
+    grid-template-columns:0.9fr 1.1fr;
+    gap:28px;
+    align-items:stretch;
+}
+
+/* LEFT PANEL */
+
+.info-panel{
+    background:
+        radial-gradient(circle at top left,rgba(34,197,94,0.18),transparent 34%),
+        linear-gradient(180deg,#111827,#0f172a);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:22px;
+    padding:34px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
+}
+
+.info-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(34,197,94,0.12);
+    color:#86efac;
+    border:1px solid rgba(34,197,94,0.22);
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:22px;
+}
+
+.info-panel h1{
+    margin:0 0 14px;
+    color:white;
+    font-size:38px;
+    line-height:1.18;
+}
+
+.info-panel p{
+    margin:0;
+    color:#cbd5e1;
+    line-height:1.7;
+    font-size:15px;
+}
+
+.feature-list{
+    margin-top:28px;
+    display:grid;
+    gap:14px;
+}
+
+.feature-card{
+    display:flex;
+    gap:14px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:16px;
+}
+
+.feature-icon{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    font-size:20px;
+}
+
+.feature-card strong{
+    display:block;
+    color:white;
+    margin-bottom:4px;
+    font-size:15px;
+}
+
+.feature-card span{
+    display:block;
+    color:#94a3b8;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.guide-box{
+    margin-top:26px;
+    background:rgba(2,6,23,0.48);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;
+    padding:18px;
+}
+
+.guide-box h3{
+    margin:0 0 10px;
+    color:#22c55e;
+    font-size:16px;
+}
+
+.guide-box ul{
+    margin:0;
+    padding-left:18px;
+    color:#cbd5e1;
+    font-size:13px;
+    line-height:1.8;
+}
+
+/* FORM PANEL */
 
 .form-card{
     background:#111827;
-    padding:35px;
-    border-radius:18px;
-    box-shadow:0 25px 60px rgba(0,0,0,0.5);
-    border:1px solid rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:22px;
+    padding:34px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
 }
 
-/* TITLE */
-
 .form-title{
-    text-align:center;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:8px;
+    color:white;
     font-size:30px;
-    margin-bottom:10px;
+    font-weight:800;
+}
+
+.form-title span{
     color:#22c55e;
 }
 
 .form-subtitle{
-    text-align:center;
     color:#94a3b8;
-    font-size:14px;
-    margin-bottom:28px;
     line-height:1.6;
+    font-size:15px;
+    margin-bottom:26px;
 }
 
-/* FIELD */
+.form-section-title{
+    margin:26px 0 14px;
+    color:#86efac;
+    font-size:17px;
+    font-weight:700;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
 
 .form-group{
     margin-bottom:18px;
+}
+
+.form-group.full{
+    grid-column:1 / -1;
 }
 
 .form-group label{
@@ -85,14 +248,14 @@ body{
     margin-bottom:8px;
     color:#e5e7eb;
     font-size:15px;
-    font-weight:600;
+    font-weight:700;
 }
 
 .form-card input{
     width:100%;
-    padding:13px 14px;
-    border-radius:12px;
-    border:none;
+    padding:14px 15px;
+    border-radius:13px;
+    border:1px solid rgba(255,255,255,0.08);
     outline:none;
     font-size:15px;
     background:#f8fafc;
@@ -100,10 +263,9 @@ body{
 }
 
 .form-card input:focus{
-    box-shadow:0 0 0 3px rgba(34,197,94,0.25);
+    border-color:#22c55e;
+    box-shadow:0 0 0 3px rgba(34,197,94,0.24);
 }
-
-/* HELP TEXT */
 
 .help-text{
     margin-top:8px;
@@ -121,62 +283,37 @@ body{
     margin-bottom:4px;
 }
 
-/* PASSWORD GUIDE BOX */
-
-.guide-box{
-    background:#0f172a;
-    border:1px solid rgba(255,255,255,0.06);
-    border-radius:14px;
-    padding:16px 18px;
-    margin-bottom:22px;
-}
-
-.guide-box h3{
-    margin:0 0 10px 0;
-    font-size:15px;
-    color:#22c55e;
-}
-
-.guide-box ul{
-    margin:0;
-    padding-left:18px;
-    color:#cbd5e1;
-    font-size:13px;
-    line-height:1.7;
-}
-
-/* BUTTON */
-
 .submit-btn{
     width:100%;
-    padding:14px;
+    padding:15px;
     background:#22c55e;
     border:none;
-    border-radius:12px;
+    border-radius:14px;
     color:white;
     font-size:16px;
-    font-weight:600;
+    font-weight:800;
     cursor:pointer;
     margin-top:8px;
     transition:0.2s;
+    box-shadow:0 12px 24px rgba(34,197,94,0.18);
 }
 
 .submit-btn:hover{
     background:#16a34a;
+    transform:translateY(-1px);
 }
-
-/* LOGIN LINK */
 
 .login-link{
     text-align:center;
     margin-top:20px;
     color:#cbd5e1;
+    font-size:15px;
 }
 
 .login-link a{
     color:#22c55e;
     text-decoration:none;
-    font-weight:600;
+    font-weight:700;
 }
 
 .login-link a:hover{
@@ -186,12 +323,16 @@ body{
 /* ERROR */
 
 .errorlist{
-    color:#f87171;
-    margin:0 0 10px 0;
+    color:#fca5a5;
+    margin:0 0 10px;
     list-style:none;
     padding:0;
     font-size:14px;
     line-height:1.5;
+}
+
+.errorlist li{
+    margin-bottom:6px;
 }
 
 .non-field-errors{
@@ -204,19 +345,39 @@ body{
     font-size:14px;
 }
 
-/* BACK BUTTON */
+/* RESPONSIVE */
 
-.home-btn{
-    background:#374151;
-    color:white;
-    border:none;
-    padding:8px 14px;
-    border-radius:8px;
-    cursor:pointer;
+@media (max-width: 1000px){
+    .signup-layout{
+        grid-template-columns:1fr;
+    }
 }
 
-.home-btn:hover{
-    background:#4b5563;
+@media (max-width: 700px){
+    .page-wrap{
+        padding:28px 18px 50px;
+    }
+
+    .nav-container{
+        padding:14px 18px;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .info-panel,
+    .form-card{
+        padding:24px;
+    }
+
+    .info-panel h1{
+        font-size:30px;
+    }
+
+    .form-title{
+        font-size:26px;
+    }
 }
 </style>
 
@@ -226,7 +387,10 @@ body{
 
 <div class="navbar">
     <div class="nav-container">
-        <div class="logo">🎬 Movie Webapp</div>
+        <div class="logo">
+            <div class="logo-icon">🎬</div>
+            <span>Movie Webapp</span>
+        </div>
 
         <div>
             <a href="{% url 'home' %}">
@@ -236,100 +400,166 @@ body{
     </div>
 </div>
 
-<div class="container">
-    <div class="form-card">
+<div class="page-wrap">
+    <div class="signup-layout">
 
-        <div class="form-title">📝 Đăng Ký Tài Khoản</div>
-        <div class="form-subtitle">
-            Tạo tài khoản để lưu lịch sử đặt phim, chọn phòng chiếu và tiếp tục thanh toán dễ dàng hơn.
-        </div>
+        <section class="info-panel">
+            <div class="info-badge">✨ Tạo tài khoản miễn phí</div>
 
-        <div class="guide-box">
-            <h3>Yêu cầu khi tạo tài khoản</h3>
-            <ul>
-                <li>Tên đăng nhập nên ngắn gọn, dễ nhớ và không trùng với người khác.</li>
-                <li>Mật khẩu không được quá ngắn hoặc quá đơn giản.</li>
-                <li>Không nên dùng mật khẩu giống với thông tin cá nhân dễ đoán.</li>
-                <li>Nên dùng kết hợp chữ cái, số và ký tự đặc biệt để bảo mật tốt hơn.</li>
-            </ul>
-        </div>
+            <h1>Đăng ký để đặt phòng chiếu nhanh hơn</h1>
 
-        <form method="POST">
-            {% csrf_token %}
+            <p>
+                Tài khoản giúp bạn lưu lịch sử đặt phim, theo dõi thanh toán,
+                nhận gợi ý phim phù hợp và quản lý các lịch xem sắp tới dễ dàng hơn.
+            </p>
 
-            {% if form.non_field_errors %}
-                <div class="non-field-errors">
-                    {{ form.non_field_errors }}
+            <div class="feature-list">
+                <div class="feature-card">
+                    <div class="feature-icon">📜</div>
+                    <div>
+                        <strong>Lưu lịch sử đặt phim</strong>
+                        <span>Theo dõi đơn đã thanh toán, đơn chưa thanh toán và hóa đơn nội bộ.</span>
+                    </div>
                 </div>
-            {% endif %}
 
-            <div class="form-group">
-                <label for="{{ form.username.id_for_label }}">Tên đăng nhập</label>
-                {{ form.username.errors }}
-                <input
-                    type="text"
-                    name="{{ form.username.name }}"
-                    id="{{ form.username.id_for_label }}"
-                    value="{{ form.username.value|default:'' }}"
-                    placeholder="Nhập tên đăng nhập"
-                    required
-                >
-                {% if form.username.help_text %}
-                    <div class="help-text">{{ form.username.help_text|safe }}</div>
-                {% else %}
-                    <div class="help-text">
-                        Dùng tên này để đăng nhập vào hệ thống sau khi tạo tài khoản.
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div>
+                        <strong>Gợi ý phim cá nhân hóa</strong>
+                        <span>Hệ thống có thể gợi ý phim dựa trên thể loại và lịch sử xem của bạn.</span>
                     </div>
-                {% endif %}
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🏠</div>
+                    <div>
+                        <strong>Đặt phòng chiếu thuận tiện</strong>
+                        <span>Chọn phim, chọn phòng, kiểm tra chi phí và thanh toán mô phỏng nhanh chóng.</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.password1.id_for_label }}">Mật khẩu</label>
-                {{ form.password1.errors }}
-                <input
-                    type="password"
-                    name="{{ form.password1.name }}"
-                    id="{{ form.password1.id_for_label }}"
-                    placeholder="Nhập mật khẩu"
-                    required
-                >
-                {% if form.password1.help_text %}
-                    <div class="help-text">{{ form.password1.help_text|safe }}</div>
-                {% else %}
-                    <div class="help-text">
-                        Mật khẩu nên đủ mạnh và không dễ đoán.
-                    </div>
-                {% endif %}
+            <div class="guide-box">
+                <h3>Yêu cầu tài khoản</h3>
+                <ul>
+                    <li>Email phải là duy nhất và sẽ dùng để đăng nhập.</li>
+                    <li>Số điện thoại cần đúng định dạng để hỗ trợ liên hệ khi cần.</li>
+                    <li>Ngày sinh giúp hoàn thiện thông tin tài khoản người dùng.</li>
+                    <li>Mật khẩu tối thiểu 8 ký tự, không quá đơn giản.</li>
+                    <li>Không dùng mật khẩu giống thông tin cá nhân dễ đoán.</li>
+                    <li>Nên kết hợp chữ cái, số và ký tự đặc biệt.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="form-card">
+            <div class="form-title">
+                📝 <span>Đăng Ký Tài Khoản</span>
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.password2.id_for_label }}">Nhập lại mật khẩu</label>
-                {{ form.password2.errors }}
-                <input
-                    type="password"
-                    name="{{ form.password2.name }}"
-                    id="{{ form.password2.id_for_label }}"
-                    placeholder="Nhập lại mật khẩu để xác nhận"
-                    required
-                >
-                {% if form.password2.help_text %}
-                    <div class="help-text">{{ form.password2.help_text|safe }}</div>
-                {% else %}
-                    <div class="help-text">
-                        Nhập lại đúng mật khẩu vừa tạo ở phía trên.
-                    </div>
-                {% endif %}
+            <div class="form-subtitle">
+                Điền thông tin bên dưới để tạo tài khoản và sử dụng đầy đủ chức năng của Movie Webapp.
             </div>
 
-            <button type="submit" class="submit-btn">
-                Đăng Ký
-            </button>
-        </form>
+            <form method="POST">
+                {% csrf_token %}
 
-        <div class="login-link">
-            Đã có tài khoản?
-            <a href="{% url 'login' %}">Đăng nhập</a>
-        </div>
+                {% if form.non_field_errors %}
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="form-section-title">Thông tin cá nhân</div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}">Họ</label>
+                        {{ form.first_name.errors }}
+                        {{ form.first_name }}
+                        {% if form.first_name.help_text %}
+                            <div class="help-text">{{ form.first_name.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}">Tên</label>
+                        {{ form.last_name.errors }}
+                        {{ form.last_name }}
+                        {% if form.last_name.help_text %}
+                            <div class="help-text">{{ form.last_name.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="{{ form.email.id_for_label }}">Email</label>
+                        {{ form.email.errors }}
+                        {{ form.email }}
+                        {% if form.email.help_text %}
+                            <div class="help-text">{{ form.email.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.phone_number.id_for_label }}">Số điện thoại</label>
+                        {{ form.phone_number.errors }}
+                        {{ form.phone_number }}
+                        {% if form.phone_number.help_text %}
+                            <div class="help-text">{{ form.phone_number.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.date_of_birth.id_for_label }}">Ngày sinh</label>
+                        {{ form.date_of_birth.errors }}
+                        {{ form.date_of_birth }}
+                        {% if form.date_of_birth.help_text %}
+                            <div class="help-text">{{ form.date_of_birth.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-section-title">Thông tin đăng nhập</div>
+
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label for="{{ form.username.id_for_label }}">Tên đăng nhập</label>
+                        {{ form.username.errors }}
+                        {{ form.username }}
+                        {% if form.username.help_text %}
+                            <div class="help-text">{{ form.username.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password1.id_for_label }}">Mật khẩu</label>
+                        {{ form.password1.errors }}
+                        {{ form.password1 }}
+                        {% if form.password1.help_text %}
+                            <div class="help-text">{{ form.password1.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password2.id_for_label }}">Nhập lại mật khẩu</label>
+                        {{ form.password2.errors }}
+                        {{ form.password2 }}
+                        {% if form.password2.help_text %}
+                            <div class="help-text">{{ form.password2.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Tạo tài khoản
+                </button>
+            </form>
+
+            <div class="login-link">
+                Đã có tài khoản?
+                <a href="{% url 'login' %}">Đăng nhập</a>
+            </div>
+        </section>
 
     </div>
 </div>

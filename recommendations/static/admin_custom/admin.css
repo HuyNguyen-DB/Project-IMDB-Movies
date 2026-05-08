@@ -218,8 +218,6 @@ body.dashboard #content-main,
 
 /* =========================================================
    STAT CARDS
-   Không ép 7 cột cố định nữa.
-   Card sẽ rộng tối thiểu 235px và tự giãn đều để lấp màn hình.
 ========================================================= */
 
 .stat-grid{
@@ -300,7 +298,6 @@ body.dashboard #content-main,
 
 /* =========================================================
    DASHBOARD MODEL CARDS
-   Card quản lý rộng hơn, tự lấp đầy màn hình.
 ========================================================= */
 
 .admin-section-title{
@@ -742,6 +739,235 @@ td span[style*="border-radius:999px"]{
 }
 
 /* =========================================================
+   FIX ADMIN CHANGE FORM: FIELD TEXT BỊ CẮT
+========================================================= */
+
+.change-form input,
+.change-form select,
+.change-form textarea,
+.change-form .vTextField,
+.change-form .vIntegerField,
+.change-form .vURLField,
+.change-form .vDateField,
+.change-form .vTimeField{
+    min-height:42px !important;
+    height:auto !important;
+    line-height:1.4 !important;
+    padding:9px 12px !important;
+    font-size:14px !important;
+    box-sizing:border-box !important;
+}
+
+.change-form select{
+    min-width:150px !important;
+    padding-right:34px !important;
+}
+
+.change-form .form-row{
+    display:flex !important;
+    align-items:center !important;
+    gap:18px !important;
+    min-height:64px !important;
+}
+
+.change-form .form-row > div{
+    display:flex !important;
+    align-items:center !important;
+    gap:14px !important;
+    width:100% !important;
+}
+
+.change-form .form-row label{
+    width:170px !important;
+    min-width:170px !important;
+    margin:0 !important;
+    line-height:1.4 !important;
+}
+
+.change-form .readonly{
+    line-height:1.5 !important;
+    padding:8px 0 !important;
+    font-size:14px !important;
+}
+
+.change-form select[name="user"]{
+    min-width:180px !important;
+}
+
+.change-form input[type="text"],
+.change-form input[type="number"],
+.change-form input[type="url"]{
+    min-width:340px !important;
+}
+
+.change-form .submit-row{
+    display:flex !important;
+    justify-content:flex-end !important;
+    align-items:center !important;
+    gap:12px !important;
+    padding:16px !important;
+}
+
+.change-form .submit-row input,
+.change-form .submit-row a{
+    min-height:42px !important;
+    line-height:1.2 !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+}
+
+.change-form .submit-row .deletelink{
+    margin-right:auto !important;
+}
+
+.change-form fieldset.module{
+    margin-bottom:24px !important;
+}
+
+.change-form fieldset.module h2{
+    font-size:18px !important;
+    padding:14px 18px !important;
+}
+
+/* =========================================================
+   SCREEN ROOM - STACKED ROOM IMAGE INLINE
+========================================================= */
+
+.inline-group{
+    margin-top:26px !important;
+    border-radius:16px !important;
+    overflow:hidden !important;
+    background:#ffffff !important;
+}
+
+.inline-group h2{
+    font-size:18px !important;
+    font-weight:700 !important;
+    padding:16px 20px !important;
+    background:#f1f5f9 !important;
+    color:#111827 !important;
+    border-bottom:1px solid var(--border) !important;
+}
+
+.inline-group .inline-related{
+    background:#ffffff !important;
+    border:1px solid #dbe3ef !important;
+    border-radius:14px !important;
+    margin:16px !important;
+    padding:0 !important;
+    overflow:hidden !important;
+    box-shadow:0 6px 18px rgba(15,23,42,0.05);
+}
+
+.inline-group .inline-related h3{
+    background:#f8fafc !important;
+    border-bottom:1px solid #e5eaf2 !important;
+    color:#111827 !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    padding:14px 18px !important;
+    margin:0 !important;
+}
+
+.inline-group .inline-related fieldset{
+    border:none !important;
+    box-shadow:none !important;
+    margin:0 !important;
+    border-radius:0 !important;
+    background:#ffffff !important;
+}
+
+.inline-group .inline-related .form-row{
+    display:grid !important;
+    grid-template-columns:180px minmax(0, 1fr) !important;
+    align-items:center !important;
+    gap:18px !important;
+    padding:18px !important;
+    min-height:auto !important;
+    border-bottom:1px solid #eef2f7 !important;
+}
+
+.inline-group .inline-related .form-row:last-child{
+    border-bottom:none !important;
+}
+
+.inline-group .inline-related .form-row > div{
+    display:block !important;
+    width:100% !important;
+}
+
+.inline-group .inline-related label{
+    width:auto !important;
+    min-width:0 !important;
+    font-weight:700 !important;
+    color:#334155 !important;
+    margin:0 !important;
+}
+
+.inline-group .inline-related .readonly{
+    padding:0 !important;
+    line-height:1.5 !important;
+}
+
+.inline-group .inline-related input[type="file"]{
+    width:100% !important;
+    max-width:520px !important;
+    min-height:42px !important;
+    padding:8px 10px !important;
+    background:#ffffff !important;
+    border:1px solid #cbd5e1 !important;
+    border-radius:10px !important;
+    font-size:14px !important;
+}
+
+.inline-group .inline-related .file-upload{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:8px !important;
+    color:#475569 !important;
+    font-size:13px !important;
+    line-height:1.5 !important;
+}
+
+.inline-group .inline-related .file-upload a{
+    color:#2563eb !important;
+    font-weight:600 !important;
+    word-break:break-word !important;
+}
+
+.inline-group .inline-related .delete{
+    background:#fff7ed !important;
+    border-top:1px solid #fed7aa !important;
+}
+
+.inline-group .inline-related .delete label{
+    color:#9a3412 !important;
+}
+
+.inline-group .inline-related input[type="checkbox"]{
+    width:18px !important;
+    height:18px !important;
+    min-height:auto !important;
+    cursor:pointer !important;
+}
+
+.inline-group .add-row{
+    background:#f8fafc !important;
+    padding:16px 18px !important;
+}
+
+.inline-group .add-row a{
+    color:#2563eb !important;
+    font-weight:700 !important;
+    text-decoration:none !important;
+}
+
+.inline-group .add-row a:hover{
+    text-decoration:underline !important;
+}
+
+/* =========================================================
    RESPONSIVE
 ========================================================= */
 
@@ -769,6 +995,10 @@ td span[style*="border-radius:999px"]{
 
     .admin-model-grid{
         grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .inline-group .inline-related .form-row{
+        grid-template-columns:1fr !important;
     }
 }
 
@@ -845,101 +1075,12 @@ td span[style*="border-radius:999px"]{
     td{
         font-size:13px !important;
     }
-}
 
-/* =========================================================
-   FIX ADMIN CHANGE FORM: FIELD TEXT BỊ CẮT
-========================================================= */
+    .inline-group .inline-related{
+        margin:12px !important;
+    }
 
-.change-form input,
-.change-form select,
-.change-form textarea,
-.change-form .vTextField,
-.change-form .vIntegerField,
-.change-form .vURLField,
-.change-form .vDateField,
-.change-form .vTimeField{
-    min-height:42px !important;
-    height:auto !important;
-    line-height:1.4 !important;
-    padding:9px 12px !important;
-    font-size:14px !important;
-    box-sizing:border-box !important;
-}
-
-.change-form select{
-    min-width:150px !important;
-    padding-right:34px !important;
-}
-
-.change-form .form-row{
-    display:flex !important;
-    align-items:center !important;
-    gap:18px !important;
-    min-height:64px !important;
-}
-
-.change-form .form-row > div{
-    display:flex !important;
-    align-items:center !important;
-    gap:14px !important;
-    width:100% !important;
-}
-
-.change-form .form-row label{
-    width:170px !important;
-    min-width:170px !important;
-    margin:0 !important;
-    line-height:1.4 !important;
-}
-
-.change-form .readonly{
-    line-height:1.5 !important;
-    padding:8px 0 !important;
-    font-size:14px !important;
-}
-
-/* User select có icon sửa/thêm bên cạnh nên cần rộng hơn */
-.change-form select[name="user"]{
-    min-width:180px !important;
-}
-
-/* Các field text trong form */
-.change-form input[type="text"],
-.change-form input[type="number"],
-.change-form input[type="url"]{
-    min-width:340px !important;
-}
-
-/* Nút save/delete không bị dính hoặc quá nhỏ */
-.change-form .submit-row{
-    display:flex !important;
-    justify-content:flex-end !important;
-    align-items:center !important;
-    gap:12px !important;
-    padding:16px !important;
-}
-
-.change-form .submit-row input,
-.change-form .submit-row a{
-    min-height:42px !important;
-    line-height:1.2 !important;
-    display:inline-flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-}
-
-/* Nút xóa ở bên trái */
-.change-form .submit-row .deletelink{
-    margin-right:auto !important;
-}
-
-/* Fieldset spacing dễ nhìn hơn */
-.change-form fieldset.module{
-    margin-bottom:24px !important;
-}
-
-.change-form fieldset.module h2{
-    font-size:18px !important;
-    padding:14px 18px !important;
+    .inline-group .inline-related .form-row{
+        padding:14px !important;
+    }
 }
