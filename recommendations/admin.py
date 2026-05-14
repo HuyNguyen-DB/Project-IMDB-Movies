@@ -89,6 +89,7 @@ except admin.sites.NotRegistered:
 
 # =========================================================
 # CUSTOM USER CHANGE FORM
+# Dùng cho trang chỉnh sửa người dùng đã tồn tại.
 # =========================================================
 
 class CustomUserChangeForm(forms.ModelForm):
@@ -165,10 +166,173 @@ class CustomUserChangeForm(forms.ModelForm):
 
         return phone_number
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        is_superuser = cleaned_data.get("is_superuser")
+
+        if is_superuser:
+            cleaned_data["is_staff"] = True
+
+        return cleaned_data
+
     def save(self, commit=True):
-        user = super().save(commit=commit)
+        user = super().save(commit=False)
+
+        if self.cleaned_data.get("is_superuser"):
+            user.is_staff = True
 
         if commit:
+            user.save()
+
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.phone_number = self.cleaned_data.get("phone_number", "")
+            profile.date_of_birth = self.cleaned_data.get("date_of_birth")
+            profile.save()
+
+        return user
+
+
+# =========================================================
+# CUSTOM USER ADD FORM
+# Dùng cho trang thêm người dùng mới trong admin.
+# Có thêm thông tin cá nhân, liên hệ và quyền ngay khi tạo.
+# =========================================================
+
+class CustomUserAddForm(forms.ModelForm):
+    password1 = forms.CharField(
+        label="Mật khẩu",
+        widget=forms.PasswordInput,
+        help_text="Mật khẩu nên có ít nhất 8 ký tự, không quá đơn giản và không chỉ gồm số."
+    )
+
+    password2 = forms.CharField(
+        label="Xác nhận mật khẩu",
+        widget=forms.PasswordInput,
+        help_text="Nhập lại mật khẩu để xác nhận."
+    )
+
+    phone_number = forms.CharField(
+        label="Số điện thoại",
+        max_length=20,
+        required=False,
+    )
+
+    date_of_birth = forms.DateField(
+        label="Ngày sinh",
+        required=False,
+        widget=forms.DateInput(attrs={
+            "type": "date"
+        }),
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["username"].label = "Tên đăng nhập"
+        self.fields["first_name"].label = "Họ"
+        self.fields["last_name"].label = "Tên"
+        self.fields["email"].label = "Email"
+
+        self.fields["is_active"].label = "Kích hoạt tài khoản"
+        self.fields["is_staff"].label = "Cho phép vào trang quản trị"
+        self.fields["is_superuser"].label = "Toàn quyền quản trị"
+
+        self.fields["is_active"].initial = True
+        self.fields["is_staff"].initial = False
+        self.fields["is_superuser"].initial = False
+
+        self.fields["first_name"].required = False
+        self.fields["last_name"].required = False
+        self.fields["email"].required = False
+        self.fields["is_active"].required = False
+        self.fields["is_staff"].required = False
+        self.fields["is_superuser"].required = False
+
+        self.fields["username"].help_text = (
+            "Bắt buộc. Tối đa 150 ký tự. Chỉ gồm chữ, số và các ký tự @/./+/-/_."
+        )
+
+    def clean_password1(self):
+        password1 = self.cleaned_data.get("password1")
+
+        if not password1:
+            raise forms.ValidationError("Vui lòng nhập mật khẩu.")
+
+        if len(password1) < 8:
+            raise forms.ValidationError("Mật khẩu phải có ít nhất 8 ký tự.")
+
+        if password1.isdigit():
+            raise forms.ValidationError("Mật khẩu không được chỉ gồm số.")
+
+        return password1
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+
+        if not password2:
+            raise forms.ValidationError("Vui lòng nhập lại mật khẩu.")
+
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Hai mật khẩu không khớp.")
+
+        return password2
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get("phone_number", "").strip()
+
+        if not phone_number:
+            return phone_number
+
+        if not phone_number.isdigit():
+            raise forms.ValidationError("Số điện thoại chỉ được chứa chữ số.")
+
+        if len(phone_number) < 9 or len(phone_number) > 11:
+            raise forms.ValidationError("Số điện thoại phải có từ 9 đến 11 chữ số.")
+
+        existing_profile = UserProfile.objects.filter(
+            phone_number=phone_number
+        ).first()
+
+        if existing_profile:
+            raise forms.ValidationError("Số điện thoại này đã được sử dụng.")
+
+        return phone_number
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        is_superuser = cleaned_data.get("is_superuser")
+
+        if is_superuser:
+            cleaned_data["is_staff"] = True
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        user.set_password(self.cleaned_data["password1"])
+
+        if self.cleaned_data.get("is_superuser"):
+            user.is_staff = True
+
+        if commit:
+            user.save()
+
             profile, created = UserProfile.objects.get_or_create(user=user)
             profile.phone_number = self.cleaned_data.get("phone_number", "")
             profile.date_of_birth = self.cleaned_data.get("date_of_birth")
@@ -231,6 +395,7 @@ class AccountStatusFilter(admin.SimpleListFilter):
 
 class CustomUserAdmin(UserAdmin):
     form = CustomUserChangeForm
+    add_form = CustomUserAddForm
 
     list_display = (
         "username",
@@ -310,7 +475,8 @@ class CustomUserAdmin(UserAdmin):
                 ),
                 "description": (
                     "Bật 'Cho phép vào trang quản trị' cho tài khoản được phép truy cập admin. "
-                    "Bật 'Toàn quyền quản trị' chỉ cho tài khoản quản trị chính."
+                    "Bật 'Toàn quyền quản trị' chỉ cho tài khoản quản trị chính. "
+                    "Khi bật toàn quyền, hệ thống sẽ tự bật quyền truy cập admin."
                 ),
             },
         ),
@@ -330,7 +496,7 @@ class CustomUserAdmin(UserAdmin):
 
     add_fieldsets = (
         (
-            "Tạo người dùng mới",
+            "Thông tin tài khoản",
             {
                 "classes": (
                     "wide",
@@ -339,6 +505,41 @@ class CustomUserAdmin(UserAdmin):
                     "username",
                     "password1",
                     "password2",
+                ),
+            },
+        ),
+        (
+            "Thông tin cá nhân",
+            {
+                "fields": (
+                    "first_name",
+                    "last_name",
+                    "date_of_birth",
+                ),
+            },
+        ),
+        (
+            "Thông tin liên hệ",
+            {
+                "fields": (
+                    "email",
+                    "phone_number",
+                ),
+            },
+        ),
+        (
+            "Trạng thái và quyền truy cập",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                ),
+                "description": (
+                    "Bật 'Kích hoạt tài khoản' để tài khoản có thể đăng nhập. "
+                    "Bật 'Cho phép vào trang quản trị' nếu tài khoản này được phép đăng nhập admin. "
+                    "Bật 'Toàn quyền quản trị' cho tài khoản admin chính. "
+                    "Khi bật toàn quyền, hệ thống sẽ tự bật quyền truy cập admin."
                 ),
             },
         ),

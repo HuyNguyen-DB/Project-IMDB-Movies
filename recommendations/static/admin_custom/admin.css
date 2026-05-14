@@ -833,6 +833,9 @@ td span[style*="border-radius:999px"]{
 /* =========================================================
    SCREEN ROOM - STACKED ROOM IMAGE INLINE
 ========================================================= */
+/* =========================================================
+   SCREEN ROOM - STACKED ROOM IMAGE INLINE
+========================================================= */
 
 .inline-group{
     margin-top:26px !important;
@@ -878,14 +881,16 @@ td span[style*="border-radius:999px"]{
     background:#ffffff !important;
 }
 
+/* FIX LỖI ĐƯỜNG DẪN ẢNH BỊ XUỐNG TỪNG CHỮ */
 .inline-group .inline-related .form-row{
-    display:grid !important;
-    grid-template-columns:180px minmax(0, 1fr) !important;
-    align-items:center !important;
-    gap:18px !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    gap:12px !important;
     padding:18px !important;
     min-height:auto !important;
     border-bottom:1px solid #eef2f7 !important;
+    width:100% !important;
 }
 
 .inline-group .inline-related .form-row:last-child{
@@ -906,8 +911,11 @@ td span[style*="border-radius:999px"]{
 }
 
 .inline-group .inline-related .readonly{
+    width:100% !important;
     padding:0 !important;
     line-height:1.5 !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
 }
 
 .inline-group .inline-related input[type="file"]{
@@ -925,14 +933,18 @@ td span[style*="border-radius:999px"]{
     display:flex !important;
     flex-direction:column !important;
     gap:8px !important;
+    width:100% !important;
     color:#475569 !important;
     font-size:13px !important;
     line-height:1.5 !important;
 }
 
 .inline-group .inline-related .file-upload a{
+    display:block !important;
+    width:100% !important;
     color:#2563eb !important;
     font-weight:600 !important;
+    overflow-wrap:anywhere !important;
     word-break:break-word !important;
 }
 

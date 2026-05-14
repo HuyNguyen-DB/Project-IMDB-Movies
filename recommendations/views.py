@@ -68,7 +68,7 @@ def home(request):
             'status',
             'image',
             'price_per_30min'
-        ).order_by('room_id')[:8]
+        ).order_by('room_id')
     )
 
     # Ưu tiên hiển thị phòng VIP trước, sau đó phòng nhóm, phòng thường.
@@ -88,7 +88,10 @@ def home(request):
 
     screen_rooms.sort(
         key=lambda room: (room_priority(room), room.room_id)
+
     )
+    screen_rooms = screen_rooms[:6]
+
 
     if request.method == 'POST':
         user_genres = request.POST.get('genres', '').strip()

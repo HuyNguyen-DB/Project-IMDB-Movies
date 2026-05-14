@@ -146,3 +146,4 @@ LOGOUT_REDIRECT_URL = 'login'  # Chuyển hướng đến trang đăng nhập sa
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+TMDB_API_KEY = "a3c425d862517f368af52863c3e6275e"

@@ -179,7 +179,6 @@ class Invoice(models.Model):
     def __str__(self):
         return f"{self.invoice_code} - {self.user.username}"
 
-
 class Movie(models.Model):
     tconst = models.CharField(
         max_length=20,
@@ -223,6 +222,24 @@ class Movie(models.Model):
         null=True,
         blank=True,
         verbose_name='Đường dẫn poster'
+    )
+
+    poster_checked = models.BooleanField(
+        default=False,
+        verbose_name='Đã kiểm tra poster'
+    )
+
+    poster_source = models.CharField(
+        max_length=30,
+        blank=True,
+        default='',
+        verbose_name='Nguồn poster'
+    )
+
+    poster_updated_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Thời điểm cập nhật poster'
     )
 
     class Meta:
