@@ -994,8 +994,8 @@ body{
                     <div class="history-card {% if movie.is_today %}today-highlight{% elif movie.is_tomorrow %}tomorrow-highlight{% endif %}">
 
                         <img class="movie-poster"
-                             src="https://via.placeholder.com/115x165.png?text=Movie"
-                             alt="Poster">
+                             src="{% if movie.movie_poster_url %}{{ movie.movie_poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
+                             alt="{{ movie.movie_title }}">
 
                         <div class="movie-details">
 
@@ -1124,8 +1124,8 @@ body{
                     <div class="history-card {% if movie.is_today %}today-highlight{% elif movie.is_tomorrow %}tomorrow-highlight{% endif %}">
 
                         <img class="movie-poster"
-                             src="https://via.placeholder.com/115x165.png?text=Movie"
-                             alt="Poster">
+                             src="{% if movie.movie_poster_url %}{{ movie.movie_poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
+                             alt="{{ movie.movie_title }}">
 
                         <div class="movie-details">
 
@@ -1244,8 +1244,8 @@ body{
                 <div class="history-card">
 
                     <img class="movie-poster"
-                         src="https://via.placeholder.com/115x165.png?text=Movie"
-                         alt="Poster">
+                         src="{% if movie.movie_poster_url %}{{ movie.movie_poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
+                         alt="{{ movie.movie_title }}">
 
                     <div class="movie-details">
                         <h3>{{ movie.movie_title }}</h3>

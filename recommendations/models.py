@@ -67,6 +67,13 @@ class BookedMovie(models.Model):
         verbose_name='Thể loại phim'
     )
 
+    movie_poster_url = models.URLField(
+        max_length=1000,
+        null=True,
+        blank=True,
+        verbose_name='URL poster phim'
+    )
+
     room_name = models.CharField(
         max_length=255,
         verbose_name='Tên phòng chiếu'

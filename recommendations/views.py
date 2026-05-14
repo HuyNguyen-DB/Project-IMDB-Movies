@@ -509,6 +509,7 @@ def book_movie(request):
             booked_movie.user = request.user
             booked_movie.movie_title = movie.primaryTitle
             booked_movie.movie_genre = movie.genres
+            booked_movie.movie_poster_url = movie.poster_url
             booked_movie.room_name = room.name
             booked_movie.rental_duration_minutes = total_duration
             booked_movie.price_per_30min = room.price_per_30min
