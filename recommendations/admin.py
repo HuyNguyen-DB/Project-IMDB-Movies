@@ -23,12 +23,158 @@ admin.site.index_title = "Bảng điều khiển quản trị"
 
 
 # =========================================================
+# ROLE CONFIG
+# =========================================================
+
+ROLE_NORMAL = "normal"
+ROLE_ROOM_STAFF = "room_staff"
+ROLE_BOOKING_STAFF = "booking_staff"
+ROLE_SYSTEM_ADMIN = "system_admin"
+
+ROLE_CHOICES = (
+    (ROLE_NORMAL, "Người dùng thường"),
+    (ROLE_ROOM_STAFF, "Nhân viên quản lý phòng chiếu"),
+    (ROLE_BOOKING_STAFF, "Nhân viên vận hành đặt phim"),
+    (ROLE_SYSTEM_ADMIN, "Quản trị hệ thống"),
+)
+
+
+def safe_get_profile(user):
+    """
+    Lấy UserProfile theo user_id.
+    Không dùng user.profile, không dùng get(), không dùng get_or_create()
+    để tránh lỗi MultipleObjectsReturned với Djongo/MongoDB.
+    """
+    if not user or not user.pk:
+        return None
+
+    return UserProfile.objects.filter(user_id=user.id).first()
+
+
+def safe_create_profile(user):
+    """
+    Tạo UserProfile mới theo model đã dùng user làm primary_key.
+    """
+    if not user or not user.pk:
+        return None
+
+    profile = safe_get_profile(user)
+
+    if profile:
+        return profile
+
+    return UserProfile.objects.create(
+        user=user,
+        phone_number="",
+        date_of_birth=None,
+        role=ROLE_NORMAL,
+    )
+
+
+def safe_get_or_create_profile(user):
+    profile = safe_get_profile(user)
+
+    if profile:
+        return profile
+
+    return safe_create_profile(user)
+
+
+def is_system_admin(user):
+    return bool(user and user.is_authenticated and user.is_superuser)
+
+
+def get_user_role(user):
+    if not user or not user.pk:
+        return ROLE_NORMAL
+
+    if user.is_superuser:
+        return ROLE_SYSTEM_ADMIN
+
+    profile = safe_get_profile(user)
+
+    if profile and profile.role:
+        return profile.role
+
+    return ROLE_NORMAL
+
+
+def is_room_staff(user):
+    if not user or not user.is_authenticated:
+        return False
+
+    if user.is_superuser:
+        return True
+
+    return get_user_role(user) == ROLE_ROOM_STAFF
+
+
+def is_booking_staff(user):
+    if not user or not user.is_authenticated:
+        return False
+
+    if user.is_superuser:
+        return True
+
+    return get_user_role(user) == ROLE_BOOKING_STAFF
+
+
+def apply_user_role(user, role):
+    """
+    Gán quyền hệ thống không dùng Group.
+    Role nhân viên lưu trong UserProfile.role.
+    Quyền vào admin dùng User.is_staff.
+    Toàn quyền dùng User.is_superuser.
+    """
+    profile = safe_get_or_create_profile(user)
+
+    if role == ROLE_SYSTEM_ADMIN:
+        if profile:
+            profile.role = ROLE_NORMAL
+            profile.save(update_fields=["role"])
+
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(update_fields=["is_staff", "is_superuser"])
+        return
+
+    if role == ROLE_ROOM_STAFF:
+        if profile:
+            profile.role = ROLE_ROOM_STAFF
+            profile.save(update_fields=["role"])
+
+        user.is_staff = True
+        user.is_superuser = False
+        user.save(update_fields=["is_staff", "is_superuser"])
+        return
+
+    if role == ROLE_BOOKING_STAFF:
+        if profile:
+            profile.role = ROLE_BOOKING_STAFF
+            profile.save(update_fields=["role"])
+
+        user.is_staff = True
+        user.is_superuser = False
+        user.save(update_fields=["is_staff", "is_superuser"])
+        return
+
+    if profile:
+        profile.role = ROLE_NORMAL
+        profile.save(update_fields=["role"])
+
+    user.is_staff = False
+    user.is_superuser = False
+    user.save(update_fields=["is_staff", "is_superuser"])
+
+
+# =========================================================
 # HELPER FUNCTIONS
 # =========================================================
 
 def format_money(value):
     if value is None:
         return "Chưa có giá"
+
     return f"{value:,} VND"
 
 
@@ -78,7 +224,7 @@ def badge(text, color):
 
 
 # =========================================================
-# HIDE GROUPS
+# HIDE DEFAULT GROUP ADMIN
 # =========================================================
 
 try:
@@ -89,7 +235,6 @@ except admin.sites.NotRegistered:
 
 # =========================================================
 # CUSTOM USER CHANGE FORM
-# Dùng cho trang chỉnh sửa người dùng đã tồn tại.
 # =========================================================
 
 class CustomUserChangeForm(forms.ModelForm):
@@ -107,6 +252,15 @@ class CustomUserChangeForm(forms.ModelForm):
         }),
     )
 
+    role = forms.ChoiceField(
+        label="Vai trò trong hệ thống",
+        choices=ROLE_CHOICES,
+        required=True,
+        help_text=(
+            "Chọn vai trò phù hợp. Chỉ Quản trị hệ thống mới được cấp hoặc thay đổi vai trò."
+        ),
+    )
+
     class Meta:
         model = User
         fields = (
@@ -115,8 +269,6 @@ class CustomUserChangeForm(forms.ModelForm):
             "last_name",
             "email",
             "is_active",
-            "is_staff",
-            "is_superuser",
         )
 
     def __init__(self, *args, **kwargs):
@@ -125,23 +277,20 @@ class CustomUserChangeForm(forms.ModelForm):
         user = self.instance
 
         if user and user.pk:
-            try:
-                profile = user.profile
+            profile = safe_get_profile(user)
+
+            if profile:
                 self.fields["phone_number"].initial = profile.phone_number
                 self.fields["date_of_birth"].initial = profile.date_of_birth
-            except UserProfile.DoesNotExist:
-                pass
-            except Exception:
-                pass
+                self.fields["role"].initial = get_user_role(user)
+            else:
+                self.fields["role"].initial = ROLE_NORMAL
 
         self.fields["username"].label = "Tên đăng nhập"
         self.fields["first_name"].label = "Họ"
         self.fields["last_name"].label = "Tên"
         self.fields["email"].label = "Email"
-
         self.fields["is_active"].label = "Kích hoạt tài khoản"
-        self.fields["is_staff"].label = "Cho phép vào trang quản trị"
-        self.fields["is_superuser"].label = "Toàn quyền quản trị"
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get("phone_number", "").strip()
@@ -155,48 +304,29 @@ class CustomUserChangeForm(forms.ModelForm):
         if len(phone_number) < 9 or len(phone_number) > 11:
             raise forms.ValidationError("Số điện thoại phải có từ 9 đến 11 chữ số.")
 
-        existing_profile = UserProfile.objects.filter(
-            phone_number=phone_number
-        ).exclude(
-            user=self.instance
-        ).first()
+        existing_profile = (
+            UserProfile.objects
+            .filter(phone_number=phone_number)
+            .exclude(user_id=self.instance.id)
+            .first()
+        )
 
         if existing_profile:
             raise forms.ValidationError("Số điện thoại này đã được sử dụng.")
 
         return phone_number
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        is_superuser = cleaned_data.get("is_superuser")
-
-        if is_superuser:
-            cleaned_data["is_staff"] = True
-
-        return cleaned_data
-
     def save(self, commit=True):
         user = super().save(commit=False)
 
-        if self.cleaned_data.get("is_superuser"):
-            user.is_staff = True
-
         if commit:
             user.save()
-
-            profile, created = UserProfile.objects.get_or_create(user=user)
-            profile.phone_number = self.cleaned_data.get("phone_number", "")
-            profile.date_of_birth = self.cleaned_data.get("date_of_birth")
-            profile.save()
 
         return user
 
 
 # =========================================================
 # CUSTOM USER ADD FORM
-# Dùng cho trang thêm người dùng mới trong admin.
-# Có thêm thông tin cá nhân, liên hệ và quyền ngay khi tạo.
 # =========================================================
 
 class CustomUserAddForm(forms.ModelForm):
@@ -226,6 +356,17 @@ class CustomUserAddForm(forms.ModelForm):
         }),
     )
 
+    role = forms.ChoiceField(
+        label="Vai trò trong hệ thống",
+        choices=ROLE_CHOICES,
+        initial=ROLE_NORMAL,
+        required=True,
+        help_text=(
+            "Chọn 'Nhân viên quản lý phòng chiếu' hoặc 'Nhân viên vận hành đặt phim' "
+            "nếu đây là tài khoản nhân viên."
+        ),
+    )
+
     class Meta:
         model = User
         fields = (
@@ -234,8 +375,6 @@ class CustomUserAddForm(forms.ModelForm):
             "last_name",
             "email",
             "is_active",
-            "is_staff",
-            "is_superuser",
         )
 
     def __init__(self, *args, **kwargs):
@@ -245,21 +384,14 @@ class CustomUserAddForm(forms.ModelForm):
         self.fields["first_name"].label = "Họ"
         self.fields["last_name"].label = "Tên"
         self.fields["email"].label = "Email"
-
         self.fields["is_active"].label = "Kích hoạt tài khoản"
-        self.fields["is_staff"].label = "Cho phép vào trang quản trị"
-        self.fields["is_superuser"].label = "Toàn quyền quản trị"
 
         self.fields["is_active"].initial = True
-        self.fields["is_staff"].initial = False
-        self.fields["is_superuser"].initial = False
 
         self.fields["first_name"].required = False
         self.fields["last_name"].required = False
         self.fields["email"].required = False
         self.fields["is_active"].required = False
-        self.fields["is_staff"].required = False
-        self.fields["is_superuser"].required = False
 
         self.fields["username"].help_text = (
             "Bắt buộc. Tối đa 150 ký tự. Chỉ gồm chữ, số và các ký tự @/./+/-/_."
@@ -312,31 +444,12 @@ class CustomUserAddForm(forms.ModelForm):
 
         return phone_number
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        is_superuser = cleaned_data.get("is_superuser")
-
-        if is_superuser:
-            cleaned_data["is_staff"] = True
-
-        return cleaned_data
-
     def save(self, commit=True):
         user = super().save(commit=False)
-
         user.set_password(self.cleaned_data["password1"])
-
-        if self.cleaned_data.get("is_superuser"):
-            user.is_staff = True
 
         if commit:
             user.save()
-
-            profile, created = UserProfile.objects.get_or_create(user=user)
-            profile.phone_number = self.cleaned_data.get("phone_number", "")
-            profile.date_of_birth = self.cleaned_data.get("date_of_birth")
-            profile.save()
 
         return user
 
@@ -351,17 +464,44 @@ class AccountTypeFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return (
-            ("normal", "Người dùng"),
-            ("staff", "Nhân viên admin"),
-            ("superuser", "Toàn quyền quản trị"),
+            ("normal", "Người dùng thường"),
+            ("room_staff", "Nhân viên quản lý phòng chiếu"),
+            ("booking_staff", "Nhân viên vận hành đặt phim"),
+            ("superuser", "Quản trị hệ thống"),
         )
 
     def queryset(self, request, queryset):
         if self.value() == "normal":
-            return queryset.filter(is_staff=False, is_superuser=False)
+            return queryset.filter(
+                is_staff=False,
+                is_superuser=False
+            )
 
-        if self.value() == "staff":
-            return queryset.filter(is_staff=True, is_superuser=False)
+        if self.value() == "room_staff":
+            user_ids = list(
+                UserProfile.objects
+                .filter(role=ROLE_ROOM_STAFF)
+                .values_list("user_id", flat=True)
+            )
+
+            return queryset.filter(
+                id__in=user_ids,
+                is_staff=True,
+                is_superuser=False
+            )
+
+        if self.value() == "booking_staff":
+            user_ids = list(
+                UserProfile.objects
+                .filter(role=ROLE_BOOKING_STAFF)
+                .values_list("user_id", flat=True)
+            )
+
+            return queryset.filter(
+                id__in=user_ids,
+                is_staff=True,
+                is_superuser=False
+            )
 
         if self.value() == "superuser":
             return queryset.filter(is_superuser=True)
@@ -417,7 +557,6 @@ class CustomUserAdmin(UserAdmin):
         "email",
         "first_name",
         "last_name",
-        "profile__phone_number",
     )
 
     list_filter = (
@@ -466,17 +605,15 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
         (
-            "Trạng thái và quyền truy cập",
+            "Trạng thái và vai trò",
             {
                 "fields": (
                     "is_active",
-                    "is_staff",
-                    "is_superuser",
+                    "role",
                 ),
                 "description": (
-                    "Bật 'Cho phép vào trang quản trị' cho tài khoản được phép truy cập admin. "
-                    "Bật 'Toàn quyền quản trị' chỉ cho tài khoản quản trị chính. "
-                    "Khi bật toàn quyền, hệ thống sẽ tự bật quyền truy cập admin."
+                    "Chỉ Quản trị hệ thống được tạo nhân viên và cấp vai trò. "
+                    "Không tách riêng vai trò quản lý người dùng vì người dùng tự đăng ký trực tuyến."
                 ),
             },
         ),
@@ -528,22 +665,53 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
         (
-            "Trạng thái và quyền truy cập",
+            "Trạng thái và vai trò",
             {
                 "fields": (
                     "is_active",
-                    "is_staff",
-                    "is_superuser",
+                    "role",
                 ),
                 "description": (
-                    "Bật 'Kích hoạt tài khoản' để tài khoản có thể đăng nhập. "
-                    "Bật 'Cho phép vào trang quản trị' nếu tài khoản này được phép đăng nhập admin. "
-                    "Bật 'Toàn quyền quản trị' cho tài khoản admin chính. "
-                    "Khi bật toàn quyền, hệ thống sẽ tự bật quyền truy cập admin."
+                    "Chọn vai trò cho tài khoản. Nhân viên chỉ được vào những khu vực phù hợp với nghiệp vụ."
                 ),
             },
         ),
     )
+
+    def save_model(self, request, obj, form, change):
+        selected_role = form.cleaned_data.get("role", ROLE_NORMAL)
+
+        obj.save()
+
+        profile = safe_get_or_create_profile(obj)
+
+        if profile:
+            profile.phone_number = form.cleaned_data.get("phone_number", "")
+            profile.date_of_birth = form.cleaned_data.get("date_of_birth")
+
+            if selected_role == ROLE_SYSTEM_ADMIN:
+                profile.role = ROLE_NORMAL
+            else:
+                profile.role = selected_role
+
+            profile.save()
+
+        apply_user_role(obj, selected_role)
+
+    def has_module_permission(self, request):
+        return is_system_admin(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return is_system_admin(request.user)
+
+    def has_add_permission(self, request):
+        return is_system_admin(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return is_system_admin(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_system_admin(request.user)
 
     def password_change_link(self, obj):
         if not obj or not obj.pk:
@@ -572,35 +740,38 @@ class CustomUserAdmin(UserAdmin):
     full_name_display.short_description = "Họ tên"
 
     def phone_number_display(self, obj):
-        try:
-            if obj.profile and obj.profile.phone_number:
-                return obj.profile.phone_number
-        except Exception:
-            pass
+        profile = safe_get_profile(obj)
+
+        if profile and profile.phone_number:
+            return profile.phone_number
 
         return "Chưa có"
 
     phone_number_display.short_description = "Số điện thoại"
 
     def date_of_birth_display(self, obj):
-        try:
-            if obj.profile and obj.profile.date_of_birth:
-                return format_date_vi(obj.profile.date_of_birth)
-        except Exception:
-            pass
+        profile = safe_get_profile(obj)
+
+        if profile and profile.date_of_birth:
+            return format_date_vi(profile.date_of_birth)
 
         return "Chưa có"
 
     date_of_birth_display.short_description = "Ngày sinh"
 
     def account_type_display(self, obj):
-        if obj.is_superuser:
-            return badge("Toàn quyền quản trị", "red")
+        role = get_user_role(obj)
 
-        if obj.is_staff:
-            return badge("Nhân viên admin", "blue")
+        if role == ROLE_SYSTEM_ADMIN:
+            return badge("Quản trị hệ thống", "red")
 
-        return badge("Người dùng", "gray")
+        if role == ROLE_ROOM_STAFF:
+            return badge("Nhân viên quản lý phòng chiếu", "blue")
+
+        if role == ROLE_BOOKING_STAFF:
+            return badge("Nhân viên vận hành đặt phim", "orange")
+
+        return badge("Người dùng thường", "gray")
 
     account_type_display.short_description = "Loại tài khoản"
 
@@ -623,8 +794,6 @@ admin.site.register(User, CustomUserAdmin)
 
 # =========================================================
 # ROOM IMAGE INLINE
-# RoomImage được quản lý trực tiếp trong ScreenRoomAdmin.
-# Không đăng ký RoomImageAdmin riêng.
 # =========================================================
 
 class RoomImageInline(admin.StackedInline):
@@ -644,6 +813,18 @@ class RoomImageInline(admin.StackedInline):
 
     verbose_name = "Ảnh phụ"
     verbose_name_plural = "Ảnh phụ của phòng"
+
+    def has_view_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_room_staff(request.user)
+
+    def has_add_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_room_staff(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_room_staff(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_room_staff(request.user)
 
     def preview_image(self, obj):
         if obj and obj.image:
@@ -724,9 +905,17 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
     readonly_fields = (
         "booking_code",
+        "user",
+        "movie_title",
+        "movie_genre",
+        "movie_poster_url",
+        "room_name",
+        "rental_duration_minutes",
+        "price_per_30min",
+        "total_price",
+        "booking_date",
         "date_booked",
         "paid_at",
-        "total_price",
     )
 
     fieldsets = (
@@ -747,6 +936,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
                 "fields": (
                     "movie_title",
                     "movie_genre",
+                    "movie_poster_url",
                 )
             },
         ),
@@ -776,12 +966,35 @@ class BookedMovieAdmin(admin.ModelAdmin):
     actions = (
         "mark_as_paid",
         "mark_as_unpaid",
-        "confirm_bookings",
         "cancel_bookings",
+        "expire_bookings",
     )
+
+    def has_module_permission(self, request):
+        return is_system_admin(request.user) or is_booking_staff(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_booking_staff(request.user)
 
     def has_add_permission(self, request):
         return False
+
+    def has_change_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_booking_staff(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+
+        if not (is_system_admin(request.user) or is_booking_staff(request.user)):
+            actions.clear()
+
+        return actions
+
+    def get_readonly_fields(self, request, obj=None):
+        return self.readonly_fields
 
     def booking_date_vi(self, obj):
         return format_datetime_vi(obj.booking_date)
@@ -883,22 +1096,6 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
     mark_as_unpaid.short_description = "Chuyển về chưa thanh toán"
 
-    def confirm_bookings(self, request, queryset):
-        updated = 0
-
-        for booking in queryset:
-            booking.status = "confirmed"
-            booking.save()
-            updated += 1
-
-        self.message_user(
-            request,
-            f"Đã xác nhận {updated} đơn đặt phim.",
-            messages.SUCCESS,
-        )
-
-    confirm_bookings.short_description = "Xác nhận đơn"
-
     def cancel_bookings(self, request, queryset):
         updated = 0
 
@@ -914,6 +1111,23 @@ class BookedMovieAdmin(admin.ModelAdmin):
         )
 
     cancel_bookings.short_description = "Hủy đơn"
+
+    def expire_bookings(self, request, queryset):
+        updated = 0
+
+        for booking in queryset:
+            if booking.payment_status == "unpaid":
+                booking.status = "expired"
+                booking.save()
+                updated += 1
+
+        self.message_user(
+            request,
+            f"Đã chuyển {updated} đơn chưa thanh toán sang hết hạn.",
+            messages.WARNING,
+        )
+
+    expire_bookings.short_description = "Chuyển đơn chưa thanh toán sang hết hạn"
 
 
 # =========================================================
@@ -978,12 +1192,25 @@ class InvoiceAdmin(admin.ModelAdmin):
         ),
     )
 
+    def has_module_permission(self, request):
+        return is_system_admin(request.user) or is_booking_staff(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_booking_staff(request.user)
+
     def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False
 
     def booking_code_display(self, obj):
         if obj.booking:
             return obj.booking.booking_code
+
         return "Không có đơn"
 
     booking_code_display.short_description = "Mã đơn"
@@ -991,6 +1218,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     def movie_title_display(self, obj):
         if obj.booking:
             return obj.booking.movie_title
+
         return "Không có phim"
 
     movie_title_display.short_description = "Tên phim"
@@ -1074,10 +1302,34 @@ class MovieAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "poster_url",
+                    "poster_checked",
+                    "poster_source",
+                    "poster_updated_at",
                 )
             },
         ),
     )
+
+    readonly_fields = (
+        "poster_checked",
+        "poster_source",
+        "poster_updated_at",
+    )
+
+    def has_module_permission(self, request):
+        return is_system_admin(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return is_system_admin(request.user)
+
+    def has_add_permission(self, request):
+        return is_system_admin(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return is_system_admin(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_system_admin(request.user)
 
     def poster_preview(self, obj):
         if obj.poster_url:
@@ -1153,6 +1405,7 @@ class ScreenRoomAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = (
+        "status",
         "created_at",
         "image_preview_large",
     )
@@ -1164,9 +1417,6 @@ class ScreenRoomAdmin(admin.ModelAdmin):
     ]
 
     actions = (
-        "set_available",
-        "set_maintenance",
-        "set_booked",
         "set_price_normal",
         "set_price_vip",
         "set_price_group",
@@ -1181,7 +1431,11 @@ class ScreenRoomAdmin(admin.ModelAdmin):
                     "name",
                     "description",
                     "status",
-                )
+                ),
+                "description": (
+                    "Trạng thái phòng được hệ thống tự động cập nhật theo luồng đặt phim, "
+                    "nhân viên không chỉnh trạng thái thủ công tại đây."
+                ),
             },
         ),
         (
@@ -1210,6 +1464,29 @@ class ScreenRoomAdmin(admin.ModelAdmin):
             },
         ),
     )
+
+    def has_module_permission(self, request):
+        return is_system_admin(request.user) or is_room_staff(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_room_staff(request.user)
+
+    def has_add_permission(self, request):
+        return is_system_admin(request.user) or is_room_staff(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return is_system_admin(request.user) or is_room_staff(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_system_admin(request.user)
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+
+        if not (is_system_admin(request.user) or is_room_staff(request.user)):
+            actions.clear()
+
+        return actions
 
     def image_preview(self, obj):
         if obj.image:
@@ -1278,54 +1555,6 @@ class ScreenRoomAdmin(admin.ModelAdmin):
 
     created_at_vi.short_description = "Ngày tạo"
     created_at_vi.admin_order_field = "created_at"
-
-    def set_available(self, request, queryset):
-        updated = 0
-
-        for room in queryset:
-            room.status = "available"
-            room.save()
-            updated += 1
-
-        self.message_user(
-            request,
-            f"Đã chuyển {updated} phòng sang sẵn sàng.",
-            messages.SUCCESS,
-        )
-
-    set_available.short_description = "Chuyển trạng thái: Sẵn sàng"
-
-    def set_maintenance(self, request, queryset):
-        updated = 0
-
-        for room in queryset:
-            room.status = "maintenance"
-            room.save()
-            updated += 1
-
-        self.message_user(
-            request,
-            f"Đã chuyển {updated} phòng sang bảo trì.",
-            messages.WARNING,
-        )
-
-    set_maintenance.short_description = "Chuyển trạng thái: Bảo trì"
-
-    def set_booked(self, request, queryset):
-        updated = 0
-
-        for room in queryset:
-            room.status = "booked"
-            room.save()
-            updated += 1
-
-        self.message_user(
-            request,
-            f"Đã chuyển {updated} phòng sang đã đặt.",
-            messages.WARNING,
-        )
-
-    set_booked.short_description = "Chuyển trạng thái: Đã đặt"
 
     def set_price_normal(self, request, queryset):
         updated = 0

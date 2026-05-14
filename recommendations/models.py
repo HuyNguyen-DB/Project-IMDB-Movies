@@ -1,42 +1,58 @@
 from django.db import models
+from djongo import models as djongo_models
 from django.contrib.auth.models import User
 from django.utils import timezone
 import uuid
-
-
 class UserProfile(models.Model):
+    ROLE_NORMAL = "normal"
+    ROLE_ROOM_STAFF = "room_staff"
+    ROLE_BOOKING_STAFF = "booking_staff"
+
+    ROLE_CHOICES = [
+        (ROLE_NORMAL, "Người dùng thường"),
+        (ROLE_ROOM_STAFF, "Nhân viên quản lý phòng chiếu"),
+        (ROLE_BOOKING_STAFF, "Nhân viên vận hành đặt phim"),
+    ]
+
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        related_name='profile',
-        verbose_name='Người dùng'
+        related_name="profile",
+        primary_key=True,
+        verbose_name="Người dùng"
     )
 
     phone_number = models.CharField(
         max_length=20,
         blank=True,
-        verbose_name='Số điện thoại'
+        verbose_name="Số điện thoại"
     )
 
     date_of_birth = models.DateField(
         null=True,
         blank=True,
-        verbose_name='Ngày sinh'
+        verbose_name="Ngày sinh"
+    )
+
+    role = models.CharField(
+        max_length=30,
+        choices=ROLE_CHOICES,
+        default=ROLE_NORMAL,
+        verbose_name="Vai trò hệ thống"
     )
 
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Ngày tạo thông tin'
+        verbose_name="Ngày tạo thông tin"
     )
 
     class Meta:
-        verbose_name = 'Thông tin người dùng'
-        verbose_name_plural = 'Thông tin người dùng'
-        ordering = ['-created_at']
+        verbose_name = "Thông tin người dùng"
+        verbose_name_plural = "Thông tin người dùng"
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"Thông tin người dùng - {self.user.username}"
-
 
 class BookedMovie(models.Model):
     STATUS_CHOICES = [

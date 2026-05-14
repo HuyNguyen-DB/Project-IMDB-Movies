@@ -10,7 +10,10 @@
     <div class="dashboard-hero">
         <div>
             <h2>Tổng quan hệ thống</h2>
-            <p>Theo dõi nhanh số lượng phim, phòng chiếu, đơn đặt phim, thanh toán và doanh thu.</p>
+            <p>
+                Theo dõi nhanh tình hình phòng chiếu, đơn đặt phim, thanh toán và doanh thu.
+                Mỗi nhân viên chỉ nhìn thấy khu vực quản lý phù hợp với quyền được cấp.
+            </p>
         </div>
 
         <div class="dashboard-date">
@@ -19,11 +22,14 @@
     </div>
 
     <div class="stat-grid">
+
+        {% if request.user.is_superuser %}
         <div class="stat-card">
             <span class="stat-label">Tổng phim</span>
             <strong>{{ stats.total_movies }}</strong>
             <small>Số phim trong hệ thống</small>
         </div>
+        {% endif %}
 
         <div class="stat-card">
             <span class="stat-label">Phòng chiếu</span>
@@ -34,7 +40,7 @@
         <div class="stat-card hot">
             <span class="stat-label">Đơn chưa thanh toán</span>
             <strong>{{ stats.unpaid_bookings }}</strong>
-            <small>Cần người dùng hoàn tất thanh toán</small>
+            <small>Cần người dùng hoàn tất thanh toán hoặc nhân viên vận hành kiểm tra</small>
         </div>
 
         <div class="stat-card success">
@@ -52,7 +58,7 @@
         <div class="stat-card tomorrow">
             <span class="stat-label">Lịch chiếu ngày mai</span>
             <strong>{{ stats.tomorrow_bookings }}</strong>
-            <small>Cần chuẩn bị phòng chiếu</small>
+            <small>Cần chuẩn bị vận hành phòng chiếu</small>
         </div>
 
         <div class="stat-card revenue">
@@ -64,7 +70,7 @@
 
     <div class="admin-section-title">
         <h2>Khu vực quản lý</h2>
-        <p>Chọn nhanh chức năng cần thao tác.</p>
+        <p>Chọn nhanh chức năng được phân quyền cho tài khoản của bạn.</p>
     </div>
 
     {% if app_list %}
@@ -101,15 +107,15 @@
 
                                 <p>
                                     {% if model.object_name == "Movie" %}
-                                        Quản lý danh sách phim, thể loại, năm phát hành, thời lượng và điểm đánh giá.
+                                        Quản lý kho phim, thể loại, năm phát hành, thời lượng, điểm đánh giá và poster.
                                     {% elif model.object_name == "ScreenRoom" %}
-                                        Quản lý phòng chiếu, trạng thái phòng, giá thuê, ảnh chính và ảnh phụ của phòng.
+                                        Quản lý thông tin phòng chiếu, giá thuê, ảnh chính và ảnh phụ. Trạng thái phòng được cập nhật tự động theo luồng đặt phim.
                                     {% elif model.object_name == "BookedMovie" %}
-                                        Theo dõi đơn đặt phim, lịch chiếu, trạng thái đơn và trạng thái thanh toán.
+                                        Theo dõi đơn đặt phim, xử lý đơn chờ thanh toán, đơn lỗi, đơn hết hạn và xác nhận thanh toán thủ công khi cần.
                                     {% elif model.object_name == "Invoice" %}
-                                        Quản lý hóa đơn được tạo sau khi người dùng hoàn tất thanh toán.
+                                        Xem hóa đơn đã sinh sau khi người dùng thanh toán để đối soát doanh thu.
                                     {% elif model.object_name == "User" %}
-                                        Quản lý tài khoản người dùng, thông tin liên hệ và quyền truy cập trang quản trị.
+                                        Quản lý tài khoản, tạo nhân viên và cấp vai trò hệ thống.
                                     {% else %}
                                         Quản lý dữ liệu hệ thống.
                                     {% endif %}
