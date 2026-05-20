@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('recommendations.urls')),  # Liên kết tới ứng dụng recommendations
     # Trang đăng nhập, chỉ rõ template
+    path('dashboard/', include('dashboard.urls')),
 ]

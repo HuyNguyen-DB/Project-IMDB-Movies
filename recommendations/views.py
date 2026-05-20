@@ -29,6 +29,10 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+import qrcode
+import io
+import base64
+
 def get_movies():
     movies_queryset = Movie.objects.all()
     movies_data = movies_queryset.values(
@@ -540,7 +544,12 @@ def book_movie(request):
 
 @login_required
 def payment_page(request, booking_id):
-    booking = get_object_or_404(BookedMovie, id=booking_id, user=request.user)
+    booking = get_object_or_404(
+        BookedMovie,
+        id=booking_id,
+        user=request.user
+    )
+
     now = timezone.now()
 
     if (
@@ -554,29 +563,37 @@ def payment_page(request, booking_id):
     if booking.status == 'expired':
         messages.error(
             request,
-            "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
+            "Đơn đặt phim này đã hết hạn."
         )
         return redirect('user_home')
 
-    if booking.status == 'cancelled':
-        messages.error(
-            request,
-            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
-        )
-        return redirect('user_home')
+    # ====== TẠO VIETQR ======
 
-    if booking.payment_status == 'paid':
-        messages.warning(request, "Đơn này đã được thanh toán trước đó.")
+    bank_id = "970422"  # MB Bank
+    account_no = "0762535498"  # số tài khoản của bạn
+    account_name = "HUY%20NGUYEN"
 
-        if hasattr(booking, 'invoice') and booking.invoice and booking.invoice.invoice_code:
-            return redirect('invoice_detail', invoice_code=booking.invoice.invoice_code)
+    amount = int(booking.total_price)
 
-        return redirect('user_home')
+    description = f"BOOKING{booking.id}"
+
+    vietqr_url = (
+        f"https://img.vietqr.io/image/"
+        f"{bank_id}-{account_no}-compact2.png"
+        f"?amount={amount}"
+        f"&addInfo={description}"
+        f"&accountName={account_name}"
+    )
+
+    context = {
+        'booking': booking,
+        'vietqr_url': vietqr_url,
+    }
 
     return render(
         request,
         'recommendations/payment.html',
-        {'booking': booking}
+        context
     )
 
 

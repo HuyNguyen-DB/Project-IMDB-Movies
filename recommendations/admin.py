@@ -1,7 +1,8 @@
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from django.utils import timezone
-from django.urls import reverse
+from django.urls import reverse, path
+from django.http import HttpResponseRedirect
 
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin
@@ -17,9 +18,33 @@ from .models import (
 )
 
 
-admin.site.site_header = "Quản trị Movie Webapp"
-admin.site.site_title = "Movie Webapp Admin"
-admin.site.index_title = "Bảng điều khiển quản trị"
+# Custom Admin Site với link Dashboard
+class CustomAdminSite(admin.AdminSite):
+    site_header = "Quản trị Movie Webapp"
+    site_title = "Movie Webapp Admin"
+    index_title = "Bảng điều khiển quản trị"
+    
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('dashboard/', self.admin_view(self.dashboard_redirect), name='dashboard-redirect'),
+        ]
+        return custom_urls + urls
+    
+    def dashboard_redirect(self, request):
+        """Chuyển hướng đến dashboard"""
+        return HttpResponseRedirect('/dashboard/')
+    
+    def index(self, request, extra_context=None):
+        """Thêm link dashboard vào trang admin index"""
+        extra_context = extra_context or {}
+        extra_context['dashboard_url'] = reverse('admin:dashboard-redirect')
+        extra_context['has_dashboard'] = True
+        return super().index(request, extra_context)
+
+
+# Sử dụng custom admin site
+admin.site.__class__ = CustomAdminSite
 
 
 # =========================================================
@@ -901,7 +926,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
     list_per_page = 25
     save_on_top = True
-    date_hierarchy = "booking_date"
+    #date_hierarchy = "booking_date"
 
     readonly_fields = (
         "booking_code",
@@ -1167,7 +1192,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     )
 
     list_per_page = 25
-    date_hierarchy = "created_at"
+    #date_hierarchy = "created_at"
 
     readonly_fields = (
         "invoice_code",

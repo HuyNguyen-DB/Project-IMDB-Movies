@@ -686,10 +686,48 @@ body{
             </div>
 
             {% if booking.payment_status == 'unpaid' %}
-            <form method="POST" action="{% url 'confirm_payment' booking.id %}" class="action-form">
-                {% csrf_token %}
-                <button type="submit" class="confirm-btn">✅ Xác nhận đã thanh toán</button>
-            </form>
+
+<div class="summary-box" style="margin-top:20px;text-align:center;">
+
+    <h3 style="margin-top:0;color:white;">
+        Quét QR để thanh toán
+    </h3>
+
+    <img
+        src="{{ vietqr_url }}"
+        alt="QR Thanh toán"
+        style="
+            width:280px;
+            max-width:100%;
+            border-radius:16px;
+            background:white;
+            padding:12px;
+        "
+    >
+
+    <p style="margin-top:18px;color:#94a3b8;line-height:1.6;">
+        Ngân hàng: <strong style="color:white;">MB Bank</strong><br>
+        Chủ tài khoản:
+        <strong style="color:white;">NGUYEN HUY</strong><br>
+        Nội dung:
+        <strong style="color:#22c55e;">
+            {{ booking.booking_code }}
+        </strong>
+    </p>
+
+</div>
+
+<form
+    method="POST"
+    action="{% url 'confirm_payment' booking.id %}"
+    class="action-form"
+>
+    {% csrf_token %}
+
+    <button type="submit" class="confirm-btn">
+        ✅ Tôi đã thanh toán
+    </button>
+</form>
             {% else %}
             <div class="paid-box">
                 <p>Đơn này đã được thanh toán thành công. Bạn có thể xem hóa đơn nội bộ ngay bên dưới.</p>
