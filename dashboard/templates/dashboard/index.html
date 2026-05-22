@@ -158,6 +158,56 @@
             color: white;
             border-color: #4f46e5;
         }
+
+        .filter-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-form label {
+            font-size: 14px;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .filter-form input[type="date"] {
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+            color: #1e40af;
+        }
+
+        .filter-button {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.18);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+        }
+
+        .filter-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(245, 158, 11, 0.24);
+            opacity: 0.95;
+        }
+
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-filter span {
+            color: #475569;
+            font-weight: 600;
+        }
         
         @media (max-width: 768px) {
             .charts-grid {
@@ -208,7 +258,27 @@
                 <div class="number">{{ paid_count }}</div>
             </div>
         </div>
-        
+
+        <div class="chart-controls">
+            <form method="get" class="filter-form">
+                <input type="hidden" name="timeframe" value="{{ selected_timeframe }}">
+                <div class="date-filter">
+                    <label for="start_date">Từ</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+                    <span>đến</span>
+                    <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+                    <button type="submit" class="filter-button">Áp dụng</button>
+                </div>
+            </form>
+            <div class="timeframe-switcher">
+                <button type="button" class="timeframe-button{% if selected_timeframe == 'total' %} active{% endif %}" data-timeframe="total">Tổng</button>
+                <button type="button" class="timeframe-button{% if selected_timeframe == 'quarter' %} active{% endif %}" data-timeframe="quarter">Quý</button>
+                <button type="button" class="timeframe-button{% if selected_timeframe == 'day' %} active{% endif %}" data-timeframe="day">Ngày</button>
+                <button type="button" class="timeframe-button{% if selected_timeframe == 'month' %} active{% endif %}" data-timeframe="month">Tháng</button>
+                <button type="button" class="timeframe-button{% if selected_timeframe == 'year' %} active{% endif %}" data-timeframe="year">Năm</button>
+            </div>
+        </div>
+
         <div class="charts-grid">
             <div class="chart-card">
                 <h3>🎬 Top 5 Phim Được Đặt Nhiều Nhất</h3>
@@ -224,20 +294,6 @@
                 </div>
             </div>
             
-            <div class="chart-card">
-                <h3>💳 Trạng Thái Thanh Toán</h3>
-                <div class="chart-container">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="chart-controls">
-            <div class="timeframe-switcher">
-                <button type="button" class="timeframe-button active" data-timeframe="day">Ngày</button>
-                <button type="button" class="timeframe-button" data-timeframe="month">Tháng</button>
-                <button type="button" class="timeframe-button" data-timeframe="year">Năm</button>
-            </div>
         </div>
 
         <div class="charts-grid">
@@ -267,9 +323,6 @@
     <script>
         const movieLabels = JSON.parse('{{ movie_labels|escapejs }}');
         const movieData = JSON.parse('{{ movie_data|escapejs }}');
-
-        const statusLabels = JSON.parse('{{ status_labels|escapejs }}');
-        const statusData = JSON.parse('{{ status_data|escapejs }}');
 
         const roomLabels = JSON.parse('{{ room_labels|escapejs }}');
         const roomData = JSON.parse('{{ room_data|escapejs }}');
@@ -340,51 +393,22 @@ new Chart(roomCtx, {
     }
 });
 
-        // ===== BIỂU ĐỒ TRẠNG THÁI THANH TOÁN =====
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        new Chart(statusCtx, {
-            type: 'pie',
-            data: {
-                labels: statusLabels,
-                datasets: [{
-                    data: statusData,
-                    backgroundColor: [
-                        '#f59e0b',  // Cam - Chưa thanh toán
-                        '#10b981',  // Xanh lá - Đã thanh toán
-                    ],
-                    borderColor: [
-                        '#f59e0b',
-                        '#10b981',
-                    ],
-                    borderWidth: 2,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                    }
-                }
-            }
-        });
-
         const timeLabels = JSON.parse('{{ time_labels|escapejs }}');
         const timeBookingCounts = JSON.parse('{{ time_booking_counts|escapejs }}');
         const timeRevenue = JSON.parse('{{ time_revenue|escapejs }}');
         const timePaymentPaid = JSON.parse('{{ time_payment_paid|escapejs }}');
         const timePaymentUnpaid = JSON.parse('{{ time_payment_unpaid|escapejs }}');
+        const timePaymentCancelled = JSON.parse('{{ time_payment_cancelled|escapejs }}');
+        const initialTimeframe = document.querySelector('.timeframe-button.active')?.dataset.timeframe || 'total';
 
         const revenueCtx = document.getElementById('revenueTrendChart').getContext('2d');
         const revenueChart = new Chart(revenueCtx, {
             type: 'bar',
             data: {
-                labels: timeLabels.day,
+                labels: timeLabels[initialTimeframe] || [],
                 datasets: [{
                     label: 'Doanh thu',
-                    data: timeRevenue.day,
+                    data: timeRevenue[initialTimeframe] || [],
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.2)',
                     fill: true,
@@ -411,10 +435,10 @@ new Chart(roomCtx, {
         const bookingChart = new Chart(bookingCtx, {
             type: 'bar',
             data: {
-                labels: timeLabels.day,
+                labels: timeLabels[initialTimeframe] || [],
                 datasets: [{
                     label: 'Số đơn đặt',
-                    data: timeBookingCounts.day,
+                    data: timeBookingCounts[initialTimeframe] || [],
                     backgroundColor: '#667eea',
                     borderColor: '#4338ca',
                     borderWidth: 1,
@@ -436,20 +460,27 @@ new Chart(roomCtx, {
         const paymentChart = new Chart(paymentCtx, {
             type: 'bar',
             data: {
-                labels: timeLabels.day,
+                labels: timeLabels[initialTimeframe] || [],
                 datasets: [
                     {
                         label: 'Chưa Thanh Toán',
-                        data: timePaymentUnpaid.day,
+                        data: timePaymentUnpaid[initialTimeframe] || [],
                         backgroundColor: '#f59e0b',
                         borderColor: '#d97706',
                         borderWidth: 1,
                     },
                     {
                         label: 'Đã Thanh Toán',
-                        data: timePaymentPaid.day,
+                        data: timePaymentPaid[initialTimeframe] || [],
                         backgroundColor: '#10b981',
                         borderColor: '#047857',
+                        borderWidth: 1,
+                    },
+                    {
+                        label: 'Đã Hủy',
+                        data: timePaymentCancelled[initialTimeframe] || [],
+                        backgroundColor: '#ef4444',
+                        borderColor: '#b91c1c',
                         borderWidth: 1,
                     }
                 ]
@@ -478,17 +509,23 @@ new Chart(roomCtx, {
             paymentChart.data.labels = labels;
             paymentChart.data.datasets[0].data = timePaymentUnpaid[timeframe] || [];
             paymentChart.data.datasets[1].data = timePaymentPaid[timeframe] || [];
+            paymentChart.data.datasets[2].data = timePaymentCancelled[timeframe] || [];
 
             revenueChart.update();
             bookingChart.update();
             paymentChart.update();
         }
 
+        const dateInputs = [
+            document.getElementById('start_date'),
+            document.getElementById('end_date')
+        ];
+
         document.querySelectorAll('.timeframe-button').forEach(button => {
             button.addEventListener('click', () => {
-                document.querySelectorAll('.timeframe-button').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                updateTimeframe(button.dataset.timeframe);
+                const params = new URLSearchParams(window.location.search);
+                params.set('timeframe', button.dataset.timeframe);
+                window.location.search = params.toString();
             });
         });
     </script>
