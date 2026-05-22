@@ -619,12 +619,12 @@ body{
 
                 <div class="info-card">
                     <span class="info-label">Tên phim</span>
-                    <div class="info-value">{{ booking.movie_title }}</div>
+                    <div class="info-value">{% if booking.movie %}{{ booking.movie.primaryTitle }}{% else %}Không rõ phim{% endif %}</div>
                 </div>
 
                 <div class="info-card">
                     <span class="info-label">Thể loại</span>
-                    <div class="info-value">{{ booking.movie_genre }}</div>
+                    <div class="info-value">{% if booking.movie %}{{ booking.movie.genres }}{% else %}Chưa có{% endif %}</div>
                 </div>
 
                 <div class="info-card">
@@ -654,7 +654,7 @@ body{
             </div>
 
             <div class="status-row">
-                <span class="badge {{ booking.status }}">{{ booking.status|upper }}</span>
+                <span class="badge {{ booking.booking_status }}">{{ booking.booking_status|upper }}</span>
                 <span class="badge {{ booking.payment_status }}">{{ booking.payment_status|upper }}</span>
             </div>
 

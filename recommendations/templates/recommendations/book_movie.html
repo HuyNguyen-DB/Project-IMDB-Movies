@@ -665,11 +665,15 @@ body{
                     <span class="meta-label">Trạng thái phòng</span>
                     <div class="meta-value">
                         {% if room.status == "available" %}
-                            Đang hoạt động
+                            Sẵn sàng
+                        {% elif room.status == "booked" %}
+                            Đang được đặt
                         {% elif room.status == "maintenance" %}
                             Đang bảo trì
+                        {% elif room.status == "inactive" %}
+                            Ngưng sử dụng
                         {% else %}
-                            Đã đặt
+                            {{ room.status }}
                         {% endif %}
                     </div>
                 </div>

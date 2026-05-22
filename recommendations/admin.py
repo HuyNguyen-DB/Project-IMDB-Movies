@@ -886,36 +886,37 @@ class BookedMovieAdmin(admin.ModelAdmin):
     list_display = (
         "booking_code",
         "user",
-        "movie_title",
+        "movie_display",
         "room_name",
         "booking_date_vi",
+        "booking_end_time_vi",
         "rental_duration_minutes",
         "total_price_vi",
-        "status_badge",
+        "booking_status_badge",
         "payment_badge",
         "invoice_badge",
     )
 
     list_display_links = (
         "booking_code",
-        "movie_title",
+        "movie_display",
     )
 
     list_filter = (
-        "status",
+        "booking_status",
         "payment_status",
         "booking_date",
         "date_booked",
         "room_name",
-        "movie_genre",
     )
 
     search_fields = (
         "booking_code",
         "user__username",
         "user__email",
-        "movie_title",
-        "movie_genre",
+        "movie__primaryTitle",
+        "movie__tconst",
+        "room_id_snapshot",
         "room_name",
     )
 
@@ -926,21 +927,22 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
     list_per_page = 25
     save_on_top = True
-    #date_hierarchy = "booking_date"
 
     readonly_fields = (
         "booking_code",
         "user",
-        "movie_title",
-        "movie_genre",
-        "movie_poster_url",
+        "movie",
+        "room_id_snapshot",
         "room_name",
         "rental_duration_minutes",
         "price_per_30min",
+        "discount_amount",
         "total_price",
         "booking_date",
+        "booking_end_time",
         "date_booked",
         "paid_at",
+        "refunded_at",
     )
 
     fieldsets = (
@@ -950,7 +952,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
                 "fields": (
                     "booking_code",
                     "user",
-                    "status",
+                    "booking_status",
                     "payment_status",
                 )
             },
@@ -959,9 +961,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
             "Thông tin phim",
             {
                 "fields": (
-                    "movie_title",
-                    "movie_genre",
-                    "movie_poster_url",
+                    "movie",
                 )
             },
         ),
@@ -969,9 +969,11 @@ class BookedMovieAdmin(admin.ModelAdmin):
             "Thông tin phòng chiếu",
             {
                 "fields": (
+                    "room_id_snapshot",
                     "room_name",
                     "rental_duration_minutes",
                     "price_per_30min",
+                    "discount_amount",
                     "total_price",
                 )
             },
@@ -981,8 +983,10 @@ class BookedMovieAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "booking_date",
+                    "booking_end_time",
                     "date_booked",
                     "paid_at",
+                    "refunded_at",
                 )
             },
         ),
@@ -1012,20 +1016,32 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-
         if not (is_system_admin(request.user) or is_booking_staff(request.user)):
             actions.clear()
-
         return actions
 
     def get_readonly_fields(self, request, obj=None):
         return self.readonly_fields
 
+    def movie_display(self, obj):
+        if obj.movie:
+            return obj.movie.primaryTitle
+        return "Không rõ phim"
+
+    movie_display.short_description = "Tên phim"
+    movie_display.admin_order_field = "movie__primaryTitle"
+
     def booking_date_vi(self, obj):
         return format_datetime_vi(obj.booking_date)
 
-    booking_date_vi.short_description = "Ngày giờ xem"
+    booking_date_vi.short_description = "Bắt đầu xem"
     booking_date_vi.admin_order_field = "booking_date"
+
+    def booking_end_time_vi(self, obj):
+        return format_datetime_vi(obj.booking_end_time)
+
+    booking_end_time_vi.short_description = "Kết thúc xem"
+    booking_end_time_vi.admin_order_field = "booking_end_time"
 
     def total_price_vi(self, obj):
         return format_money(obj.total_price)
@@ -1033,27 +1049,30 @@ class BookedMovieAdmin(admin.ModelAdmin):
     total_price_vi.short_description = "Tổng tiền"
     total_price_vi.admin_order_field = "total_price"
 
-    def status_badge(self, obj):
+    def booking_status_badge(self, obj):
         status_map = {
-            "pending": ("Chờ thanh toán", "yellow"),
+            "pending_payment": ("Chờ thanh toán", "yellow"),
             "confirmed": ("Đã xác nhận", "green"),
+            "in_use": ("Đang sử dụng", "blue"),
+            "completed": ("Đã hoàn tất", "green"),
             "cancelled": ("Đã hủy", "red"),
             "expired": ("Hết hạn", "gray"),
         }
-
-        text, color = status_map.get(obj.status, (obj.status, "gray"))
+        text, color = status_map.get(obj.booking_status, (obj.booking_status, "gray"))
         return badge(text, color)
 
-    status_badge.short_description = "Trạng thái đơn"
+    booking_status_badge.short_description = "Trạng thái đơn"
 
     def payment_badge(self, obj):
-        if obj.payment_status == "paid":
-            return badge("Đã thanh toán", "green")
-
-        if obj.payment_status == "unpaid":
-            return badge("Chưa thanh toán", "orange")
-
-        return badge(obj.payment_status, "gray")
+        payment_map = {
+            "unpaid": ("Chưa thanh toán", "orange"),
+            "paid": ("Đã thanh toán", "green"),
+            "refund_pending": ("Chờ hoàn tiền", "yellow"),
+            "refunded": ("Đã hoàn tiền", "blue"),
+            "failed": ("Thanh toán lỗi", "red"),
+        }
+        text, color = payment_map.get(obj.payment_status, (obj.payment_status, "gray"))
+        return badge(text, color)
 
     payment_badge.short_description = "Thanh toán"
 
@@ -1064,7 +1083,6 @@ class BookedMovieAdmin(admin.ModelAdmin):
                 return badge(invoice.invoice_code, "blue")
         except Exception:
             pass
-
         return badge("Chưa có hóa đơn", "gray")
 
     invoice_badge.short_description = "Hóa đơn"
@@ -1075,7 +1093,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
         for booking in queryset:
             booking.payment_status = "paid"
-            booking.status = "confirmed"
+            booking.booking_status = "confirmed"
 
             if not booking.paid_at:
                 booking.paid_at = timezone.now()
@@ -1087,7 +1105,6 @@ class BookedMovieAdmin(admin.ModelAdmin):
                 booking=booking,
                 defaults={
                     "user": booking.user,
-                    "amount": booking.total_price,
                 },
             )
 
@@ -1108,7 +1125,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
         for booking in queryset:
             booking.payment_status = "unpaid"
-            booking.status = "pending"
+            booking.booking_status = "pending_payment"
             booking.paid_at = None
             booking.save()
             updated += 1
@@ -1125,7 +1142,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
         updated = 0
 
         for booking in queryset:
-            booking.status = "cancelled"
+            booking.booking_status = "cancelled"
             booking.save()
             updated += 1
 
@@ -1142,7 +1159,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
         for booking in queryset:
             if booking.payment_status == "unpaid":
-                booking.status = "expired"
+                booking.booking_status = "expired"
                 booking.save()
                 updated += 1
 
@@ -1165,9 +1182,10 @@ class InvoiceAdmin(admin.ModelAdmin):
         "invoice_code",
         "user",
         "booking_code_display",
-        "movie_title_display",
-        "amount_vi",
-        "created_at_vi",
+        "movie_title",
+        "room_name",
+        "final_amount_vi",
+        "issued_at_vi",
     )
 
     list_display_links = (
@@ -1178,28 +1196,41 @@ class InvoiceAdmin(admin.ModelAdmin):
         "invoice_code",
         "user__username",
         "user__email",
+        "customer_name",
+        "customer_email",
         "booking__booking_code",
-        "booking__movie_title",
+        "movie_title",
+        "room_name",
     )
 
     list_filter = (
-        "created_at",
+        "issued_at",
         "user",
+        "payment_status_at_issue",
     )
 
     ordering = (
-        "-created_at",
+        "-issued_at",
     )
 
     list_per_page = 25
-    #date_hierarchy = "created_at"
 
     readonly_fields = (
         "invoice_code",
         "booking",
         "user",
-        "amount",
-        "created_at",
+        "customer_name",
+        "customer_email",
+        "movie_title",
+        "room_name",
+        "booking_start_time",
+        "booking_end_time",
+        "rental_duration_minutes",
+        "price_per_30min",
+        "discount_amount",
+        "final_amount",
+        "payment_status_at_issue",
+        "issued_at",
     )
 
     fieldsets = (
@@ -1210,8 +1241,25 @@ class InvoiceAdmin(admin.ModelAdmin):
                     "invoice_code",
                     "booking",
                     "user",
-                    "amount",
-                    "created_at",
+                    "customer_name",
+                    "customer_email",
+                    "payment_status_at_issue",
+                    "issued_at",
+                )
+            },
+        ),
+        (
+            "Thông tin giao dịch tại thời điểm xuất hóa đơn",
+            {
+                "fields": (
+                    "movie_title",
+                    "room_name",
+                    "booking_start_time",
+                    "booking_end_time",
+                    "rental_duration_minutes",
+                    "price_per_30min",
+                    "discount_amount",
+                    "final_amount",
                 )
             },
         ),
@@ -1235,30 +1283,21 @@ class InvoiceAdmin(admin.ModelAdmin):
     def booking_code_display(self, obj):
         if obj.booking:
             return obj.booking.booking_code
-
         return "Không có đơn"
 
     booking_code_display.short_description = "Mã đơn"
 
-    def movie_title_display(self, obj):
-        if obj.booking:
-            return obj.booking.movie_title
+    def final_amount_vi(self, obj):
+        return format_money(obj.final_amount)
 
-        return "Không có phim"
+    final_amount_vi.short_description = "Thành tiền"
+    final_amount_vi.admin_order_field = "final_amount"
 
-    movie_title_display.short_description = "Tên phim"
+    def issued_at_vi(self, obj):
+        return format_datetime_vi(obj.issued_at)
 
-    def amount_vi(self, obj):
-        return format_money(obj.amount)
-
-    amount_vi.short_description = "Số tiền"
-    amount_vi.admin_order_field = "amount"
-
-    def created_at_vi(self, obj):
-        return format_datetime_vi(obj.created_at)
-
-    created_at_vi.short_description = "Ngày tạo"
-    created_at_vi.admin_order_field = "created_at"
+    issued_at_vi.short_description = "Ngày xuất"
+    issued_at_vi.admin_order_field = "issued_at"
 
 
 # =========================================================
@@ -1328,7 +1367,6 @@ class MovieAdmin(admin.ModelAdmin):
                 "fields": (
                     "poster_url",
                     "poster_checked",
-                    "poster_source",
                     "poster_updated_at",
                 )
             },
@@ -1337,7 +1375,6 @@ class MovieAdmin(admin.ModelAdmin):
 
     readonly_fields = (
         "poster_checked",
-        "poster_source",
         "poster_updated_at",
     )
 

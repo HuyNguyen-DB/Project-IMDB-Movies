@@ -1295,10 +1295,14 @@ main{
 
                 {% if room.status == "available" %}
                 <span class="room-badge">● Sẵn sàng</span>
+                {% elif room.status == "booked" %}
+                <span class="room-badge" style="background:rgba(239,68,68,0.16);color:#fca5a5;border-color:rgba(239,68,68,0.28);">● Đang được đặt</span>
                 {% elif room.status == "maintenance" %}
                 <span class="room-badge" style="background:rgba(249,115,22,0.16);color:#fdba74;border-color:rgba(249,115,22,0.28);">● Bảo trì</span>
+                {% elif room.status == "inactive" %}
+                <span class="room-badge" style="background:rgba(100,116,139,0.16);color:#cbd5e1;border-color:rgba(148,163,184,0.28);">● Ngưng sử dụng</span>
                 {% else %}
-                <span class="room-badge" style="background:rgba(239,68,68,0.16);color:#fca5a5;border-color:rgba(239,68,68,0.28);">● Đã đặt</span>
+                <span class="room-badge" style="background:rgba(100,116,139,0.16);color:#cbd5e1;border-color:rgba(148,163,184,0.28);">● {{ room.status }}</span>
                 {% endif %}
             </div>
 

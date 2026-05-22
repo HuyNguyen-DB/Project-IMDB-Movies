@@ -41,17 +41,26 @@ def get_admin_stats():
 
     total_revenue = 0
     for invoice in invoices:
-        total_revenue += invoice.amount or 0
+        total_revenue += invoice.final_amount or 0
 
     return {
         "total_movies": Movie.objects.count(),
         "total_rooms": ScreenRoom.objects.count(),
         "available_rooms": ScreenRoom.objects.filter(status="available").count(),
+
         "total_bookings": len(bookings),
-        "paid_bookings": len([b for b in bookings if b.payment_status == "paid"]),
-        "unpaid_bookings": len([b for b in bookings if b.payment_status == "unpaid"]),
+        "paid_bookings": len([
+            booking for booking in bookings
+            if booking.payment_status == "paid"
+        ]),
+        "unpaid_bookings": len([
+            booking for booking in bookings
+            if booking.payment_status == "unpaid"
+        ]),
+
         "today_bookings": today_bookings,
         "tomorrow_bookings": tomorrow_bookings,
+
         "total_invoices": len(invoices),
         "total_revenue": f"{total_revenue:,} VND",
     }

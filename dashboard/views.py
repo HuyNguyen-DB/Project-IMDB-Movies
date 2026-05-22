@@ -1,10 +1,12 @@
 from collections import defaultdict
 from datetime import date
+import json
 
 from django.shortcuts import render
 from django.db.models import Count, Sum
+
 from recommendations.models import BookedMovie
-import json
+
 
 TIMEFRAMES = ["day", "month", "year"]
 
@@ -24,15 +26,8 @@ def format_time_label(key, timeframe):
         return key.strftime("%m/%Y")
     return key.strftime("%Y")
 
-    ordered = sorted(groups.items())
-    labels = [format_time_label(key, timeframe) for key, _ in ordered]
-    paid_values = [counts["paid"] for _, counts in ordered]
-    unpaid_values = [counts["unpaid"] for _, counts in ordered]
-    return labels, paid_values, unpaid_values
-
 
 def dashboard_view(request):
-
     total_bookings = BookedMovie.objects.count()
 
     total_revenue = (
@@ -42,15 +37,15 @@ def dashboard_view(request):
     )
 
     confirmed_count = BookedMovie.objects.filter(
-        status="confirmed"
+        booking_status="confirmed"
     ).count()
 
     pending_count = BookedMovie.objects.filter(
-        status="pending"
+        booking_status="pending_payment"
     ).count()
 
     cancelled_count = BookedMovie.objects.filter(
-        status="cancelled"
+        booking_status="cancelled"
     ).count()
 
     unpaid_count = BookedMovie.objects.filter(
@@ -62,25 +57,18 @@ def dashboard_view(request):
     ).count()
 
     # ===== TOP PHIM =====
-
     top_movies_query = (
         BookedMovie.objects
-        .exclude(movie_title__isnull=True)
-        .exclude(movie_title="")
-        .values("movie_title")
+        .filter(movie__isnull=False)
+        .values("movie__primaryTitle")
         .annotate(total=Count("id"))
         .order_by("-total")[:5]
     )
 
-    movie_labels = []
-    movie_data = []
-
-    for movie in top_movies_query:
-        movie_labels.append(movie["movie_title"])
-        movie_data.append(movie["total"])
+    movie_labels = [item["movie__primaryTitle"] or "Không rõ phim" for item in top_movies_query]
+    movie_data = [item["total"] for item in top_movies_query]
 
     # ===== TRẠNG THÁI THANH TOÁN =====
-
     status_labels = [
         "Chưa Thanh Toán",
         "Đã Thanh Toán",
@@ -91,6 +79,7 @@ def dashboard_view(request):
         paid_count,
     ]
 
+    # ===== TOP PHÒNG =====
     top_rooms_query = (
         BookedMovie.objects
         .exclude(room_name__isnull=True)
@@ -113,29 +102,24 @@ def dashboard_view(request):
 
     for timeframe in TIMEFRAMES:
         groups_bookings = defaultdict(int)
-        groups_revenue = defaultdict(float)  # Dùng float cho tiền tệ
+        groups_revenue = defaultdict(float)
         groups_paid = defaultdict(int)
         groups_unpaid = defaultdict(int)
 
-        # Gộp chung vòng lặp để đảm bảo tất cả đều dùng chung 1 trục thời gian (key)
         for item in all_bookings:
             dt = item.date_booked or item.booking_date
             key = time_group_key(dt, timeframe)
 
-            # Đếm tổng số đơn
             groups_bookings[key] += 1
 
-            # Phân loại trạng thái thanh toán và cộng doanh thu
             if item.payment_status == "paid":
                 groups_revenue[key] += float(item.total_price or 0)
                 groups_paid[key] += 1
             else:
                 groups_unpaid[key] += 1
 
-        # Lấy danh sách các mốc thời gian đã được sắp xếp
         ordered_keys = sorted(groups_bookings.keys())
 
-        # Xuất ra các mảng cùng kích thước
         time_labels[timeframe] = [format_time_label(k, timeframe) for k in ordered_keys]
         time_booking_counts[timeframe] = [groups_bookings[k] for k in ordered_keys]
         time_revenue[timeframe] = [groups_revenue[k] for k in ordered_keys]
@@ -146,6 +130,7 @@ def dashboard_view(request):
         "total_bookings": total_bookings,
         "total_revenue": total_revenue["total"] or 0,
         "confirmed_count": confirmed_count,
+        "pending_count": pending_count,
         "cancelled_count": cancelled_count,
         "unpaid_count": unpaid_count,
         "paid_count": paid_count,
@@ -167,21 +152,3 @@ def dashboard_view(request):
     }
 
     return render(request, "dashboard/index.html", context)
-
-# ===== TOP PHÒNG =====
-
-top_rooms_query = (
-    BookedMovie.objects
-    .exclude(room_name__isnull=True)
-    .exclude(room_name="")
-    .values("room_name")
-    .annotate(total=Count("id"))
-    .order_by("-total")[:5]
-)
-
-room_labels = []
-room_data = []
-
-for room in top_rooms_query:
-    room_labels.append(room["room_name"])
-    room_data.append(room["total"])

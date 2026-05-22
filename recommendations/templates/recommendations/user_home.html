@@ -994,8 +994,8 @@ body{
                     <div class="history-card {% if movie.is_today %}today-highlight{% elif movie.is_tomorrow %}tomorrow-highlight{% endif %}">
 
                         <img class="movie-poster"
-                             src="{% if movie.movie_poster_url %}{{ movie.movie_poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
-                             alt="{{ movie.movie_title }}">
+                             src="{% if movie.movie and movie.movie.poster_url %}{{ movie.movie.poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
+                             alt="{% if movie.movie %}{{ movie.movie.primaryTitle }}{% else %}Không rõ phim{% endif %}">
 
                         <div class="movie-details">
 
@@ -1005,7 +1005,7 @@ body{
                                 <span class="tomorrow-label">📌 Lịch xem ngày mai</span>
                             {% endif %}
 
-                            <h3>{{ movie.movie_title }}</h3>
+                            <h3>{% if movie.movie %}{{ movie.movie.primaryTitle }}{% else %}Không rõ phim{% endif %}</h3>
 
                             <div class="meta-row">
                                 <div class="meta-box">
@@ -1015,7 +1015,7 @@ body{
 
                                 <div class="meta-box">
                                     <span class="meta-label">Thể loại</span>
-                                    <div class="meta-value">{{ movie.movie_genre }}</div>
+                                    <div class="meta-value">{% if movie.movie %}{{ movie.movie.genres }}{% else %}Chưa có{% endif %}</div>
                                 </div>
 
                                 <div class="meta-box">
@@ -1040,17 +1040,21 @@ body{
                             </div>
 
                             <div class="status-badges">
-                                <span class="badge {{ movie.status }}">
-                                    {% if movie.status == 'pending' %}
+                                <span class="badge {{ movie.booking_status }}">
+                                    {% if movie.booking_status == 'pending_payment' %}
                                         CHỜ THANH TOÁN
-                                    {% elif movie.status == 'confirmed' %}
+                                    {% elif movie.booking_status == 'confirmed' %}
                                         ĐÃ XÁC NHẬN
-                                    {% elif movie.status == 'cancelled' %}
+                                    {% elif movie.booking_status == 'in_use' %}
+                                        ĐANG SỬ DỤNG
+                                    {% elif movie.booking_status == 'completed' %}
+                                        ĐÃ HOÀN TẤT
+                                    {% elif movie.booking_status == 'cancelled' %}
                                         ĐÃ HỦY
-                                    {% elif movie.status == 'expired' %}
+                                    {% elif movie.booking_status == 'expired' %}
                                         HẾT HẠN
                                     {% else %}
-                                        {{ movie.status|upper }}
+                                        {{ movie.booking_status|upper }}
                                     {% endif %}
                                 </span>
 
@@ -1059,6 +1063,12 @@ body{
                                         CHƯA THANH TOÁN
                                     {% elif movie.payment_status == 'paid' %}
                                         ĐÃ THANH TOÁN
+                                    {% elif movie.payment_status == 'refund_pending' %}
+                                        CHỜ HOÀN TIỀN
+                                    {% elif movie.payment_status == 'refunded' %}
+                                        ĐÃ HOÀN TIỀN
+                                    {% elif movie.payment_status == 'failed' %}
+                                        THANH TOÁN LỖI
                                     {% else %}
                                         {{ movie.payment_status|upper }}
                                     {% endif %}
@@ -1124,8 +1134,8 @@ body{
                     <div class="history-card {% if movie.is_today %}today-highlight{% elif movie.is_tomorrow %}tomorrow-highlight{% endif %}">
 
                         <img class="movie-poster"
-                             src="{% if movie.movie_poster_url %}{{ movie.movie_poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
-                             alt="{{ movie.movie_title }}">
+                             src="{% if movie.movie and movie.movie.poster_url %}{{ movie.movie.poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
+                             alt="{% if movie.movie %}{{ movie.movie.primaryTitle }}{% else %}Không rõ phim{% endif %}">
 
                         <div class="movie-details">
 
@@ -1135,7 +1145,7 @@ body{
                                 <span class="tomorrow-label">📌 Lịch xem ngày mai</span>
                             {% endif %}
 
-                            <h3>{{ movie.movie_title }}</h3>
+                            <h3>{% if movie.movie %}{{ movie.movie.primaryTitle }}{% else %}Không rõ phim{% endif %}</h3>
 
                             <div class="meta-row">
                                 <div class="meta-box">
@@ -1160,17 +1170,21 @@ body{
                             </div>
 
                             <div class="status-badges">
-                                <span class="badge {{ movie.status }}">
-                                    {% if movie.status == 'pending' %}
+                                <span class="badge {{ movie.booking_status }}">
+                                    {% if movie.booking_status == 'pending_payment' %}
                                         CHỜ THANH TOÁN
-                                    {% elif movie.status == 'confirmed' %}
+                                    {% elif movie.booking_status == 'confirmed' %}
                                         ĐÃ XÁC NHẬN
-                                    {% elif movie.status == 'cancelled' %}
+                                    {% elif movie.booking_status == 'in_use' %}
+                                        ĐANG SỬ DỤNG
+                                    {% elif movie.booking_status == 'completed' %}
+                                        ĐÃ HOÀN TẤT
+                                    {% elif movie.booking_status == 'cancelled' %}
                                         ĐÃ HỦY
-                                    {% elif movie.status == 'expired' %}
+                                    {% elif movie.booking_status == 'expired' %}
                                         HẾT HẠN
                                     {% else %}
-                                        {{ movie.status|upper }}
+                                        {{ movie.booking_status|upper }}
                                     {% endif %}
                                 </span>
 
@@ -1179,6 +1193,12 @@ body{
                                         CHƯA THANH TOÁN
                                     {% elif movie.payment_status == 'paid' %}
                                         ĐÃ THANH TOÁN
+                                    {% elif movie.payment_status == 'refund_pending' %}
+                                        CHỜ HOÀN TIỀN
+                                    {% elif movie.payment_status == 'refunded' %}
+                                        ĐÃ HOÀN TIỀN
+                                    {% elif movie.payment_status == 'failed' %}
+                                        THANH TOÁN LỖI
                                     {% else %}
                                         {{ movie.payment_status|upper }}
                                     {% endif %}
@@ -1244,11 +1264,11 @@ body{
                 <div class="history-card">
 
                     <img class="movie-poster"
-                         src="{% if movie.movie_poster_url %}{{ movie.movie_poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
-                         alt="{{ movie.movie_title }}">
+                         src="{% if movie.movie and movie.movie.poster_url %}{{ movie.movie.poster_url }}{% else %}https://via.placeholder.com/115x165.png?text=No+Image{% endif %}"
+                         alt="{% if movie.movie %}{{ movie.movie.primaryTitle }}{% else %}Không rõ phim{% endif %}">
 
                     <div class="movie-details">
-                        <h3>{{ movie.movie_title }}</h3>
+                        <h3>{% if movie.movie %}{{ movie.movie.primaryTitle }}{% else %}Không rõ phim{% endif %}</h3>
 
                         <div class="meta-row">
                             <div class="meta-box">
@@ -1258,7 +1278,7 @@ body{
 
                             <div class="meta-box">
                                 <span class="meta-label">Thể loại</span>
-                                <div class="meta-value">{{ movie.movie_genre }}</div>
+                                <div class="meta-value">{% if movie.movie %}{{ movie.movie.genres }}{% else %}Chưa có{% endif %}</div>
                             </div>
 
                             <div class="meta-box">
@@ -1283,13 +1303,13 @@ body{
                         </div>
 
                         <div class="status-badges">
-                            <span class="badge {{ movie.status }}">
-                                {% if movie.status == 'cancelled' %}
+                            <span class="badge {{ movie.booking_status }}">
+                                {% if movie.booking_status == 'cancelled' %}
                                     ĐÃ HỦY
-                                {% elif movie.status == 'expired' %}
+                                {% elif movie.booking_status == 'expired' %}
                                     HẾT HẠN
                                 {% else %}
-                                    {{ movie.status|upper }}
+                                    {{ movie.booking_status|upper }}
                                 {% endif %}
                             </span>
 
@@ -1298,6 +1318,12 @@ body{
                                     CHƯA THANH TOÁN
                                 {% elif movie.payment_status == 'paid' %}
                                     ĐÃ THANH TOÁN
+                                {% elif movie.payment_status == 'refund_pending' %}
+                                    CHỜ HOÀN TIỀN
+                                {% elif movie.payment_status == 'refunded' %}
+                                    ĐÃ HOÀN TIỀN
+                                {% elif movie.payment_status == 'failed' %}
+                                    THANH TOÁN LỖI
                                 {% else %}
                                     {{ movie.payment_status|upper }}
                                 {% endif %}

@@ -95,7 +95,6 @@ class Command(BaseCommand):
                     update_data = {
                         "poster_url": poster_url,
                         "poster_checked": True,
-                        "poster_source": "TMDb",
                         "poster_updated_at": timezone.now(),
                     }
 
@@ -111,7 +110,6 @@ class Command(BaseCommand):
                 else:
                     update_data = {
                         "poster_checked": True,
-                        "poster_source": "",
                         "poster_updated_at": timezone.now(),
                     }
 

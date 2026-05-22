@@ -29,10 +29,6 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-import qrcode
-import io
-import base64
-
 def get_movies():
     movies_queryset = Movie.objects.all()
     movies_data = movies_queryset.values(
@@ -148,10 +144,10 @@ def user_home(request):
     BookedMovie.objects.filter(
         user=request.user,
         payment_status='unpaid',
-        status='pending',
+        booking_status='pending_payment',
         booking_date__lt=now
     ).update(
-        status='expired'
+        booking_status='expired'
     )
 
     if request.method == 'POST':
@@ -179,19 +175,19 @@ def user_home(request):
     paid_movies = [
         movie for movie in booked_movies
         if movie.payment_status == 'paid'
-        and movie.status not in ['cancelled', 'expired']
+        and movie.booking_status not in ['cancelled', 'expired']
     ]
 
     unpaid_movies = [
         movie for movie in booked_movies
         if movie.payment_status == 'unpaid'
-        and movie.status == 'pending'
+        and movie.booking_status == 'pending_payment'
         and movie.booking_date >= now
     ]
 
     cancelled_expired_movies = [
         movie for movie in booked_movies
-        if movie.status in ['cancelled', 'expired']
+        if movie.booking_status in ['cancelled', 'expired']
     ]
 
     sort_option = request.GET.get('sort', 'closest')
@@ -423,15 +419,15 @@ def recommend_page(request):
     )
 
     if request.user.is_authenticated and recommendations:
-        booked_titles = set(
+        booked_movie_ids = set(
             BookedMovie.objects
-            .filter(user=request.user, payment_status='paid')
-            .values_list('movie_title', flat=True)
+            .filter(user=request.user, payment_status='paid', movie__isnull=False)
+            .values_list('movie_id', flat=True)
         )
 
         recommendations = [
             movie for movie in recommendations
-            if movie['primaryTitle'] not in booked_titles
+            if movie.get('tconst') not in booked_movie_ids
         ]
 
     return render(
@@ -469,8 +465,8 @@ def build_user_genres_from_history(user):
 
     genres = []
     for bm in booked_movies:
-        if bm.movie_genre:
-            parts = bm.movie_genre.lower().split(',')
+        if bm.movie and bm.movie.genres:
+            parts = bm.movie.genres.lower().split(',')
             genres.extend([g.strip() for g in parts if g.strip()])
 
     if not genres:
@@ -511,15 +507,15 @@ def book_movie(request):
             booked_movie = form.save(commit=False)
 
             booked_movie.user = request.user
-            booked_movie.movie_title = movie.primaryTitle
-            booked_movie.movie_genre = movie.genres
-            booked_movie.movie_poster_url = movie.poster_url
+            booked_movie.movie = movie
+            booked_movie.room_id_snapshot = room.room_id
             booked_movie.room_name = room.name
             booked_movie.rental_duration_minutes = total_duration
             booked_movie.price_per_30min = room.price_per_30min
+            booked_movie.discount_amount = 0
             booked_movie.total_price = total_price
 
-            booked_movie.status = 'pending'
+            booked_movie.booking_status = 'pending_payment'
             booked_movie.payment_status = 'unpaid'
 
             booked_movie.save()
@@ -544,56 +540,43 @@ def book_movie(request):
 
 @login_required
 def payment_page(request, booking_id):
-    booking = get_object_or_404(
-        BookedMovie,
-        id=booking_id,
-        user=request.user
-    )
-
+    booking = get_object_or_404(BookedMovie, id=booking_id, user=request.user)
     now = timezone.now()
 
     if (
         booking.payment_status == 'unpaid'
-        and booking.status == 'pending'
+        and booking.booking_status == 'pending_payment'
         and booking.booking_date < now
     ):
-        booking.status = 'expired'
+        booking.booking_status = 'expired'
         booking.save()
 
-    if booking.status == 'expired':
+    if booking.booking_status == 'expired':
         messages.error(
             request,
-            "Đơn đặt phim này đã hết hạn."
+            "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
         )
         return redirect('user_home')
 
-    # ====== TẠO VIETQR ======
+    if booking.booking_status == 'cancelled':
+        messages.error(
+            request,
+            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
+        )
+        return redirect('user_home')
 
-    bank_id = "970422"  # MB Bank
-    account_no = "0762535498"  # số tài khoản của bạn
-    account_name = "HUY%20NGUYEN"
+    if booking.payment_status == 'paid':
+        messages.warning(request, "Đơn này đã được thanh toán trước đó.")
 
-    amount = int(booking.total_price)
+        if hasattr(booking, 'invoice') and booking.invoice and booking.invoice.invoice_code:
+            return redirect('invoice_detail', invoice_code=booking.invoice.invoice_code)
 
-    description = f"BOOKING{booking.id}"
-
-    vietqr_url = (
-        f"https://img.vietqr.io/image/"
-        f"{bank_id}-{account_no}-compact2.png"
-        f"?amount={amount}"
-        f"&addInfo={description}"
-        f"&accountName={account_name}"
-    )
-
-    context = {
-        'booking': booking,
-        'vietqr_url': vietqr_url,
-    }
+        return redirect('user_home')
 
     return render(
         request,
         'recommendations/payment.html',
-        context
+        {'booking': booking}
     )
 
 
@@ -607,10 +590,10 @@ def confirm_payment(request, booking_id):
 
     if (
         booking.payment_status == 'unpaid'
-        and booking.status == 'pending'
+        and booking.booking_status == 'pending_payment'
         and booking.booking_date < now
     ):
-        booking.status = 'expired'
+        booking.booking_status = 'expired'
         booking.save()
 
         messages.error(
@@ -619,14 +602,14 @@ def confirm_payment(request, booking_id):
         )
         return redirect('user_home')
 
-    if booking.status == 'expired':
+    if booking.booking_status == 'expired':
         messages.error(
             request,
             "Đơn đặt phim này đã hết hạn nên không thể thanh toán."
         )
         return redirect('user_home')
 
-    if booking.status == 'cancelled':
+    if booking.booking_status == 'cancelled':
         messages.error(
             request,
             "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
@@ -642,7 +625,7 @@ def confirm_payment(request, booking_id):
         return redirect('user_home')
 
     booking.payment_status = 'paid'
-    booking.status = 'confirmed'
+    booking.booking_status = 'confirmed'
     booking.paid_at = timezone.now()
     booking.save()
 
@@ -650,7 +633,6 @@ def confirm_payment(request, booking_id):
         booking=booking,
         defaults={
             'user': request.user,
-            'amount': booking.total_price
         }
     )
 

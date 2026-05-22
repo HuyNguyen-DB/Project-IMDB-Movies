@@ -533,22 +533,22 @@ body{
 
             <div class="info-box">
                 <span class="info-label">Tên phim</span>
-                <div class="info-value">{{ invoice.booking.movie_title }}</div>
+                <div class="info-value">{{ invoice.movie_title }}</div>
             </div>
 
             <div class="info-box">
                 <span class="info-label">Thể loại</span>
-                <div class="info-value">{{ invoice.booking.movie_genre }}</div>
+                <div class="info-value">{% if invoice.booking.movie %}{{ invoice.booking.movie.genres }}{% else %}Chưa có{% endif %}</div>
             </div>
 
             <div class="info-box">
                 <span class="info-label">Phòng chiếu</span>
-                <div class="info-value">{{ invoice.booking.room_name }}</div>
+                <div class="info-value">{{ invoice.room_name }}</div>
             </div>
 
             <div class="info-box">
                 <span class="info-label">Ngày giờ xem</span>
-                <div class="info-value">{{ invoice.booking.booking_date }}</div>
+                <div class="info-value">{{ invoice.booking_start_time|date:"H:i, d/m/Y" }}</div>
             </div>
 
             <div class="info-box">
@@ -558,19 +558,19 @@ body{
 
             <div class="info-box">
                 <span class="info-label">Thời lượng thuê</span>
-                <div class="info-value">{{ invoice.booking.rental_duration_minutes }} phút</div>
+                <div class="info-value">{{ invoice.rental_duration_minutes }} phút</div>
             </div>
 
             <div class="info-box">
                 <span class="info-label">Đơn giá</span>
-                <div class="info-value">{{ invoice.booking.price_per_30min }} VND / 30 phút</div>
+                <div class="info-value">{{ invoice.price_per_30min }} VND / 30 phút</div>
             </div>
         </div>
 
         <div class="total-panel">
             <h3>Tổng thanh toán</h3>
             <p>Số tiền dưới đây là tổng chi phí hệ thống đã xác nhận cho đơn đặt phim này.</p>
-            <div class="total-price">{{ invoice.amount }} VND</div>
+            <div class="total-price">{{ invoice.final_amount }} VND</div>
         </div>
 
         <div class="action-buttons">

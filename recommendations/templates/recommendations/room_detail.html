@@ -668,11 +668,15 @@
 
             <div class="room-status-box">
                 {% if room.status == "available" %}
-                    <span class="available">● Đang hoạt động</span>
+                    <span class="available">● Sẵn sàng</span>
+                {% elif room.status == "booked" %}
+                    <span class="closed">● Đang được đặt</span>
                 {% elif room.status == "maintenance" %}
                     <span class="maintenance">● Đang bảo trì</span>
+                {% elif room.status == "inactive" %}
+                    <span class="closed">● Ngưng sử dụng</span>
                 {% else %}
-                    <span class="closed">● Đã đóng</span>
+                    <span class="closed">● {{ room.status }}</span>
                 {% endif %}
             </div>
 
@@ -695,11 +699,15 @@
                     <span class="info-label">Trạng thái</span>
                     <div class="info-value">
                         {% if room.status == "available" %}
-                            Đang hoạt động
+                            Sẵn sàng
+                        {% elif room.status == "booked" %}
+                            Đang được đặt
                         {% elif room.status == "maintenance" %}
                             Đang bảo trì
+                        {% elif room.status == "inactive" %}
+                            Ngưng sử dụng
                         {% else %}
-                            Đã đóng
+                            {{ room.status }}
                         {% endif %}
                     </div>
                 </div>
