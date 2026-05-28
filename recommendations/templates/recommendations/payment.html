@@ -658,8 +658,8 @@ body{
                 <span class="badge {{ booking.payment_status }}">{{ booking.payment_status|upper }}</span>
             </div>
 
-            <div class="note-box">
-                Hãy kiểm tra kỹ thông tin trước khi thanh toán. Khi bấm xác nhận, hệ thống sẽ chuyển đơn từ trạng thái chờ thanh toán sang đã thanh toán và sinh hóa đơn nội bộ.
+            <div class="note-box" id="payment-note-box">
+                Hãy kiểm tra kỹ thông tin trước khi thanh toán. Sau khi chuyển khoản thành công và hệ thống nhận được cập nhật trạng thái, bạn sẽ được tự động chuyển đến trang hóa đơn.
             </div>
         </div>
 
@@ -717,17 +717,15 @@ body{
 
 </div>
 
-<form
-    method="POST"
-    action="{% url 'confirm_payment' booking.id %}"
-    class="action-form"
->
-    {% csrf_token %}
+<div class="summary-box" style="margin-top:20px;text-align:center;">
+    <p style="margin-top:0;color:#d1fae5;line-height:1.6;">
+        Bạn chỉ cần hoàn tất chuyển khoản theo QR trên. Hệ thống sẽ tự động kiểm tra trạng thái thanh toán mỗi 5 giây, xác nhận và tạo hóa đơn khi thanh toán được cập nhật.
+    </p>
+</div>
 
-    <button type="submit" class="confirm-btn">
-        ✅ Tôi đã thanh toán
-    </button>
-</form>
+<div id="payment-status-message" class="summary-box" style="margin-top:20px;text-align:center; background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.18); color:#bfdbfe;">
+    Đang chờ xác nhận thanh toán... Vui lòng không tắt trang.
+</div>
             {% else %}
             <div class="paid-box">
                 <p>Đơn này đã được thanh toán thành công. Bạn có thể xem hóa đơn nội bộ ngay bên dưới.</p>
@@ -751,5 +749,63 @@ body{
     </div>
 </div>
 
+<script>
+    const paymentStatusEndpoint = "{% url 'payment_status' booking.id %}";
+    const invoiceRedirectPrefix = "{% url 'invoice_detail' 'INVOICE_CODE' %}".replace('INVOICE_CODE', '').replace('//', '/');
+    const statusMessage = document.getElementById('payment-status-message');
+
+    function updateStatusMessage(text, isError = false) {
+        if (!statusMessage) return;
+        statusMessage.textContent = text;
+        statusMessage.style.color = isError ? '#fecaca' : '#bfdbfe';
+        statusMessage.style.background = isError ? 'rgba(239,68,68,0.08)' : 'rgba(59,130,246,0.08)';
+        statusMessage.style.borderColor = isError ? 'rgba(239,68,68,0.18)' : 'rgba(59,130,246,0.18)';
+    }
+
+    async function checkPaymentStatus() {
+        try {
+            const response = await fetch(paymentStatusEndpoint, {
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                updateStatusMessage('Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại sau.', true);
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.payment_status === 'paid') {
+                if (data.invoice_code) {
+                    window.location.href = invoiceRedirectPrefix + data.invoice_code + '/';
+                    return;
+                }
+                updateStatusMessage('Thanh toán đã được xác nhận. Đang tạo hóa đơn, vui lòng chờ...');
+                setTimeout(checkPaymentStatus, 3000);
+                return;
+            }
+
+            if (data.booking_status === 'expired') {
+                updateStatusMessage('Đơn đặt đã hết hạn vì chưa thanh toán đúng hạn.', true);
+                return;
+            }
+
+            if (data.booking_status === 'cancelled') {
+                updateStatusMessage('Đơn đặt đã bị hủy, không thể thanh toán.', true);
+                return;
+            }
+
+            updateStatusMessage('Đang chờ xác nhận thanh toán... Vui lòng không tắt trang.');
+        } catch (error) {
+            updateStatusMessage('Lỗi kết nối khi kiểm tra thanh toán. Vui lòng thử lại sau.', true);
+        }
+    }
+
+    setInterval(checkPaymentStatus, 5000);
+    checkPaymentStatus();
+</script>
 </body>
 </html>

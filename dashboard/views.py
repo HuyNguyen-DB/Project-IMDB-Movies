@@ -130,7 +130,7 @@ def dashboard_view(request):
     time_payment_unpaid = {}
     time_payment_cancelled = {}
 
-    for timeframe in TIMEFRAMES:
+    for tf in TIMEFRAMES:
         groups_bookings = defaultdict(int)
         groups_revenue = defaultdict(float)
         groups_paid = defaultdict(int)
@@ -139,7 +139,7 @@ def dashboard_view(request):
 
         for item in bookings_queryset:
             dt = item.date_booked or item.booking_date
-            key = time_group_key(dt, timeframe)
+            key = time_group_key(dt, tf)
 
             groups_bookings[key] += 1
 
@@ -151,14 +151,14 @@ def dashboard_view(request):
             else:
                 groups_unpaid[key] += 1
 
-        ordered_keys = sort_time_keys(groups_bookings.keys(), timeframe)
+        ordered_keys = sort_time_keys(groups_bookings.keys(), tf)
 
-        time_labels[timeframe] = [format_time_label(k, timeframe) for k in ordered_keys]
-        time_booking_counts[timeframe] = [groups_bookings[k] for k in ordered_keys]
-        time_revenue[timeframe] = [groups_revenue[k] for k in ordered_keys]
-        time_payment_paid[timeframe] = [groups_paid[k] for k in ordered_keys]
-        time_payment_unpaid[timeframe] = [groups_unpaid[k] for k in ordered_keys]
-        time_payment_cancelled[timeframe] = [groups_cancelled[k] for k in ordered_keys]
+        time_labels[tf] = [format_time_label(k, tf) for k in ordered_keys]
+        time_booking_counts[tf] = [groups_bookings[k] for k in ordered_keys]
+        time_revenue[tf] = [groups_revenue[k] for k in ordered_keys]
+        time_payment_paid[tf] = [groups_paid[k] for k in ordered_keys]
+        time_payment_unpaid[tf] = [groups_unpaid[k] for k in ordered_keys]
+        time_payment_cancelled[tf] = [groups_cancelled[k] for k in ordered_keys]
 
     context = {
         "total_bookings": total_bookings,
