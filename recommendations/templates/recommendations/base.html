@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Movie Webapp{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'recommendations/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'recommendations/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'recommendations/css/pages.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    {% block navbar %}
+        {% include "recommendations/partials/navbar.html" %}
+    {% endblock %}
+
+    {% include "recommendations/partials/messages.html" %}
+
+    {% block content %}{% endblock %}
+
+    <script src="{% static 'recommendations/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

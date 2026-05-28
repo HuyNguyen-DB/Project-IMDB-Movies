@@ -1,0 +1,49 @@
+<article class="room-card room-card-equal">
+    <a href="{% url 'room_detail' room.room_id %}" class="room-image-link">
+        {% if room.image %}
+            <img src="{{ room.image.url }}" alt="{{ room.name }}" class="room-image">
+        {% else %}
+            <div class="room-placeholder">🏠</div>
+        {% endif %}
+    </a>
+
+    <div class="room-body">
+        <div class="room-title-row">
+            <h3>{{ room.name }}</h3>
+
+            <span class="status-badge status-{{ room.status|default:'available' }}">
+                {{ room.get_status_display }}
+            </span>
+        </div>
+
+        <div class="room-description">
+            {% if room.description %}
+                {{ room.description }}
+            {% else %}
+                Chưa có mô tả cho phòng chiếu này.
+            {% endif %}
+        </div>
+
+        <div class="room-footer">
+            {% if room.price_per_30min %}
+                <p class="price">{{ room.price_per_30min }}đ / 30 phút</p>
+            {% endif %}
+
+            <div class="card-actions">
+                <a href="{% url 'room_detail' room.room_id %}" class="btn btn-soft">
+                    Chi tiết
+                </a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'handle_booking_with_room' room.room_id %}" class="btn btn-primary">
+                        Chọn phòng
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary">
+                        Đăng nhập để đặt
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</article>

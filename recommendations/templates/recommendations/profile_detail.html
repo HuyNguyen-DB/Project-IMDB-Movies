@@ -1,0 +1,111 @@
+{% extends "recommendations/base.html" %}
+{% load vn_format %}
+
+{% block title %}Thông tin cá nhân{% endblock %}
+
+{% block content %}
+<main class="page">
+    <section class="card profile-hero">
+        <div class="profile-main">
+            <div class="profile-avatar">
+                {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+            </div>
+
+            <div>
+                <h1 class="page-title">{{ user.get_full_name|default:user.username }}</h1>
+                <p class="page-subtitle">{{ user.email|default:"Chưa có email liên hệ" }}</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary">✏️ Chỉnh sửa thông tin</a>
+            <a href="{% url 'password_change' %}" class="btn btn-soft">🔐 Đổi mật khẩu</a>
+        </div>
+    </section>
+
+    <div class="grid-2 section">
+        <section class="card">
+            <h2>👤 Thông tin cá nhân</h2>
+
+            <div class="info-row">
+                <span class="info-label">Họ tên</span>
+                <span class="info-value">{{ user.get_full_name|default:"Chưa cập nhật" }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Tên đăng nhập</span>
+                <span class="info-value">{{ user.username }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Email liên hệ</span>
+                <span class="info-value">{{ user.email|default:"Chưa cập nhật" }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Số điện thoại</span>
+                <span class="info-value">
+                    {% if profile and profile.phone_number %}
+                        {{ profile.phone_number }}
+                    {% else %}
+                        Chưa cập nhật
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Ngày sinh</span>
+                <span class="info-value">
+                    {% if profile and profile.date_of_birth %}
+                        {{ profile.date_of_birth|vn_date }}
+                    {% else %}
+                        Chưa cập nhật
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Ngày tham gia</span>
+                <span class="info-value">{{ user.date_joined|vn_datetime }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Lần đăng nhập gần nhất</span>
+                <span class="info-value">
+                    {% if user.last_login %}
+                        {{ user.last_login|vn_datetime }}
+                    {% else %}
+                        Chưa có
+                    {% endif %}
+                </span>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>📊 Thống kê tài khoản</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span>Tổng đơn đặt</span>
+                    <strong>{{ profile_stats.total_bookings }}</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Đã thanh toán</span>
+                    <strong>{{ profile_stats.paid_bookings }}</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Chưa thanh toán</span>
+                    <strong>{{ profile_stats.unpaid_bookings }}</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Hóa đơn</span>
+                    <strong>{{ profile_stats.total_invoices }}</strong>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

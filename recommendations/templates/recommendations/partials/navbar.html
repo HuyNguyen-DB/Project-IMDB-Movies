@@ -1,0 +1,47 @@
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <a href="{% url 'home' %}" class="logo-box" aria-label="Movie Webapp">
+                <span class="logo-icon">🎬</span>
+                <span class="logo-text">
+                    <strong>Movie Webapp</strong>
+                    <span>Đề xuất phim & đặt phòng</span>
+                </span>
+            </a>
+
+            <div class="nav-links">
+                <a href="{% url 'home' %}">
+                    <button type="button">Trang chủ</button>
+                </a>
+
+                <a href="{% url 'movie_list' %}">
+                    <button type="button">Danh sách phim</button>
+                </a>
+
+                <a href="{% url 'room_list' %}">
+                    <button type="button">Phòng chiếu</button>
+                </a>
+
+                <a href="{% url 'recommend' %}">
+                    <button type="button">🤖 Gợi ý AI</button>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            {% if user.is_authenticated %}
+                {% include "recommendations/partials/user_dropdown.html" %}
+            {% else %}
+                <div class="guest-actions">
+                    <a href="{% url 'login' %}">
+                        <button type="button" class="btn btn-primary">Đăng nhập</button>
+                    </a>
+
+                    <a href="{% url 'signup' %}">
+                        <button type="button" class="btn btn-soft">Đăng ký</button>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>

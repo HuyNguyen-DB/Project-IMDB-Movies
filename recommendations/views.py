@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.forms import AuthenticationForm
 
 from datetime import timedelta
 import math
@@ -26,7 +27,6 @@ from .models import (
 )
 
 from .forms import (
-    EmailLoginForm,
     BookMovieForm,
     CustomUserCreationForm,
     UserProfileUpdateForm,
@@ -132,8 +132,6 @@ def create_or_get_invoice(booking):
 # =========================================================
 
 def home(request):
-    recommendations = []
-
     movies = list(
         Movie.objects.values(
             "tconst",
@@ -179,17 +177,11 @@ def home(request):
 
     screen_rooms = screen_rooms[:6]
 
-    if request.method == "POST":
-        user_genres = request.POST.get("genres", "").strip()
-        user_title = request.POST.get("title", "").strip()
-        recommendations = recommend(request, user_genres, user_title)
-
     return render(
         request,
         "recommendations/home.html",
         {
             "movies": movies,
-            "recommendations": recommendations,
             "screen_rooms": screen_rooms,
             "featured_movie_count": len(movies),
             "featured_room_count": len(screen_rooms),
@@ -248,10 +240,12 @@ def signup(request):
 
         if form.is_valid():
             form.save()
+
             messages.success(
                 request,
                 "Đăng ký tài khoản thành công. Bạn có thể đăng nhập ngay bây giờ."
             )
+
             return redirect("login")
     else:
         form = CustomUserCreationForm()
@@ -277,14 +271,14 @@ class CustomLoginView(LoginView):
 
 def custom_login(request):
     if request.method == "POST":
-        form = EmailLoginForm(request, data=request.POST)
+        form = AuthenticationForm(request, data=request.POST)
 
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             return redirect("home")
     else:
-        form = EmailLoginForm()
+        form = AuthenticationForm()
 
     return render(
         request,
@@ -366,7 +360,6 @@ def edit_profile(request):
 
 @login_required
 def user_home(request):
-    recommendations = []
     now = timezone.now()
 
     BookedMovie.objects.filter(
@@ -377,11 +370,6 @@ def user_home(request):
     ).update(
         booking_status="expired"
     )
-
-    if request.method == "POST":
-        user_genres = request.POST.get("genres", "").strip()
-        user_title = request.POST.get("title", "").strip()
-        recommendations = recommend(request, user_genres, user_title)
 
     booked_movies = list(
         BookedMovie.objects
@@ -481,8 +469,6 @@ def user_home(request):
         request,
         "recommendations/user_home.html",
         {
-            "recommendations": recommendations,
-
             "paid_movies": paid_page_obj,
             "unpaid_movies": unpaid_page_obj,
             "cancelled_expired_movies": expired_page_obj,
@@ -594,8 +580,8 @@ def recommend_page(request):
     recommendations = []
 
     if request.method == "POST":
-        user_genres = request.POST.get("genres")
-        user_title = request.POST.get("title")
+        user_genres = request.POST.get("genres", "").strip()
+        user_title = request.POST.get("title", "").strip()
 
     if not user_genres and not user_title:
         if request.user.is_authenticated:
@@ -670,6 +656,7 @@ def build_user_genres_from_history(user):
     for booking in booked_movies:
         if booking.movie and booking.movie.genres:
             parts = booking.movie.genres.lower().split(",")
+
             genres.extend([
                 genre.strip()
                 for genre in parts
@@ -811,7 +798,10 @@ def book_movie(request):
     base_duration = round_to_30_minutes(runtime)
 
     if request.method == "POST":
-        extra_time = int(request.POST.get("extra_time", 0))
+        try:
+            extra_time = int(request.POST.get("extra_time", 0))
+        except (TypeError, ValueError):
+            extra_time = 0
     else:
         extra_time = 0
 

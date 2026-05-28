@@ -2,7 +2,6 @@ from django import forms
 from .models import BookedMovie, UserProfile
 from django.forms import DateTimeInput
 
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -16,20 +15,6 @@ class BookMovieForm(forms.ModelForm):
     class Meta:
         model = BookedMovie
         fields = ['booking_date']
-
-
-class EmailLoginForm(AuthenticationForm):
-    username = forms.EmailField(label="Email", max_length=254)
-
-    def clean_username(self):
-        email = self.cleaned_data.get("username")
-
-        try:
-            User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise forms.ValidationError("Không tìm thấy tài khoản với email này.")
-
-        return email
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -55,7 +40,7 @@ class CustomUserCreationForm(UserCreationForm):
         label="Email",
         required=True,
         widget=forms.EmailInput(attrs={
-            "placeholder": "Nhập email đăng nhập"
+            "placeholder": "Nhập email liên hệ"
         })
     )
 
@@ -94,39 +79,38 @@ class CustomUserCreationForm(UserCreationForm):
 
         self.fields["username"].label = "Tên đăng nhập"
         self.fields["username"].help_text = (
-            "Tên đăng nhập tối đa 150 ký tự. Chỉ gồm chữ cái, số và @ . + - _"
+            "Tên đăng nhập dùng để đăng nhập vào hệ thống. "
+            "Tối đa 150 ký tự. Chỉ gồm chữ cái, số và @ . + - _"
         )
 
         self.fields["first_name"].help_text = "Nhập họ của bạn."
         self.fields["last_name"].help_text = "Nhập tên của bạn."
-        self.fields["email"].help_text = "Email này sẽ được dùng để đăng nhập vào hệ thống."
-        self.fields["phone_number"].help_text = "Số điện thoại dùng để liên hệ khi cần xác nhận đơn đặt phim."
-        self.fields["date_of_birth"].help_text = "Ngày sinh giúp hệ thống quản lý thông tin tài khoản rõ ràng hơn."
-
-        self.fields["password1"].label = "Mật khẩu"
-        self.fields["password1"].help_text = (
-            "Mật khẩu phải có ít nhất 8 ký tự, không quá đơn giản và không chỉ gồm số."
+        self.fields["email"].help_text = (
+            "Email dùng để liên hệ và nhận thông tin tài khoản khi cần."
         )
-
-        self.fields["password2"].label = "Nhập lại mật khẩu"
-        self.fields["password2"].help_text = (
-            "Nhập lại mật khẩu giống phía trên để xác nhận."
+        self.fields["phone_number"].help_text = (
+            "Số điện thoại dùng để liên hệ khi cần xác nhận đơn đặt phim."
+        )
+        self.fields["date_of_birth"].help_text = (
+            "Ngày sinh giúp hệ thống quản lý thông tin tài khoản rõ ràng hơn."
         )
 
         self.fields["username"].widget.attrs.update({
             "placeholder": "Ví dụ: khang123"
         })
 
+        self.fields["password1"].label = "Mật khẩu"
         self.fields["password1"].widget.attrs.update({
             "placeholder": "Nhập mật khẩu"
         })
 
+        self.fields["password2"].label = "Nhập lại mật khẩu"
         self.fields["password2"].widget.attrs.update({
             "placeholder": "Nhập lại mật khẩu"
         })
 
     def clean_email(self):
-        email = self.cleaned_data.get("email")
+        email = self.cleaned_data.get("email", "").strip()
 
         if email and User.objects.filter(email=email).exists():
             raise forms.ValidationError("Email này đã được sử dụng.")
@@ -135,6 +119,9 @@ class CustomUserCreationForm(UserCreationForm):
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get("phone_number", "").strip()
+
+        if not phone_number:
+            raise forms.ValidationError("Vui lòng nhập số điện thoại.")
 
         if not phone_number.isdigit():
             raise forms.ValidationError("Số điện thoại chỉ được chứa chữ số.")
@@ -189,7 +176,7 @@ class UserProfileUpdateForm(forms.Form):
         label="Email",
         required=True,
         widget=forms.EmailInput(attrs={
-            "placeholder": "Nhập email"
+            "placeholder": "Nhập email liên hệ"
         })
     )
 
