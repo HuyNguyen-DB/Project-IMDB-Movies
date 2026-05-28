@@ -154,10 +154,6 @@
    - Làm card phòng lớn hơn so với grid-auto mặc định
    ========================================================= */
 
-/* -------------------------
-   3.1. Header trang danh sách phòng
-   ------------------------- */
-
 .room-list-header{
     padding-top:38px;
     padding-bottom:10px;
@@ -166,10 +162,6 @@
 .room-list-page{
     padding-top:20px;
 }
-
-/* -------------------------
-   3.2. Khoảng cách giữa các nhóm phòng
-   ------------------------- */
 
 .room-section{
     margin-top:42px;
@@ -187,23 +179,12 @@
     font-size:28px;
 }
 
-/* -------------------------
-   3.3. Grid riêng cho room card
-   - Màn hình lớn: 3 card / hàng để card rộng hơn
-   - Màn hình vừa: 2 card / hàng
-   - Mobile: 1 card / hàng
-   ------------------------- */
-
 .room-list-grid{
     display:grid;
     grid-template-columns:repeat(3, minmax(0, 1fr));
     gap:24px;
     align-items:stretch;
 }
-
-/* -------------------------
-   3.4. Tăng kích thước card phòng ở trang /rooms/
-   ------------------------- */
 
 .room-list-grid .room-card{
     min-height:440px;
@@ -304,7 +285,154 @@ textarea{
 
 
 /* =========================================================
-   5. AUTH PAGES
+   5. DATE INPUT UI
+   - Dùng cho các ô chọn ngày như ngày sinh
+   - Giữ input type="date" để vẫn có lịch chọn ngày
+   - Hiển thị chữ tiếng Việt: ngày/tháng/năm
+   ========================================================= */
+
+.date-input-wrapper{
+    position:relative;
+    width:100%;
+}
+
+.date-input-wrapper .date-input{
+    width:100%;
+    padding-right:46px;
+}
+
+.date-input-wrapper .date-input::-webkit-datetime-edit{
+    color:transparent;
+}
+
+.date-input-wrapper .date-input:focus::-webkit-datetime-edit,
+.date-input-wrapper .date-input:valid::-webkit-datetime-edit{
+    color:#ffffff;
+}
+
+.date-placeholder{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#9ca3af;
+    font-size:15px;
+    pointer-events:none;
+    transition:opacity .18s ease;
+}
+
+.date-input-wrapper:focus-within .date-placeholder,
+.date-input-wrapper.has-value .date-placeholder,
+.date-input-wrapper:has(.date-input:valid) .date-placeholder{
+    opacity:0;
+}
+
+.date-calendar-icon{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:16px;
+    opacity:.85;
+    pointer-events:none;
+}
+
+.date-input-wrapper .date-input::-webkit-calendar-picker-indicator{
+    cursor:pointer;
+    opacity:0;
+    width:34px;
+    height:34px;
+    position:absolute;
+    right:6px;
+}
+
+
+/* =========================================================
+   6. DATETIME INPUT UI
+   - Dùng cho input chọn ngày + giờ ở trang đặt phim
+   - Input thật vẫn là type="datetime-local"
+   - Hiển thị tiếng Việt: ngày/tháng/năm giờ:phút
+   ========================================================= */
+
+.datetime-input-wrapper{
+    position:relative;
+    width:100%;
+}
+
+.datetime-input-wrapper .datetime-input{
+    width:100%;
+    padding-right:48px;
+}
+
+.datetime-input-wrapper .datetime-input::-webkit-datetime-edit{
+    color:transparent;
+}
+
+.datetime-input-wrapper .datetime-input:focus::-webkit-datetime-edit,
+.datetime-input-wrapper .datetime-input:valid::-webkit-datetime-edit{
+    color:#ffffff;
+}
+
+.datetime-placeholder{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#9ca3af;
+    font-size:15px;
+    pointer-events:none;
+    transition:opacity .18s ease;
+}
+
+.datetime-input-wrapper:focus-within .datetime-placeholder,
+.datetime-input-wrapper.has-value .datetime-placeholder,
+.datetime-input-wrapper:has(.datetime-input:valid) .datetime-placeholder{
+    opacity:0;
+}
+
+.datetime-calendar-icon{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:16px;
+    opacity:.9;
+    pointer-events:none;
+}
+
+.datetime-input-wrapper .datetime-input::-webkit-calendar-picker-indicator{
+    cursor:pointer;
+    opacity:0;
+    width:36px;
+    height:36px;
+    position:absolute;
+    right:6px;
+}
+
+
+/* =========================================================
+   7. BOOK MOVIE PAGE
+   - Style riêng cho trang đặt phim
+   - Làm phần tóm tắt phim gọn và rõ ràng hơn
+   ========================================================= */
+
+.booking-movie-summary{
+    grid-template-columns:180px 1fr;
+}
+
+.booking-movie-poster{
+    height:260px;
+}
+
+.booking-movie-poster img{
+    height:260px;
+    width:100%;
+    object-fit:cover;
+}
+
+
+/* =========================================================
+   8. AUTH PAGES
    - Login, signup và các trang form tài khoản
    ========================================================= */
 
@@ -369,7 +497,7 @@ textarea{
 
 
 /* =========================================================
-   6. PROFILE PAGES
+   9. PROFILE PAGES
    - Trang thông tin cá nhân, chỉnh sửa profile
    ========================================================= */
 
@@ -447,7 +575,7 @@ textarea{
 
 
 /* =========================================================
-   7. PAGE COMMON
+   10. PAGE COMMON
    - Style dùng chung cho nhiều trang
    ========================================================= */
 
@@ -554,7 +682,7 @@ textarea{
 
 
 /* =========================================================
-   8. GENRE / AI RECOMMENDATION
+   11. GENRE / AI RECOMMENDATION
    - Trang chọn thể loại và gợi ý AI
    ========================================================= */
 
@@ -585,7 +713,7 @@ textarea{
 
 
 /* =========================================================
-   9. PAGINATION / TOP ACTIONS
+   12. PAGINATION / TOP ACTIONS
    - Phân trang và cụm nút hành động phía trên
    ========================================================= */
 
@@ -623,7 +751,7 @@ textarea{
 
 
 /* =========================================================
-   10. DESKTOP GRID TUNING
+   13. DESKTOP GRID TUNING
    - Tối ưu số cột ở màn hình lớn
    ========================================================= */
 
@@ -639,7 +767,7 @@ textarea{
 
 
 /* =========================================================
-   11. RESPONSIVE TABLET
+   14. RESPONSIVE TABLET
    - Tối ưu cho màn hình vừa
    ========================================================= */
 
@@ -672,7 +800,7 @@ textarea{
 
 
 /* =========================================================
-   12. RESPONSIVE MOBILE
+   15. RESPONSIVE MOBILE
    - Tối ưu cho điện thoại
    ========================================================= */
 
@@ -724,6 +852,20 @@ textarea{
     .room-grid,
     .grid-auto{
         grid-template-columns:1fr;
+    }
+
+    .booking-movie-summary{
+        grid-template-columns:1fr;
+    }
+
+    .booking-movie-poster,
+    .booking-movie-poster img{
+        height:320px;
+    }
+
+    .date-placeholder,
+    .datetime-placeholder{
+        font-size:14px;
     }
 }
 

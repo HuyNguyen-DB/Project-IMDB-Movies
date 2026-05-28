@@ -1,31 +1,205 @@
 {% extends "recommendations/base.html" %}
+
 {% block title %}Đăng ký tài khoản{% endblock %}
+
 {% block content %}
+
+{% comment %}
+=========================================================
+1. SIGNUP PAGE LAYOUT
+- Trang đăng ký tài khoản người dùng
+- Email chỉ dùng làm thông tin liên hệ
+- Đăng nhập bằng tên đăng nhập và mật khẩu
+=========================================================
+{% endcomment %}
+
 <main class="auth-page">
     <div class="auth-grid">
+
+        {% comment %}
+        =========================
+        1.1. LEFT INTRO PANEL
+        =========================
+        {% endcomment %}
+
         <section class="auth-panel">
             <span class="hero-kicker">Tạo tài khoản</span>
+
             <h1>Tham gia Movie Webapp</h1>
-            <p>Tạo tài khoản để nhận gợi ý phim, đặt phòng chiếu và quản lý lịch sử đặt phim của bạn. Email chỉ dùng làm thông tin liên hệ, đăng nhập vẫn sử dụng tên đăng nhập và mật khẩu.</p>
+
+            <p>
+                Tạo tài khoản để nhận gợi ý phim, đặt phòng chiếu và quản lý lịch sử đặt phim của bạn.
+                Email chỉ dùng làm thông tin liên hệ, đăng nhập vẫn sử dụng tên đăng nhập và mật khẩu.
+            </p>
         </section>
+
+
+        {% comment %}
+        =========================
+        1.2. SIGNUP FORM
+        =========================
+        {% endcomment %}
+
         <section class="form-card">
             <h1>Đăng ký</h1>
-            <form method="POST">{% csrf_token %}
-                {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    {{ form.non_field_errors }}
+                {% endif %}
+
                 <div class="form-grid">
-                    <div class="form-group full"><label for="{{ form.username.id_for_label }}">Tên đăng nhập</label>{{ form.username.errors }}{{ form.username }}{% if form.username.help_text %}<span class="helptext">{{ form.username.help_text|safe }}</span>{% endif %}</div>
-                    <div class="form-group"><label for="{{ form.first_name.id_for_label }}">Họ</label>{{ form.first_name.errors }}{{ form.first_name }}{% if form.first_name.help_text %}<span class="helptext">{{ form.first_name.help_text|safe }}</span>{% endif %}</div>
-                    <div class="form-group"><label for="{{ form.last_name.id_for_label }}">Tên</label>{{ form.last_name.errors }}{{ form.last_name }}{% if form.last_name.help_text %}<span class="helptext">{{ form.last_name.help_text|safe }}</span>{% endif %}</div>
-                    <div class="form-group full"><label for="{{ form.email.id_for_label }}">Email liên hệ</label>{{ form.email.errors }}{{ form.email }}{% if form.email.help_text %}<span class="helptext">{{ form.email.help_text|safe }}</span>{% endif %}</div>
-                    <div class="form-group"><label for="{{ form.phone_number.id_for_label }}">Số điện thoại</label>{{ form.phone_number.errors }}{{ form.phone_number }}{% if form.phone_number.help_text %}<span class="helptext">{{ form.phone_number.help_text|safe }}</span>{% endif %}</div>
-                    <div class="form-group"><label for="{{ form.date_of_birth.id_for_label }}">Ngày sinh</label>{{ form.date_of_birth.errors }}{{ form.date_of_birth }}{% if form.date_of_birth.help_text %}<span class="helptext">{{ form.date_of_birth.help_text|safe }}</span>{% endif %}</div>
-                    <div class="form-group"><label for="{{ form.password1.id_for_label }}">Mật khẩu</label>{{ form.password1.errors }}{{ form.password1 }}{% if form.password1.help_text %}<span class="helptext">{{ form.password1.help_text|safe }}</span>{% endif %}</div>
-                    <div class="form-group"><label for="{{ form.password2.id_for_label }}">Nhập lại mật khẩu</label>{{ form.password2.errors }}{{ form.password2 }}{% if form.password2.help_text %}<span class="helptext">{{ form.password2.help_text|safe }}</span>{% endif %}</div>
+
+                    {% comment %}
+                    -------------------------
+                    Tên đăng nhập
+                    -------------------------
+                    {% endcomment %}
+
+                    <div class="form-group full">
+                        <label for="{{ form.username.id_for_label }}">Tên đăng nhập</label>
+                        {{ form.username.errors }}
+                        {{ form.username }}
+
+                        {% if form.username.help_text %}
+                            <span class="helptext">{{ form.username.help_text|safe }}</span>
+                        {% endif %}
+                    </div>
+
+
+                    {% comment %}
+                    -------------------------
+                    Họ và tên
+                    -------------------------
+                    {% endcomment %}
+
+                    <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}">Họ</label>
+                        {{ form.first_name.errors }}
+                        {{ form.first_name }}
+
+                        {% if form.first_name.help_text %}
+                            <span class="helptext">{{ form.first_name.help_text|safe }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}">Tên</label>
+                        {{ form.last_name.errors }}
+                        {{ form.last_name }}
+
+                        {% if form.last_name.help_text %}
+                            <span class="helptext">{{ form.last_name.help_text|safe }}</span>
+                        {% endif %}
+                    </div>
+
+
+                    {% comment %}
+                    -------------------------
+                    Email liên hệ
+                    -------------------------
+                    {% endcomment %}
+
+                    <div class="form-group full">
+                        <label for="{{ form.email.id_for_label }}">Email liên hệ</label>
+                        {{ form.email.errors }}
+                        {{ form.email }}
+
+                        {% if form.email.help_text %}
+                            <span class="helptext">{{ form.email.help_text|safe }}</span>
+                        {% endif %}
+                    </div>
+
+
+                    {% comment %}
+                    -------------------------
+                    Số điện thoại và ngày sinh
+                    -------------------------
+                    {% endcomment %}
+
+                    <div class="form-group">
+                        <label for="{{ form.phone_number.id_for_label }}">Số điện thoại</label>
+                        {{ form.phone_number.errors }}
+                        {{ form.phone_number }}
+
+                        {% if form.phone_number.help_text %}
+                            <span class="helptext">{{ form.phone_number.help_text|safe }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% comment %}
+                    -------------------------
+                    Ngày sinh
+                    - Bọc input date để hiển thị chữ "ngày/tháng/năm"
+                    - Icon lịch chỉ là icon giao diện, input vẫn dùng lịch mặc định của trình duyệt
+                    -------------------------
+                    {% endcomment %}
+
+                    <div class="form-group">
+                        <label for="{{ form.date_of_birth.id_for_label }}">Ngày sinh</label>
+
+                        {{ form.date_of_birth.errors }}
+
+                        <div class="date-input-wrapper">
+                            {{ form.date_of_birth }}
+                            <span class="date-placeholder">ngày/tháng/năm</span>
+                            <span class="date-calendar-icon">📅</span>
+                        </div>
+
+                        {% if form.date_of_birth.help_text %}
+                            <span class="helptext">{{ form.date_of_birth.help_text|safe }}</span>
+                        {% endif %}
+                    </div>
+
+
+                    {% comment %}
+                    -------------------------
+                    Mật khẩu
+                    - Không hiển thị help_text/rule mật khẩu
+                    -------------------------
+                    {% endcomment %}
+
+                    <div class="form-group">
+                        <label for="{{ form.password1.id_for_label }}">Mật khẩu</label>
+                        {{ form.password1.errors }}
+                        {{ form.password1 }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password2.id_for_label }}">Nhập lại mật khẩu</label>
+                        {{ form.password2.errors }}
+                        {{ form.password2 }}
+                    </div>
+
                 </div>
-                <div class="actions"><a href="{% url 'home' %}" class="btn btn-soft">Về trang chủ</a><button type="submit" class="btn btn-primary">Tạo tài khoản</button></div>
+
+
+                {% comment %}
+                =========================
+                1.3. FORM ACTIONS
+                =========================
+                {% endcomment %}
+
+                <div class="actions">
+                    <a href="{% url 'home' %}" class="btn btn-soft">
+                        Về trang chủ
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        Tạo tài khoản
+                    </button>
+                </div>
             </form>
-            <p class="muted">Đã có tài khoản? <a href="{% url 'login' %}" style="color:#22c55e;">Đăng nhập</a></p>
+
+            <p class="muted">
+                Đã có tài khoản?
+                <a href="{% url 'login' %}" style="color:#22c55e;">Đăng nhập</a>
+            </p>
         </section>
+
     </div>
 </main>
+
 {% endblock %}

@@ -1,33 +1,223 @@
 {% extends "recommendations/base.html" %}
-{% block title %}Đặt phim{% endblock %}
-{% block content %}
 {% load vn_format %}
+
+{% block title %}Đặt phim{% endblock %}
+
+{% block content %}
+
+{% comment %}
+=========================================================
+1. BOOKING PAGE
+- Trang xác nhận phim, phòng và chọn thời gian bắt đầu
+=========================================================
+{% endcomment %}
+
 <main class="page">
-    <header class="section-head"><div><h1 class="page-title">Đặt phim</h1><p class="page-subtitle">Kiểm tra thông tin phim, phòng chiếu và chọn thời gian bắt đầu.</p></div></header>
+
+    {% comment %}
+    =========================================================
+    2. PAGE HEADER
+    =========================================================
+    {% endcomment %}
+
+    <header class="section-head">
+        <div>
+            <h1 class="page-title">Đặt phim</h1>
+            <p class="page-subtitle">
+                Kiểm tra thông tin phim, phòng chiếu và chọn thời gian bắt đầu.
+            </p>
+        </div>
+    </header>
+
+
+    {% comment %}
+    =========================================================
+    3. MOVIE + ROOM SUMMARY
+    - Hiển thị thông tin phim và phòng đã chọn
+    =========================================================
+    {% endcomment %}
+
     <div class="summary-layout">
+
+        {% comment %}
+        =========================
+        3.1. Thông tin phim
+        =========================
+        {% endcomment %}
+
         <section class="card">
             <h2>🎬 Thông tin phim</h2>
-            <div class="detail-grid" style="grid-template-columns:180px 1fr;">
-                <div class="detail-image" style="height:260px;">{% if movie.poster_url %}<img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" style="height:260px;">{% else %}<div class="poster-placeholder">🎬</div>{% endif %}</div>
-                <div><h2>{{ movie.primaryTitle }}</h2><p class="muted">{{ movie.genres }}</p><div class="meta-row">{% if movie.startYear %}<span>{{ movie.startYear }}</span>{% endif %}{% if movie.runtimeMinutes %}<span>{{ movie.runtimeMinutes }} phút</span>{% endif %}{% if movie.averageRating %}<span>⭐ {{ movie.averageRating }}</span>{% endif %}</div></div>
+
+            <div class="detail-grid booking-movie-summary">
+                <div class="detail-image booking-movie-poster">
+                    {% if movie.poster_url %}
+                        <img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}">
+                    {% else %}
+                        <div class="poster-placeholder">🎬</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <h2>{{ movie.primaryTitle }}</h2>
+
+                    {% if movie.genres %}
+                        <p class="muted">{{ movie.genres }}</p>
+                    {% endif %}
+
+                    <div class="meta-row">
+                        {% if movie.startYear %}
+                            <span>{{ movie.startYear }}</span>
+                        {% endif %}
+
+                        {% if movie.runtimeMinutes %}
+                            <span>{{ movie.runtimeMinutes }} phút</span>
+                        {% endif %}
+
+                        {% if movie.averageRating %}
+                            <span>⭐ {{ movie.averageRating }}</span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </section>
+
+
+        {% comment %}
+        =========================
+        3.2. Thông tin phòng
+        =========================
+        {% endcomment %}
+
         <section class="card">
             <h2>🏠 Thông tin phòng</h2>
-            <div class="info-row"><span class="info-label">Phòng</span><span class="info-value">{{ room.name }}</span></div>
-            <div class="info-row"><span class="info-label">Trạng thái</span><span class="info-value">{{ room.status }}</span></div>
-            <div class="info-row"><span class="info-label">Giá</span><span class="info-value">{{ room.price_per_30min }}đ / 30 phút</span></div>
+
+            <div class="info-row">
+                <span class="info-label">Phòng</span>
+                <span class="info-value">{{ room.name }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Trạng thái</span>
+                <span class="info-value">
+                    {{ room.get_status_display }}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Giá</span>
+                <span class="info-value">
+                    {{ room.price_per_30min }}đ / 30 phút
+                </span>
+            </div>
         </section>
+
     </div>
+
+
+    {% comment %}
+    =========================================================
+    4. BOOKING FORM
+    - Chọn thời gian bắt đầu
+    - Chọn thêm thời gian nếu muốn
+    - Hiển thị tạm tính
+    =========================================================
+    {% endcomment %}
+
     <section class="card section">
         <h2>🕒 Thời gian và thanh toán</h2>
-        <form method="POST">{% csrf_token %}
-            <div class="form-row"><div class="form-group"><label for="{{ form.booking_date.id_for_label }}">Thời gian bắt đầu</label>{{ form.booking_date }}{{ form.booking_date.errors }}</div><div class="form-group"><label>Thêm thời gian</label><select name="extra_time"><option value="0">Không thêm</option><option value="30">Thêm 30 phút</option><option value="60">Thêm 60 phút</option><option value="90">Thêm 90 phút</option></select></div></div>
-            <div class="info-row"><span class="info-label">Thời lượng cơ bản</span><span class="info-value">{{ base_duration }} phút</span></div>
-            <div class="info-row"><span class="info-label">Thời lượng hiện tại</span><span class="info-value">{{ total_duration }} phút</span></div>
-            <div class="info-row"><span class="info-label">Tạm tính</span><span class="info-value">{{ total_price }}đ</span></div>
-            <div class="actions"><a href="{% url 'room_list' %}" class="btn btn-soft">Chọn lại phòng</a><button type="submit" class="btn btn-primary">Tạo đơn đặt</button></div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-row">
+
+                {% comment %}
+                -------------------------
+                4.1. Thời gian bắt đầu
+                - Input thật vẫn là datetime-local
+                - Placeholder tiếng Việt được tạo bằng span overlay
+                -------------------------
+                {% endcomment %}
+
+                <div class="form-group">
+                    <label for="{{ form.booking_date.id_for_label }}">
+                        Thời gian bắt đầu
+                    </label>
+
+                    <div class="datetime-input-wrapper">
+                        {{ form.booking_date }}
+                        <span class="datetime-placeholder">
+                            ngày/tháng/năm giờ:phút
+                        </span>
+                        <span class="datetime-calendar-icon">
+                            📅
+                        </span>
+                    </div>
+
+                    {{ form.booking_date.errors }}
+                </div>
+
+
+                {% comment %}
+                -------------------------
+                4.2. Thêm thời gian xem phim
+                -------------------------
+                {% endcomment %}
+
+                <div class="form-group">
+                    <label for="extra_time">Thêm thời gian</label>
+
+                    <select name="extra_time" id="extra_time">
+                        <option value="0">Không thêm</option>
+                        <option value="30">Thêm 30 phút</option>
+                        <option value="60">Thêm 60 phút</option>
+                        <option value="90">Thêm 90 phút</option>
+                    </select>
+                </div>
+
+            </div>
+
+
+            {% comment %}
+            =========================================================
+            5. BOOKING PRICE SUMMARY
+            =========================================================
+            {% endcomment %}
+
+            <div class="info-row">
+                <span class="info-label">Thời lượng cơ bản</span>
+                <span class="info-value">{{ base_duration }} phút</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Thời lượng hiện tại</span>
+                <span class="info-value">{{ total_duration }} phút</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Tạm tính</span>
+                <span class="info-value">{{ total_price }}đ</span>
+            </div>
+
+
+            {% comment %}
+            =========================================================
+            6. FORM ACTIONS
+            =========================================================
+            {% endcomment %}
+
+            <div class="actions">
+                <a href="{% url 'room_list' %}" class="btn btn-soft">
+                    Chọn lại phòng
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    Tạo đơn đặt
+                </button>
+            </div>
         </form>
     </section>
+
 </main>
+
 {% endblock %}
