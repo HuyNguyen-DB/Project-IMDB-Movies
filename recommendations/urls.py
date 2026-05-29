@@ -86,6 +86,7 @@ urlpatterns = [
         views.invoice_detail,
         name='invoice_detail'
     ),
+    path("webhook/sepay/", views.sepay_webhook, name="sepay_webhook"),
 
     path("chatbot/", views.chatbot_api, name="chatbot_api"),
 ]
