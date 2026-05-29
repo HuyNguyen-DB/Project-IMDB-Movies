@@ -751,7 +751,388 @@ textarea{
 
 
 /* =========================================================
-   13. DESKTOP GRID TUNING
+   13. PAYMENT PAGE - SEPAY REALTIME UI
+   - Thiết kế lại theo payment_ofhuy.html
+   - Dùng cho payment.html sau refactor base.html
+   ========================================================= */
+
+/* -------------------------
+   13.1. Khung trang thanh toán
+   ------------------------- */
+
+.payment-page{
+    max-width:1300px;
+    margin:0 auto;
+    padding:36px 30px 70px;
+}
+
+.payment-page-header{
+    margin-bottom:24px;
+}
+
+.payment-page-header h1{
+    margin:0 0 10px;
+    color:white;
+    font-size:34px;
+    line-height:1.2;
+}
+
+.payment-page-header p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.7;
+    max-width:850px;
+}
+
+
+/* -------------------------
+   13.2. Layout 2 cột
+   ------------------------- */
+
+.payment-layout{
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:28px;
+    align-items:start;
+}
+
+.payment-panel,
+.payment-summary-panel{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:28px;
+    box-shadow:var(--shadow);
+}
+
+.payment-panel-title{
+    margin:0 0 22px;
+    color:white;
+    font-size:26px;
+}
+
+
+/* -------------------------
+   13.3. Thông tin đơn đặt
+   ------------------------- */
+
+.payment-info-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(220px,1fr));
+    gap:16px;
+}
+
+.payment-info-card{
+    background:var(--surface-2);
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:16px;
+    padding:16px;
+}
+
+.payment-info-label{
+    display:block;
+    color:var(--muted);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    margin-bottom:8px;
+}
+
+.payment-info-value{
+    color:white;
+    font-size:16px;
+    font-weight:700;
+    line-height:1.5;
+}
+
+
+/* -------------------------
+   13.4. Badge trạng thái
+   ------------------------- */
+
+.payment-status-row{
+    margin-top:18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.payment-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:800;
+    border:1px solid transparent;
+    white-space:nowrap;
+}
+
+.payment-badge-pending_payment,
+.payment-badge-unpaid{
+    background:rgba(250,204,21,.12);
+    color:#fde68a;
+    border-color:rgba(250,204,21,.22);
+}
+
+.payment-badge-confirmed,
+.payment-badge-in_use,
+.payment-badge-completed,
+.payment-badge-paid{
+    background:rgba(34,197,94,.12);
+    color:#86efac;
+    border-color:rgba(34,197,94,.22);
+}
+
+.payment-badge-cancelled,
+.payment-badge-expired,
+.payment-badge-failed{
+    background:rgba(239,68,68,.12);
+    color:#fca5a5;
+    border-color:rgba(239,68,68,.22);
+}
+
+.payment-badge-refund_pending{
+    background:rgba(59,130,246,.12);
+    color:#93c5fd;
+    border-color:rgba(59,130,246,.22);
+}
+
+.payment-badge-refunded{
+    background:rgba(148,163,184,.12);
+    color:#cbd5e1;
+    border-color:rgba(148,163,184,.22);
+}
+
+
+/* -------------------------
+   13.5. Ghi chú thanh toán
+   ------------------------- */
+
+.payment-note-box{
+    margin-top:18px;
+    background:rgba(34,197,94,.08);
+    border:1px solid rgba(34,197,94,.18);
+    border-radius:16px;
+    padding:16px;
+    color:#d1fae5;
+    line-height:1.7;
+}
+
+
+/* -------------------------
+   13.6. Tóm tắt thanh toán
+   ------------------------- */
+
+.payment-summary-box{
+    background:var(--surface-2);
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:18px;
+    padding:22px;
+}
+
+.payment-summary-row{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.payment-summary-row:last-child{
+    border-bottom:none;
+    padding-bottom:0;
+}
+
+.payment-summary-row span{
+    color:var(--muted);
+}
+
+.payment-summary-row strong{
+    color:white;
+    text-align:right;
+}
+
+.payment-total-row strong{
+    font-size:26px;
+    color:#22c55e;
+}
+
+
+/* -------------------------
+   13.7. QR thanh toán
+   ------------------------- */
+
+.payment-qr-box{
+    margin-top:20px;
+    text-align:center;
+    background:var(--surface-2);
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:18px;
+    padding:22px;
+}
+
+.payment-qr-box h3{
+    margin:0 0 16px;
+    color:white;
+}
+
+.payment-qr-image-wrap{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:white;
+    padding:12px;
+    border-radius:18px;
+}
+
+.payment-qr-image-wrap img{
+    width:280px;
+    max-width:100%;
+    display:block;
+    border-radius:12px;
+}
+
+.payment-bank-info{
+    margin-top:18px;
+    color:var(--muted);
+    line-height:1.7;
+}
+
+.payment-bank-info p{
+    margin:6px 0;
+}
+
+.payment-bank-info strong{
+    color:white;
+}
+
+.payment-transfer-content{
+    color:#22c55e !important;
+    font-size:18px;
+    letter-spacing:.4px;
+}
+
+
+/* -------------------------
+   13.8. Box chờ xác nhận thanh toán
+   ------------------------- */
+
+.payment-status-message{
+    margin-top:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    padding:16px;
+    border-radius:16px;
+    background:rgba(59,130,246,.08);
+    border:1px solid rgba(59,130,246,.18);
+    color:#bfdbfe;
+    text-align:left;
+}
+
+.payment-status-message strong{
+    display:block;
+    margin-bottom:4px;
+    color:inherit;
+}
+
+.payment-status-message p{
+    margin:0;
+    color:inherit;
+    opacity:.9;
+    line-height:1.5;
+    font-size:14px;
+}
+
+.payment-status-waiting{
+    background:rgba(59,130,246,.08);
+    border-color:rgba(59,130,246,.18);
+    color:#bfdbfe;
+}
+
+.payment-status-success{
+    background:rgba(34,197,94,.10);
+    border-color:rgba(34,197,94,.22);
+    color:#bbf7d0;
+}
+
+.payment-status-error{
+    background:rgba(239,68,68,.10);
+    border-color:rgba(239,68,68,.22);
+    color:#fecaca;
+}
+
+.payment-spinner{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    border:3px solid rgba(255,255,255,.16);
+    border-top-color:#22c55e;
+    animation:paymentSpin 1s linear infinite;
+    flex-shrink:0;
+}
+
+.payment-spinner-done{
+    animation:none;
+    border-color:#22c55e;
+    position:relative;
+}
+
+.payment-spinner-done::after{
+    content:"✓";
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#22c55e;
+    font-weight:900;
+    font-size:16px;
+}
+
+@keyframes paymentSpin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+
+/* -------------------------
+   13.9. Đã thanh toán
+   ------------------------- */
+
+.payment-paid-box{
+    margin-top:20px;
+    background:rgba(34,197,94,.08);
+    border:1px solid rgba(34,197,94,.18);
+    border-radius:16px;
+    padding:18px;
+}
+
+.payment-paid-box p{
+    margin:0 0 14px;
+    color:#d1fae5;
+    line-height:1.6;
+}
+
+
+/* -------------------------
+   13.10. Nút phụ
+   ------------------------- */
+
+.payment-secondary-actions{
+    margin-top:18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+
+/* =========================================================
+   14. DESKTOP GRID TUNING
    - Tối ưu số cột ở màn hình lớn
    ========================================================= */
 
@@ -767,7 +1148,7 @@ textarea{
 
 
 /* =========================================================
-   14. RESPONSIVE TABLET
+   15. RESPONSIVE TABLET
    - Tối ưu cho màn hình vừa
    ========================================================= */
 
@@ -778,6 +1159,12 @@ textarea{
 
     .room-list-grid .room-image-link{
         height:220px;
+    }
+}
+
+@media(max-width:1024px){
+    .payment-layout{
+        grid-template-columns:1fr;
     }
 }
 
@@ -800,9 +1187,41 @@ textarea{
 
 
 /* =========================================================
-   15. RESPONSIVE MOBILE
+   16. RESPONSIVE MOBILE
    - Tối ưu cho điện thoại
    ========================================================= */
+
+@media(max-width:768px){
+    .payment-page{
+        padding:28px 18px 50px;
+    }
+
+    .payment-page-header h1{
+        font-size:28px;
+    }
+
+    .payment-panel,
+    .payment-summary-panel{
+        padding:22px;
+    }
+
+    .payment-info-grid{
+        grid-template-columns:1fr;
+    }
+
+    .payment-summary-row{
+        flex-direction:column;
+        gap:4px;
+    }
+
+    .payment-summary-row strong{
+        text-align:left;
+    }
+
+    .payment-status-message{
+        align-items:flex-start;
+    }
+}
 
 @media(max-width:720px){
     .hero-section{
@@ -889,77 +1308,5 @@ textarea{
 
     .room-section-head h2{
         font-size:24px;
-    }
-}
-/* =========================================================
-   PAYMENT PAGE
-   - Giao diện thanh toán realtime qua SePay
-   ========================================================= */
-
-.payment-card{
-    text-align:center;
-}
-
-.payment-note-box{
-    margin:18px auto;
-    padding:14px 16px;
-    border-radius:16px;
-    border:1px solid rgba(34,197,94,.28);
-    background:rgba(34,197,94,.10);
-    max-width:420px;
-}
-
-.payment-note-box p{
-    margin:0 0 6px;
-    color:var(--muted);
-    font-size:14px;
-}
-
-.payment-note-box strong{
-    color:#86efac;
-    font-size:20px;
-    letter-spacing:.5px;
-}
-
-.payment-waiting-box{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:14px;
-    margin:18px auto;
-    padding:16px;
-    border-radius:16px;
-    background:var(--surface-2);
-    border:1px solid var(--line);
-    max-width:460px;
-    text-align:left;
-}
-
-.payment-waiting-box strong{
-    color:white;
-    display:block;
-    margin-bottom:4px;
-}
-
-.payment-waiting-box p{
-    margin:0;
-    color:var(--muted);
-    line-height:1.5;
-    font-size:14px;
-}
-
-.payment-spinner{
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    border:3px solid rgba(255,255,255,.16);
-    border-top-color:#22c55e;
-    animation:paymentSpin 1s linear infinite;
-    flex-shrink:0;
-}
-
-@keyframes paymentSpin{
-    to{
-        transform:rotate(360deg);
     }
 }

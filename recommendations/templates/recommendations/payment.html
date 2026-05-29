@@ -8,149 +8,343 @@
 {% comment %}
 =========================================================
 1. PAYMENT PAGE
-- Trang thanh toán theo hướng realtime qua SePay
-- Không còn nút xác nhận thanh toán thủ công
-- Hệ thống tự kiểm tra trạng thái thanh toán định kỳ
+- Giao diện thanh toán theo phong cách payment_ofhuy.html
+- Vẫn dùng base.html, navbar chung, CSS chung của project
+- Luồng thanh toán:
+  + Hiển thị thông tin đơn đặt
+  + Hiển thị QR chuyển khoản
+  + Tự động kiểm tra trạng thái thanh toán mỗi 5 giây
+  + Khi paid thì tự chuyển sang hóa đơn
 =========================================================
 {% endcomment %}
 
-<main class="page">
+<main class="payment-page">
 
     {% comment %}
     =========================================================
     2. PAGE HEADER
+    - Tiêu đề trang thanh toán
     =========================================================
     {% endcomment %}
 
-    <header class="section-head">
-        <div>
-            <h1 class="page-title">Thanh toán đơn đặt phim</h1>
-            <p class="page-subtitle">
-                Quét mã VietQR bên dưới và chuyển khoản đúng nội dung để hệ thống tự động xác nhận.
-            </p>
-        </div>
+    <header class="payment-page-header">
+        <h1>💳 Thanh toán đơn đặt phim</h1>
+        <p>
+            Kiểm tra thông tin đơn đặt, quét mã VietQR và chuyển khoản đúng nội dung để hệ thống tự động xác nhận thanh toán.
+        </p>
     </header>
 
 
     {% comment %}
     =========================================================
     3. PAYMENT LAYOUT
+    - Cột trái: thông tin đơn đặt phim
+    - Cột phải: tóm tắt thanh toán + mã QR
     =========================================================
     {% endcomment %}
 
-    <div class="summary-layout">
+    <section class="payment-layout">
 
         {% comment %}
         =========================
-        3.1. BOOKING SUMMARY
+        3.1. LEFT PANEL - BOOKING INFO
         =========================
         {% endcomment %}
 
-        <section class="card">
-            <h2>Thông tin đơn đặt</h2>
+        <div class="payment-panel">
+            <h2 class="payment-panel-title">Thông tin đơn đặt phim</h2>
 
-            <div class="info-row">
-                <span class="info-label">Mã đơn</span>
-                <span class="info-value">{{ booking.booking_code }}</span>
-            </div>
+            <div class="payment-info-grid">
 
-            <div class="info-row">
-                <span class="info-label">Phim</span>
-                <span class="info-value">
-                    {% if booking.movie %}
-                        {{ booking.movie.primaryTitle }}
-                    {% else %}
-                        Không rõ phim
-                    {% endif %}
-                </span>
-            </div>
+                {% comment %}
+                -------------------------
+                Mã đơn
+                -------------------------
+                {% endcomment %}
 
-            <div class="info-row">
-                <span class="info-label">Phòng</span>
-                <span class="info-value">{{ booking.room_name }}</span>
-            </div>
-
-            <div class="info-row">
-                <span class="info-label">Thời gian bắt đầu</span>
-                <span class="info-value">{{ booking.booking_date|vn_datetime }}</span>
-            </div>
-
-            {% if booking.booking_end_time %}
-                <div class="info-row">
-                    <span class="info-label">Thời gian kết thúc</span>
-                    <span class="info-value">{{ booking.booking_end_time|vn_datetime }}</span>
+                <div class="payment-info-card">
+                    <span class="payment-info-label">Mã đơn</span>
+                    <div class="payment-info-value">
+                        {{ booking.booking_code }}
+                    </div>
                 </div>
-            {% endif %}
 
-            <div class="info-row">
-                <span class="info-label">Thời lượng</span>
-                <span class="info-value">{{ booking.rental_duration_minutes }} phút</span>
+
+                {% comment %}
+                -------------------------
+                Tên phim
+                -------------------------
+                {% endcomment %}
+
+                <div class="payment-info-card">
+                    <span class="payment-info-label">Tên phim</span>
+                    <div class="payment-info-value">
+                        {% if booking.movie %}
+                            {{ booking.movie.primaryTitle }}
+                        {% else %}
+                            Không rõ phim
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                {% comment %}
+                -------------------------
+                Thể loại phim
+                -------------------------
+                {% endcomment %}
+
+                <div class="payment-info-card">
+                    <span class="payment-info-label">Thể loại</span>
+                    <div class="payment-info-value">
+                        {% if booking.movie and booking.movie.genres %}
+                            {{ booking.movie.genres }}
+                        {% else %}
+                            Chưa cập nhật
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                {% comment %}
+                -------------------------
+                Phòng chiếu
+                -------------------------
+                {% endcomment %}
+
+                <div class="payment-info-card">
+                    <span class="payment-info-label">Phòng chiếu</span>
+                    <div class="payment-info-value">
+                        {{ booking.room_name }}
+                    </div>
+                </div>
+
+
+                {% comment %}
+                -------------------------
+                Thời gian bắt đầu
+                -------------------------
+                {% endcomment %}
+
+                <div class="payment-info-card">
+                    <span class="payment-info-label">Thời gian bắt đầu</span>
+                    <div class="payment-info-value">
+                        {{ booking.booking_date|vn_datetime }}
+                    </div>
+                </div>
+
+
+                {% comment %}
+                -------------------------
+                Thời gian kết thúc
+                -------------------------
+                {% endcomment %}
+
+                <div class="payment-info-card">
+                    <span class="payment-info-label">Thời gian kết thúc</span>
+                    <div class="payment-info-value">
+                        {% if booking.booking_end_time %}
+                            {{ booking.booking_end_time|vn_datetime }}
+                        {% else %}
+                            Chưa cập nhật
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                {% comment %}
+                -------------------------
+                Thời lượng thuê
+                -------------------------
+                {% endcomment %}
+
+                <div class="payment-info-card">
+                    <span class="payment-info-label">Thời lượng thuê</span>
+                    <div class="payment-info-value">
+                        {{ booking.rental_duration_minutes }} phút
+                    </div>
+                </div>
+
+
+                {% comment %}
+                -------------------------
+                Đơn giá
+                -------------------------
+                {% endcomment %}
+
+                <div class="payment-info-card">
+                    <span class="payment-info-label">Đơn giá</span>
+                    <div class="payment-info-value">
+                        {{ booking.price_per_30min }}đ / 30 phút
+                    </div>
+                </div>
+
             </div>
 
-            <div class="info-row">
-                <span class="info-label">Trạng thái đơn</span>
-                <span class="info-value">{{ booking.get_booking_status_display }}</span>
-            </div>
 
-            <div class="info-row">
-                <span class="info-label">Thanh toán</span>
-                <span class="info-value" id="paymentStatusText">
+            {% comment %}
+            =========================================================
+            4. STATUS BADGES
+            - Hiển thị trạng thái đơn và trạng thái thanh toán
+            =========================================================
+            {% endcomment %}
+
+            <div class="payment-status-row">
+                <span class="payment-badge payment-badge-{{ booking.booking_status }}">
+                    {{ booking.get_booking_status_display }}
+                </span>
+
+                <span class="payment-badge payment-badge-{{ booking.payment_status }}" id="paymentStatusBadge">
                     {{ booking.get_payment_status_display }}
                 </span>
             </div>
 
-            <div class="info-row">
-                <span class="info-label">Tổng tiền</span>
-                <span class="info-value">{{ booking.total_price }}đ</span>
+
+            {% comment %}
+            =========================================================
+            5. NOTE BOX
+            - Hướng dẫn người dùng
+            =========================================================
+            {% endcomment %}
+
+            <div class="payment-note-box">
+                Hãy chuyển khoản đúng số tiền và đúng nội dung chuyển khoản. Sau khi SePay xác nhận giao dịch, hệ thống sẽ tự động tạo hóa đơn và chuyển bạn sang trang hóa đơn.
             </div>
-        </section>
+        </div>
 
 
         {% comment %}
         =========================
-        3.2. VIETQR PAYMENT BOX
+        3.2. RIGHT PANEL - PAYMENT SUMMARY
         =========================
         {% endcomment %}
 
-        <section class="card payment-card">
-            <h2>VietQR</h2>
+        <aside class="payment-summary-panel">
+            <h2 class="payment-panel-title">Tóm tắt thanh toán</h2>
 
-            <p class="muted">
-                Vui lòng chuyển khoản đúng số tiền và đúng nội dung bên dưới.
-            </p>
 
-            <div class="qr-box">
-                <img src="{{ vietqr_url }}" alt="Mã VietQR thanh toán">
-            </div>
+            {% comment %}
+            =========================================================
+            6. SUMMARY BOX
+            - Tổng hợp tiền và thông tin chính
+            =========================================================
+            {% endcomment %}
 
-            <div class="payment-note-box">
-                <p>Nội dung chuyển khoản</p>
-                <strong>{{ booking.booking_code }}</strong>
-            </div>
+            <div class="payment-summary-box">
+                <div class="payment-summary-row">
+                    <span>Mã đơn</span>
+                    <strong>{{ booking.booking_code }}</strong>
+                </div>
 
-            <div class="payment-waiting-box" id="paymentWaitingBox">
-                <div class="payment-spinner"></div>
+                <div class="payment-summary-row">
+                    <span>Thời lượng thuê</span>
+                    <strong>{{ booking.rental_duration_minutes }} phút</strong>
+                </div>
 
-                <div>
-                    <strong>Đang chờ thanh toán...</strong>
-                    <p>
-                        Sau khi bạn chuyển khoản thành công, hệ thống sẽ tự động xác nhận và chuyển sang hóa đơn.
-                    </p>
+                <div class="payment-summary-row">
+                    <span>Giá mỗi 30 phút</span>
+                    <strong>{{ booking.price_per_30min }}đ</strong>
+                </div>
+
+                {% if booking.discount_amount %}
+                    <div class="payment-summary-row">
+                        <span>Giảm giá</span>
+                        <strong>{{ booking.discount_amount }}đ</strong>
+                    </div>
+                {% endif %}
+
+                <div class="payment-summary-row payment-total-row">
+                    <span>Tổng thanh toán</span>
+                    <strong>{{ booking.total_price }}đ</strong>
                 </div>
             </div>
 
-            <div class="actions">
+
+            {% comment %}
+            =========================================================
+            7. QR PAYMENT AREA
+            - Nếu chưa thanh toán thì hiển thị QR
+            - Nếu đã thanh toán thì hiển thị nút xem hóa đơn
+            =========================================================
+            {% endcomment %}
+
+            {% if booking.payment_status == "unpaid" %}
+                <div class="payment-qr-box">
+                    <h3>Quét QR để thanh toán</h3>
+
+                    <div class="payment-qr-image-wrap">
+                        <img src="{{ vietqr_url }}" alt="QR thanh toán VietQR">
+                    </div>
+
+                    <div class="payment-bank-info">
+                        <p>
+                            Ngân hàng:
+                            <strong>MB Bank</strong>
+                        </p>
+
+                        <p>
+                            Chủ tài khoản:
+                            <strong>NGUYEN HUY</strong>
+                        </p>
+
+                        <p>
+                            Nội dung:
+                            <strong class="payment-transfer-content">
+                                {{ booking.booking_code }}
+                            </strong>
+                        </p>
+                    </div>
+                </div>
+
+
+                {% comment %}
+                =========================================================
+                8. AUTO PAYMENT STATUS MESSAGE
+                - JS sẽ cập nhật trạng thái ở đây
+                =========================================================
+                {% endcomment %}
+
+                <div id="payment-status-message" class="payment-status-message">
+                    <div class="payment-spinner"></div>
+
+                    <div>
+                        <strong>Đang chờ xác nhận thanh toán...</strong>
+                        <p>Hệ thống tự động kiểm tra giao dịch mỗi 5 giây. Vui lòng không tắt trang.</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="payment-paid-box">
+                    <p>
+                        Đơn này đã được thanh toán thành công. Bạn có thể xem hóa đơn nội bộ ngay bên dưới.
+                    </p>
+
+                    {% if booking.invoice and booking.invoice.invoice_code %}
+                        <a href="{% url 'invoice_detail' booking.invoice.invoice_code %}" class="btn btn-primary">
+                            🧾 Xem hóa đơn
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+
+            {% comment %}
+            =========================================================
+            9. SECONDARY ACTIONS
+            =========================================================
+            {% endcomment %}
+
+            <div class="payment-secondary-actions">
                 <a href="{% url 'user_home' %}" class="btn btn-soft">
-                    Quay lại lịch sử
+                    📜 Lịch sử đặt phim
                 </a>
 
-                <button type="button" class="btn btn-primary" id="checkPaymentNow">
-                    Kiểm tra thanh toán
-                </button>
+                <a href="{% url 'home' %}" class="btn btn-soft">
+                    🏠 Trang chủ
+                </a>
             </div>
-        </section>
+        </aside>
 
-    </div>
+    </section>
 
 </main>
 
@@ -161,99 +355,162 @@
 
 {% comment %}
 =========================================================
-4. PAYMENT STATUS POLLING
-- Gọi API payment_status định kỳ
-- Nếu payment_status = paid thì chuyển sang invoice_detail
+10. PAYMENT STATUS POLLING
+- Gọi API payment_status
+- Nếu paid và có invoice_code thì chuyển sang invoice_detail
 =========================================================
 {% endcomment %}
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const paymentStatusUrl = "{{ payment_check_url }}";
-    const invoiceBaseUrl = "{% url 'invoice_detail' 'INVOICE_CODE_PLACEHOLDER' %}";
-    const statusText = document.getElementById("paymentStatusText");
-    const checkButton = document.getElementById("checkPaymentNow");
-    const waitingBox = document.getElementById("paymentWaitingBox");
+    const paymentStatusEndpoint = "{% url 'payment_status' booking.id %}";
+    const invoiceRedirectPrefix = "{% url 'invoice_detail' 'INVOICE_CODE' %}"
+        .replace("INVOICE_CODE", "")
+        .replace("//", "/");
+
+    const statusMessage = document.getElementById("payment-status-message");
+    const statusBadge = document.getElementById("paymentStatusBadge");
 
     let isRedirecting = false;
 
-    function goToInvoice(invoiceCode) {
+    function updateStatusMessage(text, type = "waiting") {
+        if (!statusMessage) {
+            return;
+        }
+
+        statusMessage.classList.remove(
+            "payment-status-success",
+            "payment-status-error",
+            "payment-status-waiting"
+        );
+
+        if (type === "success") {
+            statusMessage.classList.add("payment-status-success");
+        } else if (type === "error") {
+            statusMessage.classList.add("payment-status-error");
+        } else {
+            statusMessage.classList.add("payment-status-waiting");
+        }
+
+        statusMessage.innerHTML = `
+            <div class="payment-spinner ${type === "success" ? "payment-spinner-done" : ""}"></div>
+            <div>
+                <strong>${text}</strong>
+                <p>${type === "success" ? "Đang chuyển sang hóa đơn..." : "Vui lòng không tắt trang trong quá trình kiểm tra thanh toán."}</p>
+            </div>
+        `;
+    }
+
+    function updatePaymentBadge(paymentStatus) {
+        if (!statusBadge) {
+            return;
+        }
+
+        statusBadge.className = "payment-badge payment-badge-" + paymentStatus;
+
+        if (paymentStatus === "paid") {
+            statusBadge.textContent = "Đã thanh toán";
+        } else if (paymentStatus === "unpaid") {
+            statusBadge.textContent = "Chưa thanh toán";
+        } else if (paymentStatus === "refund_pending") {
+            statusBadge.textContent = "Đang chờ hoàn tiền";
+        } else if (paymentStatus === "refunded") {
+            statusBadge.textContent = "Đã hoàn tiền";
+        } else if (paymentStatus === "failed") {
+            statusBadge.textContent = "Thanh toán thất bại";
+        } else {
+            statusBadge.textContent = paymentStatus || "Chưa cập nhật";
+        }
+    }
+
+    function redirectToInvoice(invoiceCode) {
         if (!invoiceCode || isRedirecting) {
             return;
         }
 
         isRedirecting = true;
 
-        const invoiceUrl = invoiceBaseUrl.replace(
-            "INVOICE_CODE_PLACEHOLDER",
-            invoiceCode
-        );
-
+        const invoiceUrl = invoiceRedirectPrefix + invoiceCode + "/";
         window.location.href = invoiceUrl;
-    }
-
-    function updateStatusLabel(paymentStatus) {
-        if (!statusText) {
-            return;
-        }
-
-        if (paymentStatus === "paid") {
-            statusText.textContent = "Đã thanh toán";
-        } else if (paymentStatus === "unpaid") {
-            statusText.textContent = "Chưa thanh toán";
-        } else if (paymentStatus === "refund_pending") {
-            statusText.textContent = "Đang chờ hoàn tiền";
-        } else if (paymentStatus === "refunded") {
-            statusText.textContent = "Đã hoàn tiền";
-        } else if (paymentStatus === "failed") {
-            statusText.textContent = "Thanh toán thất bại";
-        } else {
-            statusText.textContent = paymentStatus || "Chưa cập nhật";
-        }
     }
 
     async function checkPaymentStatus() {
         try {
-            const response = await fetch(paymentStatusUrl, {
+            const response = await fetch(paymentStatusEndpoint, {
                 method: "GET",
+                credentials: "same-origin",
                 headers: {
+                    "Accept": "application/json",
                     "X-Requested-With": "XMLHttpRequest"
                 }
             });
 
             if (!response.ok) {
+                updateStatusMessage(
+                    "Không thể kiểm tra trạng thái thanh toán.",
+                    "error"
+                );
                 return;
             }
 
             const data = await response.json();
 
-            updateStatusLabel(data.payment_status);
+            updatePaymentBadge(data.payment_status);
 
-            if (data.payment_status === "paid" && data.invoice_code) {
-                if (waitingBox) {
-                    waitingBox.innerHTML = `
-                        <div>
-                            <strong>Thanh toán thành công!</strong>
-                            <p>Đang chuyển sang hóa đơn...</p>
-                        </div>
-                    `;
+            if (data.payment_status === "paid") {
+                if (data.invoice_code) {
+                    updateStatusMessage(
+                        "Thanh toán thành công!",
+                        "success"
+                    );
+
+                    setTimeout(function () {
+                        redirectToInvoice(data.invoice_code);
+                    }, 800);
+
+                    return;
                 }
 
-                goToInvoice(data.invoice_code);
+                updateStatusMessage(
+                    "Thanh toán đã xác nhận. Đang tạo hóa đơn...",
+                    "waiting"
+                );
+
+                setTimeout(checkPaymentStatus, 3000);
+                return;
             }
+
+            if (data.booking_status === "expired") {
+                updateStatusMessage(
+                    "Đơn đặt đã hết hạn vì chưa thanh toán đúng hạn.",
+                    "error"
+                );
+                return;
+            }
+
+            if (data.booking_status === "cancelled") {
+                updateStatusMessage(
+                    "Đơn đặt đã bị hủy, không thể thanh toán.",
+                    "error"
+                );
+                return;
+            }
+
+            updateStatusMessage(
+                "Đang chờ xác nhận thanh toán...",
+                "waiting"
+            );
         } catch (error) {
             console.error("Payment status check failed:", error);
+
+            updateStatusMessage(
+                "Lỗi kết nối khi kiểm tra thanh toán.",
+                "error"
+            );
         }
     }
 
-    if (checkButton) {
-        checkButton.addEventListener("click", checkPaymentStatus);
-    }
-
-    // Kiểm tra ngay khi vào trang
     checkPaymentStatus();
-
-    // Tự động kiểm tra mỗi 5 giây
     setInterval(checkPaymentStatus, 5000);
 });
 </script>
