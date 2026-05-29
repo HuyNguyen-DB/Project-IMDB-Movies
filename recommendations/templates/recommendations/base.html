@@ -18,8 +18,137 @@
     {% include "recommendations/partials/messages.html" %}
 
     {% block content %}{% endblock %}
+    <div class="floating-chatbot">
 
+    <button
+        id="chat-toggle"
+        class="chat-toggle"
+    >
+        💬
+    </button>
+
+    <div
+        id="chat-window"
+        class="chat-window"
+    >
+
+        <div class="chat-header">
+            <div>
+                <strong>Chatbot gợi ý</strong>
+                <p>Hỏi phim, phòng chiếu, gợi ý...</p>
+            </div>
+
+            <button
+                id="close-chat"
+                class="close-chat"
+            >
+                ✕
+            </button>
+        </div>
+
+        <div
+            id="chatbox"
+            class="chat-messages"
+        ></div>
+
+        <div class="chat-input-area">
+
+            <input
+                type="text"
+                id="userInput"
+                placeholder="Nhập câu hỏi..."
+            >
+
+            <button
+                type="button"
+                onclick="sendMessage()"
+            >
+                Gửi
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
     <script src="{% static 'recommendations/js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
+    <script>
+
+const chatToggle =
+    document.getElementById('chat-toggle');
+
+const chatWindow =
+    document.getElementById('chat-window');
+
+const closeChat =
+    document.getElementById('close-chat');
+
+chatToggle?.addEventListener('click',()=>{
+
+    chatWindow.classList.toggle('active');
+});
+
+closeChat?.addEventListener('click',()=>{
+
+    chatWindow.classList.remove('active');
+});
+
+async function sendMessage(){
+
+    const input =
+        document.getElementById("userInput");
+
+    const message =
+        input.value.trim();
+
+    if(!message){
+        return;
+    }
+
+    const chatbox =
+        document.getElementById("chatbox");
+
+    chatbox.innerHTML += `
+        <div class="chat-message chat-user">
+            ${message}
+        </div>
+    `;
+
+    input.value = "";
+
+    chatbox.scrollTop =
+        chatbox.scrollHeight;
+
+    const response = await fetch(
+        "/chatbot/",
+        {
+            method:"POST",
+
+            headers:{
+                "Content-Type":
+                    "application/x-www-form-urlencoded"
+            },
+
+            body:new URLSearchParams({
+                message:message
+            })
+        }
+    );
+
+    const data =
+        await response.json();
+
+    chatbox.innerHTML += `
+        <div class="chat-message chat-bot">
+            ${data.reply}
+        </div>
+    `;
+
+    chatbox.scrollTop =
+        chatbox.scrollHeight;
+}
+
+</script>
 </body>
 </html>
