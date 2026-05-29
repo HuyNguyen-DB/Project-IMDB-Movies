@@ -1,763 +1,223 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đặt phim</title>
-
-<style>
-*{
-    box-sizing:border-box;
-}
-
-body{
-    font-family: Arial, Helvetica, sans-serif;
-    margin:0;
-    color:#e5e7eb;
-    background:linear-gradient(180deg,#020617,#0f172a,#020617);
-}
-
-/* NAVBAR */
-
-.navbar{
-    position:sticky;
-    top:0;
-    z-index:1000;
-    background:rgba(2, 6, 23, 0.92);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid rgba(255,255,255,0.08);
-}
-
-.nav-container{
-    max-width:1300px;
-    margin:auto;
-    padding:14px 30px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:20px;
-}
-
-.nav-left{
-    display:flex;
-    align-items:center;
-    gap:18px;
-}
-
-.logo-box{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    text-decoration:none;
-    color:white;
-}
-
-.logo-icon{
-    width:42px;
-    height:42px;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(135deg,#22c55e,#16a34a);
-    font-size:22px;
-    box-shadow:0 8px 20px rgba(34,197,94,0.25);
-}
-
-.logo-text{
-    display:flex;
-    flex-direction:column;
-    line-height:1.2;
-}
-
-.logo-text strong{
-    font-size:16px;
-    color:#ffffff;
-}
-
-.logo-text span{
-    font-size:12px;
-    color:#94a3b8;
-}
-
-.nav-links{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.nav-links a{
-    text-decoration:none;
-}
-
-.nav-links button{
-    background:#111827;
-    color:white;
-    border:1px solid rgba(255,255,255,0.06);
-    padding:10px 16px;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:14px;
-    transition:0.2s;
-}
-
-.nav-links button:hover{
-    background:#1f2937;
-    transform:translateY(-1px);
-}
-
-/* USER MENU */
-
-.user-menu{
-    position:relative;
-}
-
-.user-trigger{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:14px;
-    padding:8px 12px;
-    cursor:pointer;
-    min-width:200px;
-    transition:0.2s;
-}
-
-.user-trigger:hover{
-    background:#1f2937;
-}
-
-.avatar{
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    background:linear-gradient(135deg,#22c55e,#06b6d4);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    color:white;
-    font-size:16px;
-    flex-shrink:0;
-    box-shadow:0 8px 20px rgba(6,182,212,0.2);
-}
-
-.user-info{
-    text-align:left;
-    flex:1;
-    min-width:0;
-}
-
-.user-info strong{
-    display:block;
-    font-size:14px;
-    color:white;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.user-info span{
-    display:block;
-    font-size:12px;
-    color:#9ca3af;
-}
-
-.dropdown-arrow{
-    color:#9ca3af;
-    font-size:13px;
-}
-
-.dropdown-menu{
-    position:absolute;
-    top:calc(100% + 10px);
-    right:0;
-    width:240px;
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:14px;
-    box-shadow:0 18px 40px rgba(0,0,0,0.4);
-    overflow:hidden;
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(10px);
-    transition:0.25s ease;
-}
-
-.user-menu:hover .dropdown-menu{
-    opacity:1;
-    visibility:visible;
-    transform:translateY(0);
-}
-
-.dropdown-header{
-    padding:16px;
-    border-bottom:1px solid rgba(255,255,255,0.06);
-    background:rgba(255,255,255,0.02);
-}
-
-.dropdown-header strong{
-    display:block;
-    margin-bottom:4px;
-    color:white;
-    font-size:15px;
-}
-
-.dropdown-header p{
-    margin:0;
-    color:#94a3b8;
-    font-size:12px;
-}
-
-.dropdown-item{
-    display:block;
-    text-decoration:none;
-    color:white;
-    padding:13px 16px;
-    transition:0.2s;
-    font-size:14px;
-}
-
-.dropdown-item:hover{
-    background:#1f2937;
-}
-
-.dropdown-form{
-    margin:0;
-}
-
-.dropdown-form button{
-    width:100%;
-    text-align:left;
-    background:none;
-    border:none;
-    color:#f87171;
-    padding:13px 16px;
-    cursor:pointer;
-    font-size:14px;
-}
-
-.dropdown-form button:hover{
-    background:#1f2937;
-}
-
-/* MAIN */
-
-.container{
-    max-width:1300px;
-    margin:auto;
-    padding:40px 30px 70px;
-}
-
-/* PAGE HEADER */
-
-.page-header{
-    margin-bottom:24px;
-}
-
-.page-header h1{
-    margin:0 0 10px 0;
-    font-size:34px;
-    color:white;
-}
-
-.page-header p{
-    margin:0;
-    color:#94a3b8;
-    line-height:1.6;
-}
-
-/* LAYOUT */
-
-.booking-layout{
-    display:grid;
-    grid-template-columns: 380px 1fr;
-    gap:28px;
-    align-items:start;
-}
-
-/* POSTER CARD */
-
-.poster-panel{
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.06);
-    border-radius:20px;
-    padding:20px;
-    box-shadow:0 20px 45px rgba(0,0,0,0.35);
-    position:sticky;
-    top:90px;
-}
-
-.poster-image{
-    width:100%;
-    height:520px;
-    object-fit:cover;
-    border-radius:16px;
-    display:block;
-    box-shadow:0 12px 30px rgba(0,0,0,0.45);
-}
-
-.poster-badge{
-    margin-top:16px;
-    display:inline-block;
-    padding:8px 12px;
-    border-radius:999px;
-    background:rgba(34,197,94,0.15);
-    color:#4ade80;
-    font-size:13px;
-    font-weight:600;
-    border:1px solid rgba(34,197,94,0.25);
-}
-
-/* INFO CARD */
-
-.info-panel{
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.06);
-    border-radius:20px;
-    padding:30px;
-    box-shadow:0 20px 45px rgba(0,0,0,0.35);
-}
-
-.movie-title{
-    font-size:38px;
-    font-weight:700;
-    margin:0 0 18px 0;
-    color:#22c55e;
-    line-height:1.2;
-}
-
-.meta-grid{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(220px,1fr));
-    gap:16px;
-    margin-bottom:28px;
-}
-
-.meta-card{
-    background:#0f172a;
-    border:1px solid rgba(255,255,255,0.05);
-    border-radius:16px;
-    padding:16px;
-}
-
-.meta-label{
-    display:block;
-    color:#94a3b8;
-    font-size:13px;
-    margin-bottom:8px;
-    text-transform:uppercase;
-    letter-spacing:0.5px;
-}
-
-.meta-value{
-    color:white;
-    font-size:17px;
-    line-height:1.5;
-    font-weight:600;
-}
-
-/* ACTION SHORTCUTS */
-
-.shortcut-actions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-    margin-bottom:28px;
-}
-
-.shortcut-actions a{
-    text-decoration:none;
-}
-
-.shortcut-actions button{
-    background:#1f2937;
-    color:white;
-    border:1px solid rgba(255,255,255,0.06);
-    padding:12px 18px;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:14px;
-    transition:0.2s;
-}
-
-.shortcut-actions button:hover{
-    background:#374151;
-    transform:translateY(-1px);
-}
-
-/* FORM BOX */
-
-.form-box{
-    background:#0f172a;
-    border:1px solid rgba(255,255,255,0.05);
-    border-radius:18px;
-    padding:24px;
-}
-
-.form-box h2{
-    margin:0 0 10px 0;
-    font-size:22px;
-    color:white;
-}
-
-.form-box p{
-    margin:0 0 22px 0;
-    color:#94a3b8;
-    line-height:1.6;
-}
-
-.form-group{
-    margin-bottom:18px;
-}
-
-.form-group label{
-    display:block;
-    margin-bottom:8px;
-    color:#cbd5e1;
-    font-size:15px;
-    font-weight:600;
-}
-
-.form-box input,
-.form-box select,
-.form-box textarea{
-    width:100%;
-    max-width:360px;
-    padding:12px 14px;
-    border:none;
-    outline:none;
-    border-radius:12px;
-    font-size:15px;
-    background:#f8fafc;
-    color:#111827;
-}
-
-.form-box input:focus,
-.form-box select:focus,
-.form-box textarea:focus{
-    box-shadow:0 0 0 3px rgba(34,197,94,0.25);
-}
-
-/* SUBMIT */
-
-.submit-btn{
-    margin-top:8px;
-    padding:14px 26px;
-    background:#22c55e;
-    border:none;
-    border-radius:12px;
-    color:white;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
-    transition:0.2s;
-    box-shadow:0 12px 24px rgba(34,197,94,0.2);
-}
-
-.submit-btn:hover{
-    background:#16a34a;
-    transform:translateY(-2px);
-}
-
-/* BOTTOM ACTIONS */
-
-.actions{
-    margin-top:28px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-}
-
-.actions a{
-    text-decoration:none;
-}
-
-.actions button{
-    padding:12px 20px;
-    background:#374151;
-    color:white;
-    border:none;
-    border-radius:12px;
-    font-size:15px;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.actions button:hover{
-    background:#4b5563;
-}
-
-/* RESPONSIVE */
-
-@media (max-width: 1024px){
-    .booking-layout{
-        grid-template-columns:1fr;
-    }
-
-    .poster-panel{
-        position:static;
-    }
-
-    .poster-image{
-        max-width:360px;
-        height:auto;
-        margin:auto;
-    }
-}
-
-@media (max-width: 768px){
-    .nav-container{
-        flex-direction:column;
-        align-items:stretch;
-    }
-
-    .nav-left{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-
-    .meta-grid{
-        grid-template-columns:1fr;
-    }
-
-    .movie-title{
-        font-size:30px;
-    }
-
-    .container{
-        padding:24px 18px 50px;
-    }
-
-    .info-panel,
-    .poster-panel{
-        padding:20px;
-    }
-}
-</style>
-</head>
-
-<body>
-
-<nav class="navbar">
-    <div class="nav-container">
-
-        <div class="nav-left">
-            <a href="{% url 'home' %}" class="logo-box">
-                <div class="logo-icon">🎬</div>
-                <div class="logo-text">
-                    <strong>Movie Webapp</strong>
-                    <span>Đề xuất phim & đặt phòng</span>
-                </div>
-            </a>
-
-            <div class="nav-links">
-                <a href="{% url 'home' %}">
-                    <button>Trang chủ</button>
-                </a>
-                <a href="{% url 'movie_list' %}">
-                    <button>Danh sách phim</button>
-                </a>
-                <a href="{% url 'recommend' %}">
-                    <button>Gợi ý phim</button>
-                </a>
-            </div>
+{% extends "recommendations/base.html" %}
+{% load vn_format %}
+
+{% block title %}Đặt phim{% endblock %}
+
+{% block content %}
+
+{% comment %}
+=========================================================
+1. BOOKING PAGE
+- Trang xác nhận phim, phòng và chọn thời gian bắt đầu
+=========================================================
+{% endcomment %}
+
+<main class="page">
+
+    {% comment %}
+    =========================================================
+    2. PAGE HEADER
+    =========================================================
+    {% endcomment %}
+
+    <header class="section-head">
+        <div>
+            <h1 class="page-title">Đặt phim</h1>
+            <p class="page-subtitle">
+                Kiểm tra thông tin phim, phòng chiếu và chọn thời gian bắt đầu.
+            </p>
         </div>
+    </header>
 
-        {% if user.is_authenticated %}
-        <div class="user-menu">
-            <div class="user-trigger">
-                <div class="avatar">
-                    {{ user.username|slice:":1"|upper }}
-                </div>
-                <div class="user-info">
-                    <strong>{{ user.username }}</strong>
-                    <span>Người dùng đã đăng nhập</span>
-                </div>
-                <div class="dropdown-arrow">▼</div>
-            </div>
 
-            <div class="dropdown-menu">
-                <div class="dropdown-header">
-                    <strong>{{ user.username }}</strong>
-                    <p>Quản lý tài khoản và lịch sử đặt phim</p>
-                </div>
+    {% comment %}
+    =========================================================
+    3. MOVIE + ROOM SUMMARY
+    - Hiển thị thông tin phim và phòng đã chọn
+    =========================================================
+    {% endcomment %}
 
-                <a href="{% url 'user_home' %}" class="dropdown-item">
-                    📜 Lịch sử đặt phim
-                </a>
+    <div class="summary-layout">
 
-                <a href="{% url 'movie_list' %}" class="dropdown-item">
-                    🎥 Danh sách phim
-                </a>
+        {% comment %}
+        =========================
+        3.1. Thông tin phim
+        =========================
+        {% endcomment %}
 
-                <form method="POST" action="{% url 'logout' %}" class="dropdown-form">
-                    {% csrf_token %}
-                    <button type="submit">🚪 Đăng xuất</button>
-                </form>
-            </div>
-        </div>
-        {% endif %}
+        <section class="card">
+            <h2>🎬 Thông tin phim</h2>
 
-    </div>
-</nav>
-
-<div class="container">
-
-    <div class="page-header">
-        <h1>🎟 Xác nhận đặt phim</h1>
-        <p>
-            Kiểm tra lại phim, phòng chiếu và chọn thời gian xem phù hợp trước khi tiếp tục đến bước thanh toán.
-        </p>
-    </div>
-
-    <div class="booking-layout">
-
-        <div class="poster-panel">
-            {% if movie.poster_url %}
-                <img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" class="poster-image">
-            {% else %}
-                <img src="https://via.placeholder.com/320x460?text=No+Poster" alt="No Poster" class="poster-image">
-            {% endif %}
-
-            <div class="poster-badge">Sẵn sàng đặt vé</div>
-        </div>
-
-        <div class="info-panel">
-
-            <h2 class="movie-title">{{ movie.primaryTitle }}</h2>
-
-            <div class="meta-grid">
-                <div class="meta-card">
-                    <span class="meta-label">Thể loại</span>
-                    <div class="meta-value">{{ movie.genres }}</div>
+            <div class="detail-grid booking-movie-summary">
+                <div class="detail-image booking-movie-poster">
+                    {% if movie.poster_url %}
+                        <img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}">
+                    {% else %}
+                        <div class="poster-placeholder">🎬</div>
+                    {% endif %}
                 </div>
 
-                <div class="meta-card">
-                    <span class="meta-label">Năm phát hành</span>
-                    <div class="meta-value">{{ movie.startYear }}</div>
-                </div>
+                <div>
+                    <h2>{{ movie.primaryTitle }}</h2>
 
-                {% if movie.runtimeMinutes %}
-                <div class="meta-card">
-                    <span class="meta-label">Thời lượng</span>
-                    <div class="meta-value">{{ movie.runtimeMinutes }} phút</div>
-                </div>
-                {% endif %}
+                    {% if movie.genres %}
+                        <p class="muted">{{ movie.genres }}</p>
+                    {% endif %}
 
-                {% if movie.averageRating %}
-                <div class="meta-card">
-                    <span class="meta-label">Đánh giá</span>
-                    <div class="meta-value">{{ movie.averageRating }}/10</div>
-                </div>
-                {% endif %}
+                    <div class="meta-row">
+                        {% if movie.startYear %}
+                            <span>{{ movie.startYear }}</span>
+                        {% endif %}
 
-                <div class="meta-card">
-                    <span class="meta-label">Phòng đã chọn</span>
-                    <div class="meta-value">{{ room.name }}</div>
-                </div>
+                        {% if movie.runtimeMinutes %}
+                            <span>{{ movie.runtimeMinutes }} phút</span>
+                        {% endif %}
 
-                {% if room.status %}
-                <div class="meta-card">
-                    <span class="meta-label">Trạng thái phòng</span>
-                    <div class="meta-value">
-                        {% if room.status == "available" %}
-                            Sẵn sàng
-                        {% elif room.status == "booked" %}
-                            Đang được đặt
-                        {% elif room.status == "maintenance" %}
-                            Đang bảo trì
-                        {% elif room.status == "inactive" %}
-                            Ngưng sử dụng
-                        {% else %}
-                            {{ room.status }}
+                        {% if movie.averageRating %}
+                            <span>⭐ {{ movie.averageRating }}</span>
                         {% endif %}
                     </div>
                 </div>
-                {% endif %}
+            </div>
+        </section>
+
+
+        {% comment %}
+        =========================
+        3.2. Thông tin phòng
+        =========================
+        {% endcomment %}
+
+        <section class="card">
+            <h2>🏠 Thông tin phòng</h2>
+
+            <div class="info-row">
+                <span class="info-label">Phòng</span>
+                <span class="info-value">{{ room.name }}</span>
             </div>
 
-            <div class="meta-card">
-                <span class="meta-label">Giá phòng</span>
-                <div class="meta-value">
-                    {{ room.price_per_30min }} VND / 30 phút
-                </div>
+            <div class="info-row">
+                <span class="info-label">Trạng thái</span>
+                <span class="info-value">
+                    {{ room.get_status_display }}
+                </span>
             </div>
 
-            <div class="meta-card">
-                <span class="meta-label">Thời lượng gợi ý</span>
-                <div class="meta-value">
-                    {{ base_duration }} phút
-                </div>
+            <div class="info-row">
+                <span class="info-label">Giá</span>
+                <span class="info-value">
+                    {{ room.price_per_30min }}đ / 30 phút
+                </span>
             </div>
-
-            <div class="shortcut-actions">
-                <a href="{% url 'movie_list' %}">
-                    <button type="button">🎬 Đổi phim</button>
-                </a>
-
-                <a href="{% url 'room_list' %}">
-                    <button type="button">🏢 Đổi phòng</button>
-                </a>
-            </div>
-
-            <div class="form-box">
-                <h2>Hoàn tất thông tin đặt phim</h2>
-                <p>
-                    Chọn thời gian xem mong muốn rồi xác nhận để chuyển sang bước thanh toán.
-                </p>
-
-                <form method="POST">
-                    {% csrf_token %}
-
-                    <div class="form-group">
-                        <label for="{{ form.booking_date.id_for_label }}">Thời gian xem</label>
-                        {{ form.booking_date }}
-                    </div>
-                    <div class="form-group">
-                        <label>Chọn thêm thời gian</label>
-                        <select name="extra_time">
-                            <option value="0">Không thêm</option>
-                            <option value="30">+30 phút</option>
-                            <option value="60">+60 phút</option>
-                            <option value="90">+90 phút</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tổng thời gian thuê</label>
-                        <div class="meta-value">{{ total_duration }} phút</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Tổng tiền</label>
-                        <div class="meta-value" style="color:#22c55e; font-size:20px;">
-                            {{ total_price }} VND
-                        </div>
-                    </div>
-                    <button type="submit" class="submit-btn">
-                        🎬 Xác nhận đặt phim
-                    </button>
-                </form>
-            </div>
-
-            <div class="actions">
-                <a href="{% url 'user_home' %}">
-                    <button type="button">📜 Xem lịch sử đặt phim</button>
-                </a>
-
-                <a href="{% url 'home' %}">
-                    <button type="button">🏠 Trang chủ</button>
-                </a>
-            </div>
-
-        </div>
+        </section>
 
     </div>
 
-</div>
 
-</body>
-</html>
+    {% comment %}
+    =========================================================
+    4. BOOKING FORM
+    - Chọn thời gian bắt đầu
+    - Chọn thêm thời gian nếu muốn
+    - Hiển thị tạm tính
+    =========================================================
+    {% endcomment %}
+
+    <section class="card section">
+        <h2>🕒 Thời gian và thanh toán</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-row">
+
+                {% comment %}
+                -------------------------
+                4.1. Thời gian bắt đầu
+                - Input thật vẫn là datetime-local
+                - Placeholder tiếng Việt được tạo bằng span overlay
+                -------------------------
+                {% endcomment %}
+
+                <div class="form-group">
+                    <label for="{{ form.booking_date.id_for_label }}">
+                        Thời gian bắt đầu
+                    </label>
+
+                    <div class="datetime-input-wrapper">
+                        {{ form.booking_date }}
+                        <span class="datetime-placeholder">
+                            ngày/tháng/năm giờ:phút
+                        </span>
+                        <span class="datetime-calendar-icon">
+                            📅
+                        </span>
+                    </div>
+
+                    {{ form.booking_date.errors }}
+                </div>
+
+
+                {% comment %}
+                -------------------------
+                4.2. Thêm thời gian xem phim
+                -------------------------
+                {% endcomment %}
+
+                <div class="form-group">
+                    <label for="extra_time">Thêm thời gian</label>
+
+                    <select name="extra_time" id="extra_time">
+                        <option value="0">Không thêm</option>
+                        <option value="30">Thêm 30 phút</option>
+                        <option value="60">Thêm 60 phút</option>
+                        <option value="90">Thêm 90 phút</option>
+                    </select>
+                </div>
+
+            </div>
+
+
+            {% comment %}
+            =========================================================
+            5. BOOKING PRICE SUMMARY
+            =========================================================
+            {% endcomment %}
+
+            <div class="info-row">
+                <span class="info-label">Thời lượng cơ bản</span>
+                <span class="info-value">{{ base_duration }} phút</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Thời lượng hiện tại</span>
+                <span class="info-value">{{ total_duration }} phút</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Tạm tính</span>
+                <span class="info-value">{{ total_price }}đ</span>
+            </div>
+
+
+            {% comment %}
+            =========================================================
+            6. FORM ACTIONS
+            =========================================================
+            {% endcomment %}
+
+            <div class="actions">
+                <a href="{% url 'room_list' %}" class="btn btn-soft">
+                    Chọn lại phòng
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    Tạo đơn đặt
+                </button>
+            </div>
+        </form>
+    </section>
+
+</main>
+
+{% endblock %}

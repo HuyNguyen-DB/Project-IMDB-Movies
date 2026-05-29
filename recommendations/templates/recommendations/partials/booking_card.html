@@ -1,0 +1,67 @@
+{% load vn_format %}
+
+<article class="booking-card">
+    <div class="booking-poster">
+        {% if movie.movie and movie.movie.poster_url %}
+            <img src="{{ movie.movie.poster_url }}" alt="{{ movie.movie.primaryTitle }}">
+        {% else %}
+            <div class="poster-placeholder">🎬</div>
+        {% endif %}
+    </div>
+
+    <div class="booking-info">
+        <div class="booking-head">
+            <h3>
+                {% if movie.movie %}
+                    {{ movie.movie.primaryTitle }}
+                {% else %}
+                    Không rõ phim
+                {% endif %}
+            </h3>
+
+            <span class="code-badge">{{ movie.booking_code }}</span>
+        </div>
+
+        <div class="meta-grid">
+            <span>🏠 Phòng: <strong>{{ movie.room_name }}</strong></span>
+            <span>🕒 Bắt đầu: <strong>{{ movie.booking_date|vn_datetime }}</strong></span>
+
+            {% if movie.booking_end_time %}
+                <span>⏳ Kết thúc: <strong>{{ movie.booking_end_time|vn_datetime }}</strong></span>
+            {% endif %}
+
+            <span>⏱ Thời lượng: <strong>{{ movie.rental_duration_minutes }} phút</strong></span>
+            <span>💰 Tổng tiền: <strong>{{ movie.total_price }}đ</strong></span>
+        </div>
+
+        <div class="badge-row">
+            <span class="status-badge status-{{ movie.booking_status }}">
+                {{ movie.get_booking_status_display }}
+            </span>
+
+            <span class="status-badge payment-{{ movie.payment_status }}">
+                {{ movie.get_payment_status_display }}
+            </span>
+
+            {% if movie.is_today %}
+                <span class="status-badge highlight">Hôm nay</span>
+            {% elif movie.is_tomorrow %}
+                <span class="status-badge highlight">Ngày mai</span>
+            {% endif %}
+        </div>
+
+        <div class="card-actions">
+            {% if movie.payment_status == "unpaid" and movie.booking_status == "pending_payment" %}
+                <a href="{% url 'payment_page' movie.id %}" class="btn btn-primary">
+                    Thanh toán
+                </a>
+            {% endif %}
+
+            {% if movie.invoice and movie.invoice.invoice_code %}
+                <a href="{% url 'invoice_detail' movie.invoice.invoice_code %}" class="btn btn-soft">
+                    Xem hóa đơn
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</article>

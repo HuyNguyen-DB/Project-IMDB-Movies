@@ -1,0 +1,37 @@
+<article class="movie-card compact-card">
+    <div class="poster-wrapper">
+        {% if movie.poster_url %}
+            <img src="{{ movie.poster_url }}" alt="{{ movie.primaryTitle }}" class="movie-poster">
+        {% else %}
+            <div class="poster-placeholder">🎬</div>
+        {% endif %}
+
+        <div class="movie-overlay">
+            <a href="{% url 'select_movie' movie.tconst %}" class="btn btn-primary btn-sm">
+                Chọn phim
+            </a>
+        </div>
+    </div>
+
+    <div class="movie-body">
+        <h3>{{ movie.primaryTitle }}</h3>
+
+        <div class="meta-row">
+            {% if movie.startYear %}
+                <span>{{ movie.startYear }}</span>
+            {% endif %}
+
+            {% if movie.runtimeMinutes %}
+                <span>{{ movie.runtimeMinutes }} phút</span>
+            {% endif %}
+
+            {% if movie.averageRating %}
+                <span>⭐ {{ movie.averageRating }}</span>
+            {% endif %}
+        </div>
+
+        {% if movie.genres %}
+            <p class="muted movie-genres">{{ movie.genres }}</p>
+        {% endif %}
+    </div>
+</article>

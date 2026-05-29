@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.forms import AuthenticationForm
 
 from datetime import timedelta
 import math
@@ -27,7 +28,6 @@ from .models import (
 )
 
 from .forms import (
-    EmailLoginForm,
     BookMovieForm,
     CustomUserCreationForm,
     UserProfileUpdateForm,
@@ -133,8 +133,6 @@ def create_or_get_invoice(booking):
 # =========================================================
 
 def home(request):
-    recommendations = []
-
     movies = list(
         Movie.objects.values(
             "tconst",
@@ -180,17 +178,11 @@ def home(request):
 
     screen_rooms = screen_rooms[:6]
 
-    if request.method == "POST":
-        user_genres = request.POST.get("genres", "").strip()
-        user_title = request.POST.get("title", "").strip()
-        recommendations = recommend(request, user_genres, user_title)
-
     return render(
         request,
         "recommendations/home.html",
         {
             "movies": movies,
-            "recommendations": recommendations,
             "screen_rooms": screen_rooms,
             "featured_movie_count": len(movies),
             "featured_room_count": len(screen_rooms),
@@ -249,10 +241,12 @@ def signup(request):
 
         if form.is_valid():
             form.save()
+
             messages.success(
                 request,
                 "Đăng ký tài khoản thành công. Bạn có thể đăng nhập ngay bây giờ."
             )
+
             return redirect("login")
     else:
         form = CustomUserCreationForm()
@@ -278,14 +272,14 @@ class CustomLoginView(LoginView):
 
 def custom_login(request):
     if request.method == "POST":
-        form = EmailLoginForm(request, data=request.POST)
+        form = AuthenticationForm(request, data=request.POST)
 
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             return redirect("home")
     else:
-        form = EmailLoginForm()
+        form = AuthenticationForm()
 
     return render(
         request,
@@ -367,7 +361,6 @@ def edit_profile(request):
 
 @login_required
 def user_home(request):
-    recommendations = []
     now = timezone.now()
 
     BookedMovie.objects.filter(
@@ -378,11 +371,6 @@ def user_home(request):
     ).update(
         booking_status="expired"
     )
-
-    if request.method == "POST":
-        user_genres = request.POST.get("genres", "").strip()
-        user_title = request.POST.get("title", "").strip()
-        recommendations = recommend(request, user_genres, user_title)
 
     booked_movies = list(
         BookedMovie.objects
@@ -482,8 +470,6 @@ def user_home(request):
         request,
         "recommendations/user_home.html",
         {
-            "recommendations": recommendations,
-
             "paid_movies": paid_page_obj,
             "unpaid_movies": unpaid_page_obj,
             "cancelled_expired_movies": expired_page_obj,
@@ -595,8 +581,8 @@ def recommend_page(request):
     recommendations = []
 
     if request.method == "POST":
-        user_genres = request.POST.get("genres")
-        user_title = request.POST.get("title")
+        user_genres = request.POST.get("genres", "").strip()
+        user_title = request.POST.get("title", "").strip()
 
     if not user_genres and not user_title:
         if request.user.is_authenticated:
@@ -671,6 +657,7 @@ def build_user_genres_from_history(user):
     for booking in booked_movies:
         if booking.movie and booking.movie.genres:
             parts = booking.movie.genres.lower().split(",")
+
             genres.extend([
                 genre.strip()
                 for genre in parts
@@ -812,7 +799,10 @@ def book_movie(request):
     base_duration = round_to_30_minutes(runtime)
 
     if request.method == "POST":
-        extra_time = int(request.POST.get("extra_time", 0))
+        try:
+            extra_time = int(request.POST.get("extra_time", 0))
+        except (TypeError, ValueError):
+            extra_time = 0
     else:
         extra_time = 0
 
@@ -867,6 +857,7 @@ def book_movie(request):
 # PAYMENT / INVOICE
 # =========================================================
 
+<<<<<<< HEAD
 @csrf_exempt
 def sepay_webhook(request):
     print("HEADERS:", dict(request.headers))
@@ -992,37 +983,47 @@ def payment_page(request, booking_id):
         id=booking_id,
         user=request.user,
     )
+=======
+# @login_required
+# def payment_page(request, booking_id):
+#     booking = get_object_or_404(
+#         BookedMovie.objects.select_related("movie"),
+#         id=booking_id,
+#         user=request.user,
+#     )
+>>>>>>> 811e10033850c2668846147dbfce724615702d0e
 
-    now = timezone.now()
+#     now = timezone.now()
 
-    if (
-        booking.payment_status == "unpaid"
-        and booking.booking_status == "pending_payment"
-        and booking.booking_date < now
-    ):
-        booking.booking_status = "expired"
-        booking.save(update_fields=["booking_status"])
+#     if (
+#         booking.payment_status == "unpaid"
+#         and booking.booking_status == "pending_payment"
+#         and booking.booking_date < now
+#     ):
+#         booking.booking_status = "expired"
+#         booking.save(update_fields=["booking_status"])
 
-    if booking.booking_status == "expired":
-        messages.error(
-            request,
-            "Đơn đặt phim này đã hết hạn."
-        )
-        return redirect("user_home")
+#     if booking.booking_status == "expired":
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã hết hạn."
+#         )
+#         return redirect("user_home")
 
-    if booking.booking_status == "cancelled":
-        messages.error(
-            request,
-            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
-        )
-        return redirect("user_home")
+#     if booking.booking_status == "cancelled":
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
+#         )
+#         return redirect("user_home")
 
-    if booking.payment_status == "paid":
-        messages.warning(
-            request,
-            "Đơn này đã được thanh toán trước đó."
-        )
+#     if booking.payment_status == "paid":
+#         messages.warning(
+#             request,
+#             "Đơn này đã được thanh toán trước đó."
+#         )
 
+<<<<<<< HEAD
         if not hasattr(booking, "invoice") or not booking.invoice:
             invoice = create_or_get_invoice(booking)
             return redirect(
@@ -1034,32 +1035,47 @@ def payment_page(request, booking_id):
             "invoice_detail",
             invoice_code=booking.invoice.invoice_code
         )
+=======
+#         if hasattr(booking, "invoice") and booking.invoice:
+#             return redirect(
+#                 "invoice_detail",
+#                 invoice_code=booking.invoice.invoice_code
+#             )
 
-    bank_id = "970422"
-    account_no = "0762535498"
-    account_name = "HUY%20NGUYEN"
+#         return redirect("user_home")
+>>>>>>> 811e10033850c2668846147dbfce724615702d0e
 
+#     bank_id = "970422"
+#     account_no = "0762535498"
+#     account_name = "HUY%20NGUYEN"
+
+<<<<<<< HEAD
     amount = int(booking.total_price or 0)
     description = booking.booking_code
+=======
+#     amount = int(booking.total_price or 0)
+#     description = booking.booking_code or f"BOOKING{booking.id}"
+>>>>>>> 811e10033850c2668846147dbfce724615702d0e
 
-    vietqr_url = (
-        f"https://img.vietqr.io/image/"
-        f"{bank_id}-{account_no}-compact2.png"
-        f"?amount={amount}"
-        f"&addInfo={description}"
-        f"&accountName={account_name}"
-    )
+#     vietqr_url = (
+#         f"https://img.vietqr.io/image/"
+#         f"{bank_id}-{account_no}-compact2.png"
+#         f"?amount={amount}"
+#         f"&addInfo={description}"
+#         f"&accountName={account_name}"
+#     )
 
-    return render(
-        request,
-        "recommendations/payment.html",
-        {
-            "booking": booking,
-            "vietqr_url": vietqr_url,
-        }
-    )
+#     return render(
+#         request,
+#         "recommendations/payment.html",
+#         {
+#             "booking": booking,
+#             "vietqr_url": vietqr_url,
+#         }
+#     )
 
 
+<<<<<<< HEAD
 @login_required
 def payment_status(request, booking_id):
     booking = get_object_or_404(
@@ -1109,22 +1125,40 @@ def confirm_payment(request, booking_id):
             "payment_page",
             booking_id=booking.id
         )
+=======
+# @login_required
+# def confirm_payment(request, booking_id):
+#     booking = get_object_or_404(
+#         BookedMovie.objects.select_related("movie"),
+#         id=booking_id,
+#         user=request.user,
+#     )
 
-    if (
-        booking.payment_status == "unpaid"
-        and booking.booking_status == "pending_payment"
-        and booking.booking_date < now
-    ):
-        booking.booking_status = "expired"
-        booking.save(update_fields=["booking_status"])
+#     now = timezone.now()
 
-        messages.error(
-            request,
-            "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
-        )
+#     if request.method != "POST":
+#         return redirect(
+#             "payment_page",
+#             booking_id=booking.id
+#         )
+>>>>>>> 811e10033850c2668846147dbfce724615702d0e
 
-        return redirect("user_home")
+#     if (
+#         booking.payment_status == "unpaid"
+#         and booking.booking_status == "pending_payment"
+#         and booking.booking_date < now
+#     ):
+#         booking.booking_status = "expired"
+#         booking.save(update_fields=["booking_status"])
 
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
+#         )
+
+#         return redirect("user_home")
+
+<<<<<<< HEAD
     if booking.booking_status == "expired":
         if wants_json:
             return JsonResponse({
@@ -1188,9 +1222,51 @@ def confirm_payment(request, booking_id):
             "paid_at",
         ]
     )
+=======
+#     if booking.booking_status == "expired":
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã hết hạn nên không thể thanh toán."
+#         )
+#         return redirect("user_home")
 
-    invoice = create_or_get_invoice(booking)
+#     if booking.booking_status == "cancelled":
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
+#         )
+#         return redirect("user_home")
 
+#     if booking.payment_status == "paid":
+#         messages.warning(
+#             request,
+#             "Đơn này đã được thanh toán trước đó."
+#         )
+
+#         if hasattr(booking, "invoice") and booking.invoice:
+#             return redirect(
+#                 "invoice_detail",
+#                 invoice_code=booking.invoice.invoice_code
+#             )
+
+#         return redirect("user_home")
+
+#     booking.payment_status = "paid"
+#     booking.booking_status = "confirmed"
+#     booking.paid_at = timezone.now()
+#     booking.save(
+#         update_fields=[
+#             "payment_status",
+#             "booking_status",
+#             "paid_at",
+#             "booking_end_time",
+#         ]
+#     )
+>>>>>>> 811e10033850c2668846147dbfce724615702d0e
+
+#     invoice = create_or_get_invoice(booking)
+
+<<<<<<< HEAD
     if wants_json:
         return JsonResponse({
             "payment_status": "paid",
@@ -1201,23 +1277,29 @@ def confirm_payment(request, booking_id):
         "invoice_detail",
         invoice_code=invoice.invoice_code
     )
+=======
+#     return redirect(
+#         "invoice_detail",
+#         invoice_code=invoice.invoice_code
+#     )
+>>>>>>> 811e10033850c2668846147dbfce724615702d0e
 
 
-@login_required
-def invoice_detail(request, invoice_code):
-    invoice = get_object_or_404(
-        Invoice,
-        invoice_code=invoice_code,
-        user=request.user,
-    )
+# @login_required
+# def invoice_detail(request, invoice_code):
+#     invoice = get_object_or_404(
+#         Invoice,
+#         invoice_code=invoice_code,
+#         user=request.user,
+#     )
 
-    return render(
-        request,
-        "recommendations/invoice_detail.html",
-        {
-            "invoice": invoice,
-        }
-    )
+#     return render(
+#         request,
+#         "recommendations/invoice_detail.html",
+#         {
+#             "invoice": invoice,
+#         }
+#     )
 
 
 # =========================================================
