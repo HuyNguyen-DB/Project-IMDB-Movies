@@ -856,171 +856,171 @@ def book_movie(request):
 # PAYMENT / INVOICE
 # =========================================================
 
-@login_required
-def payment_page(request, booking_id):
-    booking = get_object_or_404(
-        BookedMovie.objects.select_related("movie"),
-        id=booking_id,
-        user=request.user,
-    )
+# @login_required
+# def payment_page(request, booking_id):
+#     booking = get_object_or_404(
+#         BookedMovie.objects.select_related("movie"),
+#         id=booking_id,
+#         user=request.user,
+#     )
 
-    now = timezone.now()
+#     now = timezone.now()
 
-    if (
-        booking.payment_status == "unpaid"
-        and booking.booking_status == "pending_payment"
-        and booking.booking_date < now
-    ):
-        booking.booking_status = "expired"
-        booking.save(update_fields=["booking_status"])
+#     if (
+#         booking.payment_status == "unpaid"
+#         and booking.booking_status == "pending_payment"
+#         and booking.booking_date < now
+#     ):
+#         booking.booking_status = "expired"
+#         booking.save(update_fields=["booking_status"])
 
-    if booking.booking_status == "expired":
-        messages.error(
-            request,
-            "Đơn đặt phim này đã hết hạn."
-        )
-        return redirect("user_home")
+#     if booking.booking_status == "expired":
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã hết hạn."
+#         )
+#         return redirect("user_home")
 
-    if booking.booking_status == "cancelled":
-        messages.error(
-            request,
-            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
-        )
-        return redirect("user_home")
+#     if booking.booking_status == "cancelled":
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
+#         )
+#         return redirect("user_home")
 
-    if booking.payment_status == "paid":
-        messages.warning(
-            request,
-            "Đơn này đã được thanh toán trước đó."
-        )
+#     if booking.payment_status == "paid":
+#         messages.warning(
+#             request,
+#             "Đơn này đã được thanh toán trước đó."
+#         )
 
-        if hasattr(booking, "invoice") and booking.invoice:
-            return redirect(
-                "invoice_detail",
-                invoice_code=booking.invoice.invoice_code
-            )
+#         if hasattr(booking, "invoice") and booking.invoice:
+#             return redirect(
+#                 "invoice_detail",
+#                 invoice_code=booking.invoice.invoice_code
+#             )
 
-        return redirect("user_home")
+#         return redirect("user_home")
 
-    bank_id = "970422"
-    account_no = "0762535498"
-    account_name = "HUY%20NGUYEN"
+#     bank_id = "970422"
+#     account_no = "0762535498"
+#     account_name = "HUY%20NGUYEN"
 
-    amount = int(booking.total_price or 0)
-    description = booking.booking_code or f"BOOKING{booking.id}"
+#     amount = int(booking.total_price or 0)
+#     description = booking.booking_code or f"BOOKING{booking.id}"
 
-    vietqr_url = (
-        f"https://img.vietqr.io/image/"
-        f"{bank_id}-{account_no}-compact2.png"
-        f"?amount={amount}"
-        f"&addInfo={description}"
-        f"&accountName={account_name}"
-    )
+#     vietqr_url = (
+#         f"https://img.vietqr.io/image/"
+#         f"{bank_id}-{account_no}-compact2.png"
+#         f"?amount={amount}"
+#         f"&addInfo={description}"
+#         f"&accountName={account_name}"
+#     )
 
-    return render(
-        request,
-        "recommendations/payment.html",
-        {
-            "booking": booking,
-            "vietqr_url": vietqr_url,
-        }
-    )
-
-
-@login_required
-def confirm_payment(request, booking_id):
-    booking = get_object_or_404(
-        BookedMovie.objects.select_related("movie"),
-        id=booking_id,
-        user=request.user,
-    )
-
-    now = timezone.now()
-
-    if request.method != "POST":
-        return redirect(
-            "payment_page",
-            booking_id=booking.id
-        )
-
-    if (
-        booking.payment_status == "unpaid"
-        and booking.booking_status == "pending_payment"
-        and booking.booking_date < now
-    ):
-        booking.booking_status = "expired"
-        booking.save(update_fields=["booking_status"])
-
-        messages.error(
-            request,
-            "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
-        )
-
-        return redirect("user_home")
-
-    if booking.booking_status == "expired":
-        messages.error(
-            request,
-            "Đơn đặt phim này đã hết hạn nên không thể thanh toán."
-        )
-        return redirect("user_home")
-
-    if booking.booking_status == "cancelled":
-        messages.error(
-            request,
-            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
-        )
-        return redirect("user_home")
-
-    if booking.payment_status == "paid":
-        messages.warning(
-            request,
-            "Đơn này đã được thanh toán trước đó."
-        )
-
-        if hasattr(booking, "invoice") and booking.invoice:
-            return redirect(
-                "invoice_detail",
-                invoice_code=booking.invoice.invoice_code
-            )
-
-        return redirect("user_home")
-
-    booking.payment_status = "paid"
-    booking.booking_status = "confirmed"
-    booking.paid_at = timezone.now()
-    booking.save(
-        update_fields=[
-            "payment_status",
-            "booking_status",
-            "paid_at",
-            "booking_end_time",
-        ]
-    )
-
-    invoice = create_or_get_invoice(booking)
-
-    return redirect(
-        "invoice_detail",
-        invoice_code=invoice.invoice_code
-    )
+#     return render(
+#         request,
+#         "recommendations/payment.html",
+#         {
+#             "booking": booking,
+#             "vietqr_url": vietqr_url,
+#         }
+#     )
 
 
-@login_required
-def invoice_detail(request, invoice_code):
-    invoice = get_object_or_404(
-        Invoice,
-        invoice_code=invoice_code,
-        user=request.user,
-    )
+# @login_required
+# def confirm_payment(request, booking_id):
+#     booking = get_object_or_404(
+#         BookedMovie.objects.select_related("movie"),
+#         id=booking_id,
+#         user=request.user,
+#     )
 
-    return render(
-        request,
-        "recommendations/invoice_detail.html",
-        {
-            "invoice": invoice,
-        }
-    )
+#     now = timezone.now()
+
+#     if request.method != "POST":
+#         return redirect(
+#             "payment_page",
+#             booking_id=booking.id
+#         )
+
+#     if (
+#         booking.payment_status == "unpaid"
+#         and booking.booking_status == "pending_payment"
+#         and booking.booking_date < now
+#     ):
+#         booking.booking_status = "expired"
+#         booking.save(update_fields=["booking_status"])
+
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
+#         )
+
+#         return redirect("user_home")
+
+#     if booking.booking_status == "expired":
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã hết hạn nên không thể thanh toán."
+#         )
+#         return redirect("user_home")
+
+#     if booking.booking_status == "cancelled":
+#         messages.error(
+#             request,
+#             "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
+#         )
+#         return redirect("user_home")
+
+#     if booking.payment_status == "paid":
+#         messages.warning(
+#             request,
+#             "Đơn này đã được thanh toán trước đó."
+#         )
+
+#         if hasattr(booking, "invoice") and booking.invoice:
+#             return redirect(
+#                 "invoice_detail",
+#                 invoice_code=booking.invoice.invoice_code
+#             )
+
+#         return redirect("user_home")
+
+#     booking.payment_status = "paid"
+#     booking.booking_status = "confirmed"
+#     booking.paid_at = timezone.now()
+#     booking.save(
+#         update_fields=[
+#             "payment_status",
+#             "booking_status",
+#             "paid_at",
+#             "booking_end_time",
+#         ]
+#     )
+
+#     invoice = create_or_get_invoice(booking)
+
+#     return redirect(
+#         "invoice_detail",
+#         invoice_code=invoice.invoice_code
+#     )
+
+
+# @login_required
+# def invoice_detail(request, invoice_code):
+#     invoice = get_object_or_404(
+#         Invoice,
+#         invoice_code=invoice_code,
+#         user=request.user,
+#     )
+
+#     return render(
+#         request,
+#         "recommendations/invoice_detail.html",
+#         {
+#             "invoice": invoice,
+#         }
+#     )
 
 
 # =========================================================
