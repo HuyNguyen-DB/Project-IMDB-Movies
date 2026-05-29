@@ -69,32 +69,30 @@ urlpatterns = [
 
     path('rooms/', views.room_list, name='room_list'),
 
-<<<<<<< HEAD
-    path('payment/<int:booking_id>/', views.payment_page, name='payment_page'),
-    path('payment/<int:booking_id>/confirm/', views.confirm_payment, name='confirm_payment'),
-    path('payment/<int:booking_id>/status/', views.payment_status, name='payment_status'),
-    path('invoice/<str:invoice_code>/', views.invoice_detail, name='invoice_detail'),
-=======
+   
     path(
-        'payment/<int:booking_id>/',
+        "payment/<int:booking_id>/",
         views.payment_page,
-        name='payment_page'
+        name="payment_page"
     ),
 
     path(
-        'payment/<int:booking_id>/confirm/',
-        views.confirm_payment,
-        name='confirm_payment'
+        "payment/<int:booking_id>/status/",
+        views.payment_status,
+        name="payment_status"
     ),
 
     path(
-        'invoice/<str:invoice_code>/',
+        "invoice/<str:invoice_code>/",
         views.invoice_detail,
-        name='invoice_detail'
+        name="invoice_detail"
     ),
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
-    path("webhook/sepay/", views.sepay_webhook, name="sepay_webhook"),
 
+    path(
+        "webhook/sepay/",
+        views.sepay_webhook,
+        name="sepay_webhook"
+    ),
     path("chatbot/", views.chatbot_api, name="chatbot_api"),
 ]
 

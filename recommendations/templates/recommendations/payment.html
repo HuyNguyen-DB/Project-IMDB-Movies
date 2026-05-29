@@ -4,15 +4,48 @@
 {% block title %}Thanh toán đơn đặt phim{% endblock %}
 
 {% block content %}
+
+{% comment %}
+=========================================================
+1. PAYMENT PAGE
+- Trang thanh toán theo hướng realtime qua SePay
+- Không còn nút xác nhận thanh toán thủ công
+- Hệ thống tự kiểm tra trạng thái thanh toán định kỳ
+=========================================================
+{% endcomment %}
+
 <main class="page">
+
+    {% comment %}
+    =========================================================
+    2. PAGE HEADER
+    =========================================================
+    {% endcomment %}
+
     <header class="section-head">
         <div>
             <h1 class="page-title">Thanh toán đơn đặt phim</h1>
-            <p class="page-subtitle">Quét mã VietQR và xác nhận sau khi thanh toán.</p>
+            <p class="page-subtitle">
+                Quét mã VietQR bên dưới và chuyển khoản đúng nội dung để hệ thống tự động xác nhận.
+            </p>
         </div>
     </header>
 
+
+    {% comment %}
+    =========================================================
+    3. PAYMENT LAYOUT
+    =========================================================
+    {% endcomment %}
+
     <div class="summary-layout">
+
+        {% comment %}
+        =========================
+        3.1. BOOKING SUMMARY
+        =========================
+        {% endcomment %}
+
         <section class="card">
             <h2>Thông tin đơn đặt</h2>
 
@@ -37,14 +70,9 @@
                 <span class="info-value">{{ booking.room_name }}</span>
             </div>
 
-<<<<<<< HEAD
-            <div class="note-box" id="payment-note-box">
-                Hãy kiểm tra kỹ thông tin trước khi thanh toán. Sau khi chuyển khoản thành công và hệ thống nhận được cập nhật trạng thái, bạn sẽ được tự động chuyển đến trang hóa đơn.
-=======
             <div class="info-row">
                 <span class="info-label">Thời gian bắt đầu</span>
                 <span class="info-value">{{ booking.booking_date|vn_datetime }}</span>
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
             </div>
 
             {% if booking.booking_end_time %}
@@ -66,7 +94,9 @@
 
             <div class="info-row">
                 <span class="info-label">Thanh toán</span>
-                <span class="info-value">{{ booking.get_payment_status_display }}</span>
+                <span class="info-value" id="paymentStatusText">
+                    {{ booking.get_payment_status_display }}
+                </span>
             </div>
 
             <div class="info-row">
@@ -75,141 +105,157 @@
             </div>
         </section>
 
-        <section class="card" style="text-align:center;">
+
+        {% comment %}
+        =========================
+        3.2. VIETQR PAYMENT BOX
+        =========================
+        {% endcomment %}
+
+        <section class="card payment-card">
             <h2>VietQR</h2>
 
             <p class="muted">
-                Nội dung chuyển khoản:
-                <strong>{{ booking.booking_code }}</strong>
+                Vui lòng chuyển khoản đúng số tiền và đúng nội dung bên dưới.
             </p>
 
             <div class="qr-box">
                 <img src="{{ vietqr_url }}" alt="Mã VietQR thanh toán">
             </div>
 
-            {% if booking.payment_status == 'unpaid' %}
-<<<<<<< HEAD
+            <div class="payment-note-box">
+                <p>Nội dung chuyển khoản</p>
+                <strong>{{ booking.booking_code }}</strong>
+            </div>
 
-<div class="summary-box" style="margin-top:20px;text-align:center;">
+            <div class="payment-waiting-box" id="paymentWaitingBox">
+                <div class="payment-spinner"></div>
 
-    <h3 style="margin-top:0;color:white;">
-        Quét QR để thanh toán
-    </h3>
+                <div>
+                    <strong>Đang chờ thanh toán...</strong>
+                    <p>
+                        Sau khi bạn chuyển khoản thành công, hệ thống sẽ tự động xác nhận và chuyển sang hóa đơn.
+                    </p>
+                </div>
+            </div>
 
-    <img
-        src="{{ vietqr_url }}"
-        alt="QR Thanh toán"
-        style="
-            width:280px;
-            max-width:100%;
-            border-radius:16px;
-            background:white;
-            padding:12px;
-        "
-    >
+            <div class="actions">
+                <a href="{% url 'user_home' %}" class="btn btn-soft">
+                    Quay lại lịch sử
+                </a>
 
-    <p style="margin-top:18px;color:#94a3b8;line-height:1.6;">
-        Ngân hàng: <strong style="color:white;">MB Bank</strong><br>
-        Chủ tài khoản:
-        <strong style="color:white;">NGUYEN HUY</strong><br>
-        Nội dung:
-        <strong style="color:#22c55e;">
-            {{ booking.booking_code }}
-        </strong>
-    </p>
-
-</div>
-
-<div class="summary-box" style="margin-top:20px;text-align:center;">
-    <p style="margin-top:0;color:#d1fae5;line-height:1.6;">
-        Bạn chỉ cần hoàn tất chuyển khoản theo QR trên. Hệ thống sẽ tự động kiểm tra trạng thái thanh toán mỗi 5 giây, xác nhận và tạo hóa đơn khi thanh toán được cập nhật.
-    </p>
-</div>
-
-<div id="payment-status-message" class="summary-box" style="margin-top:20px;text-align:center; background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.18); color:#bfdbfe;">
-    Đang chờ xác nhận thanh toán... Vui lòng không tắt trang.
-</div>
-=======
-                <form method="POST" action="{% url 'confirm_payment' booking.id %}" class="actions" style="justify-content:center;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">
-                        Tôi đã thanh toán
-                    </button>
-                </form>
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
-            {% else %}
-                {% if booking.invoice and booking.invoice.invoice_code %}
-                    <a href="{% url 'invoice_detail' booking.invoice.invoice_code %}" class="btn btn-primary">
-                        Xem hóa đơn
-                    </a>
-                {% endif %}
-            {% endif %}
+                <button type="button" class="btn btn-primary" id="checkPaymentNow">
+                    Kiểm tra thanh toán
+                </button>
+            </div>
         </section>
+
     </div>
-<<<<<<< HEAD
-</div>
+
+</main>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+{% comment %}
+=========================================================
+4. PAYMENT STATUS POLLING
+- Gọi API payment_status định kỳ
+- Nếu payment_status = paid thì chuyển sang invoice_detail
+=========================================================
+{% endcomment %}
 
 <script>
-    const paymentStatusEndpoint = "{% url 'payment_status' booking.id %}";
-    const invoiceRedirectPrefix = "{% url 'invoice_detail' 'INVOICE_CODE' %}".replace('INVOICE_CODE', '').replace('//', '/');
-    const statusMessage = document.getElementById('payment-status-message');
+document.addEventListener("DOMContentLoaded", function () {
+    const paymentStatusUrl = "{{ payment_check_url }}";
+    const invoiceBaseUrl = "{% url 'invoice_detail' 'INVOICE_CODE_PLACEHOLDER' %}";
+    const statusText = document.getElementById("paymentStatusText");
+    const checkButton = document.getElementById("checkPaymentNow");
+    const waitingBox = document.getElementById("paymentWaitingBox");
 
-    function updateStatusMessage(text, isError = false) {
-        if (!statusMessage) return;
-        statusMessage.textContent = text;
-        statusMessage.style.color = isError ? '#fecaca' : '#bfdbfe';
-        statusMessage.style.background = isError ? 'rgba(239,68,68,0.08)' : 'rgba(59,130,246,0.08)';
-        statusMessage.style.borderColor = isError ? 'rgba(239,68,68,0.18)' : 'rgba(59,130,246,0.18)';
+    let isRedirecting = false;
+
+    function goToInvoice(invoiceCode) {
+        if (!invoiceCode || isRedirecting) {
+            return;
+        }
+
+        isRedirecting = true;
+
+        const invoiceUrl = invoiceBaseUrl.replace(
+            "INVOICE_CODE_PLACEHOLDER",
+            invoiceCode
+        );
+
+        window.location.href = invoiceUrl;
+    }
+
+    function updateStatusLabel(paymentStatus) {
+        if (!statusText) {
+            return;
+        }
+
+        if (paymentStatus === "paid") {
+            statusText.textContent = "Đã thanh toán";
+        } else if (paymentStatus === "unpaid") {
+            statusText.textContent = "Chưa thanh toán";
+        } else if (paymentStatus === "refund_pending") {
+            statusText.textContent = "Đang chờ hoàn tiền";
+        } else if (paymentStatus === "refunded") {
+            statusText.textContent = "Đã hoàn tiền";
+        } else if (paymentStatus === "failed") {
+            statusText.textContent = "Thanh toán thất bại";
+        } else {
+            statusText.textContent = paymentStatus || "Chưa cập nhật";
+        }
     }
 
     async function checkPaymentStatus() {
         try {
-            const response = await fetch(paymentStatusEndpoint, {
-                credentials: 'same-origin',
+            const response = await fetch(paymentStatusUrl, {
+                method: "GET",
                 headers: {
-                    'Accept': 'application/json'
+                    "X-Requested-With": "XMLHttpRequest"
                 }
             });
 
             if (!response.ok) {
-                updateStatusMessage('Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại sau.', true);
                 return;
             }
 
             const data = await response.json();
 
-            if (data.payment_status === 'paid') {
-                if (data.invoice_code) {
-                    window.location.href = invoiceRedirectPrefix + data.invoice_code + '/';
-                    return;
+            updateStatusLabel(data.payment_status);
+
+            if (data.payment_status === "paid" && data.invoice_code) {
+                if (waitingBox) {
+                    waitingBox.innerHTML = `
+                        <div>
+                            <strong>Thanh toán thành công!</strong>
+                            <p>Đang chuyển sang hóa đơn...</p>
+                        </div>
+                    `;
                 }
-                updateStatusMessage('Thanh toán đã được xác nhận. Đang tạo hóa đơn, vui lòng chờ...');
-                setTimeout(checkPaymentStatus, 3000);
-                return;
-            }
 
-            if (data.booking_status === 'expired') {
-                updateStatusMessage('Đơn đặt đã hết hạn vì chưa thanh toán đúng hạn.', true);
-                return;
+                goToInvoice(data.invoice_code);
             }
-
-            if (data.booking_status === 'cancelled') {
-                updateStatusMessage('Đơn đặt đã bị hủy, không thể thanh toán.', true);
-                return;
-            }
-
-            updateStatusMessage('Đang chờ xác nhận thanh toán... Vui lòng không tắt trang.');
         } catch (error) {
-            updateStatusMessage('Lỗi kết nối khi kiểm tra thanh toán. Vui lòng thử lại sau.', true);
+            console.error("Payment status check failed:", error);
         }
     }
 
-    setInterval(checkPaymentStatus, 5000);
+    if (checkButton) {
+        checkButton.addEventListener("click", checkPaymentStatus);
+    }
+
+    // Kiểm tra ngay khi vào trang
     checkPaymentStatus();
+
+    // Tự động kiểm tra mỗi 5 giây
+    setInterval(checkPaymentStatus, 5000);
+});
 </script>
-</body>
-</html>
-=======
-</main>
+
 {% endblock %}
->>>>>>> 811e10033850c2668846147dbfce724615702d0e

@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, login
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import JsonResponse
@@ -852,28 +852,54 @@ def book_movie(request):
         }
     )
 
-
 # =========================================================
-# PAYMENT / INVOICE
+# PAYMENT / SEPAY WEBHOOK / INVOICE FLOW
+# =========================================================
+# Luồng thanh toán mới:
+# 1. Người dùng tạo đơn đặt phim
+# 2. Hệ thống chuyển sang payment_page để hiển thị mã QR
+# 3. Người dùng chuyển khoản theo đúng nội dung booking_code
+# 4. SePay gửi webhook về hệ thống
+# 5. Webhook xác nhận số tiền + nội dung chuyển khoản
+# 6. Nếu hợp lệ:
+#       - booking.payment_status = "paid"
+#       - booking.booking_status = "confirmed"
+#       - tạo invoice
+# 7. Trang payment.html gọi payment_status định kỳ
+# 8. Khi thấy paid thì tự chuyển sang invoice_detail
 # =========================================================
 
-<<<<<<< HEAD
+
 @csrf_exempt
 def sepay_webhook(request):
+    # =====================================================
+    # 1. SEPAY WEBHOOK
+    # - Nhận thông báo thanh toán tự động từ SePay
+    # - Không cần người dùng bấm "Tôi đã thanh toán"
+    # =====================================================
+
     print("HEADERS:", dict(request.headers))
 
-    secret = request.headers.get("Authorization", "")
-
-    print("SECRET RECEIVED:", secret)
-
-    expected = "Apikey spsk_live_T6hgYSEssUWqmd7fFQ3kHKMYMk5DmbEx"
-
-    print("EXPECTED:", expected)
+    # -----------------------------------------------------
+    # 1.1. Chỉ cho phép POST
+    # -----------------------------------------------------
 
     if request.method != "POST":
         return JsonResponse({
             "error": "Invalid method"
         }, status=405)
+
+    # -----------------------------------------------------
+    # 1.2. Kiểm tra Authorization từ SePay
+    # Lưu ý: sau này nên đưa secret này vào settings.py
+    # -----------------------------------------------------
+
+    secret = request.headers.get("Authorization", "")
+
+    expected = "Apikey spsk_live_T6hgYSEssUWqmd7fFQ3kHKMYMk5DmbEx"
+
+    print("SECRET RECEIVED:", secret)
+    print("EXPECTED:", expected)
 
     if secret != expected:
         return JsonResponse({
@@ -881,6 +907,10 @@ def sepay_webhook(request):
         }, status=401)
 
     try:
+        # -------------------------------------------------
+        # 1.3. Đọc dữ liệu webhook
+        # -------------------------------------------------
+
         data = json.loads(request.body)
 
         print("SEPAY WEBHOOK DATA:", data)
@@ -893,6 +923,10 @@ def sepay_webhook(request):
                 "error": "Missing payment data"
             }, status=400)
 
+        # -------------------------------------------------
+        # 1.4. Tìm đơn chưa thanh toán khớp nội dung CK
+        # -------------------------------------------------
+
         unpaid_bookings = BookedMovie.objects.filter(
             payment_status="unpaid"
         )
@@ -900,24 +934,33 @@ def sepay_webhook(request):
         matched_booking = None
 
         print("TRYING TO MATCH BOOKINGS...")
-        
+
         for booking in unpaid_bookings:
             booking_code = str(booking.booking_code).strip()
-            booking_id_pattern = f"BM{booking.id}"
             booking_code_no_hyphen = booking_code.replace("-", "")
-            
-            print(f"Checking booking {booking.id}: code={booking_code}, no_hyphen={booking_code_no_hyphen}, pattern={booking_id_pattern}, content={content}")
+            booking_id_pattern = f"BM{booking.id}"
 
+            print(
+                f"Checking booking {booking.id}: "
+                f"code={booking_code}, "
+                f"no_hyphen={booking_code_no_hyphen}, "
+                f"pattern={booking_id_pattern}, "
+                f"content={content}"
+            )
+
+            # Cách 1: nội dung CK chứa booking_code nguyên bản
             if booking_code.lower() in content.lower():
-                print(f"MATCHED via booking_code (with hyphen): {booking.id}")
+                print(f"MATCHED via booking_code: {booking.id}")
                 matched_booking = booking
                 break
-            
+
+            # Cách 2: nội dung CK chứa booking_code nhưng bỏ dấu "-"
             if booking_code_no_hyphen.lower() in content.lower():
-                print(f"MATCHED via booking_code (no hyphen): {booking.id}")
+                print(f"MATCHED via booking_code no hyphen: {booking.id}")
                 matched_booking = booking
                 break
-            
+
+            # Cách 3: nội dung CK chứa BM + id
             if booking_id_pattern.lower() in content.lower():
                 print(f"MATCHED via booking_id_pattern: {booking.id}")
                 matched_booking = booking
@@ -925,27 +968,53 @@ def sepay_webhook(request):
 
         if not matched_booking:
             print("NO MATCH FOUND")
+
             return JsonResponse({
                 "success": True,
                 "message": "Webhook received but no matching booking"
             })
-        
-        print(f"MATCHED BOOKING: {matched_booking.id} - {matched_booking.booking_code}")
+
+        print(
+            f"MATCHED BOOKING: "
+            f"{matched_booking.id} - {matched_booking.booking_code}"
+        )
+
+        # -------------------------------------------------
+        # 1.5. Kiểm tra số tiền chuyển khoản
+        # -------------------------------------------------
 
         if int(transfer_amount) != int(matched_booking.total_price):
-            print(f"AMOUNT MISMATCH: {transfer_amount} vs {matched_booking.total_price}")
+            print(
+                f"AMOUNT MISMATCH: "
+                f"{transfer_amount} vs {matched_booking.total_price}"
+            )
+
             return JsonResponse({
                 "error": "Invalid amount"
             }, status=400)
 
+        # -------------------------------------------------
+        # 1.6. Nếu đơn đã paid trước đó thì trả invoice luôn
+        # -------------------------------------------------
+
         if matched_booking.payment_status == "paid":
             print(f"BOOKING {matched_booking.id} ALREADY PAID")
+
+            invoice = create_or_get_invoice(matched_booking)
+
             return JsonResponse({
-                "message": "Already paid"
+                "success": True,
+                "message": "Already paid",
+                "payment_status": "paid",
+                "invoice_code": invoice.invoice_code,
             })
 
-        print(f"UPDATING BOOKING {matched_booking.id} to PAID")
-        
+        # -------------------------------------------------
+        # 1.7. Cập nhật đơn thành đã thanh toán
+        # -------------------------------------------------
+
+        print(f"UPDATING BOOKING {matched_booking.id} TO PAID")
+
         matched_booking.payment_status = "paid"
         matched_booking.booking_status = "confirmed"
         matched_booking.paid_at = timezone.now()
@@ -959,13 +1028,19 @@ def sepay_webhook(request):
         )
 
         print(f"BOOKING {matched_booking.id} UPDATED SUCCESSFULLY")
-        
+
+        # -------------------------------------------------
+        # 1.8. Sau khi paid mới tạo invoice
+        # -------------------------------------------------
+
         invoice = create_or_get_invoice(matched_booking)
 
         print(f"INVOICE CREATED: {invoice.invoice_code}")
-        
+
         return JsonResponse({
             "success": True,
+            "payment_status": "paid",
+            "booking_status": matched_booking.booking_status,
             "invoice_code": invoice.invoice_code,
         })
 
@@ -975,124 +1050,140 @@ def sepay_webhook(request):
         return JsonResponse({
             "error": str(error)
         }, status=500)
-    
+
+
 @login_required
 def payment_page(request, booking_id):
+    # =====================================================
+    # 2. PAYMENT PAGE
+    # - Hiển thị trang thanh toán
+    # - Chỉ hiển thị QR và thông tin chuyển khoản
+    # - Không tạo invoice tại đây nếu chưa thanh toán
+    # =====================================================
+
     booking = get_object_or_404(
         BookedMovie.objects.select_related("movie"),
         id=booking_id,
         user=request.user,
     )
-=======
-# @login_required
-# def payment_page(request, booking_id):
-#     booking = get_object_or_404(
-#         BookedMovie.objects.select_related("movie"),
-#         id=booking_id,
-#         user=request.user,
-#     )
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
 
-#     now = timezone.now()
+    now = timezone.now()
 
-#     if (
-#         booking.payment_status == "unpaid"
-#         and booking.booking_status == "pending_payment"
-#         and booking.booking_date < now
-#     ):
-#         booking.booking_status = "expired"
-#         booking.save(update_fields=["booking_status"])
+    # -----------------------------------------------------
+    # 2.1. Nếu đơn chưa thanh toán nhưng đã quá giờ xem
+    #      thì đánh dấu hết hạn
+    # -----------------------------------------------------
 
-#     if booking.booking_status == "expired":
-#         messages.error(
-#             request,
-#             "Đơn đặt phim này đã hết hạn."
-#         )
-#         return redirect("user_home")
+    if (
+        booking.payment_status == "unpaid"
+        and booking.booking_status == "pending_payment"
+        and booking.booking_date < now
+    ):
+        booking.booking_status = "expired"
+        booking.save(update_fields=["booking_status"])
 
-#     if booking.booking_status == "cancelled":
-#         messages.error(
-#             request,
-#             "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
-#         )
-#         return redirect("user_home")
+    # -----------------------------------------------------
+    # 2.2. Chặn đơn hết hạn
+    # -----------------------------------------------------
 
-#     if booking.payment_status == "paid":
-#         messages.warning(
-#             request,
-#             "Đơn này đã được thanh toán trước đó."
-#         )
+    if booking.booking_status == "expired":
+        messages.error(
+            request,
+            "Đơn đặt phim này đã hết hạn."
+        )
 
-<<<<<<< HEAD
-        if not hasattr(booking, "invoice") or not booking.invoice:
-            invoice = create_or_get_invoice(booking)
-            return redirect(
-                "invoice_detail",
-                invoice_code=invoice.invoice_code
-            )
+        return redirect("user_home")
+
+    # -----------------------------------------------------
+    # 2.3. Chặn đơn đã hủy
+    # -----------------------------------------------------
+
+    if booking.booking_status == "cancelled":
+        messages.error(
+            request,
+            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
+        )
+
+        return redirect("user_home")
+
+    # -----------------------------------------------------
+    # 2.4. Nếu đơn đã thanh toán thì chuyển sang hóa đơn
+    # -----------------------------------------------------
+
+    if booking.payment_status == "paid":
+        invoice = create_or_get_invoice(booking)
 
         return redirect(
             "invoice_detail",
-            invoice_code=booking.invoice.invoice_code
+            invoice_code=invoice.invoice_code
         )
-=======
-#         if hasattr(booking, "invoice") and booking.invoice:
-#             return redirect(
-#                 "invoice_detail",
-#                 invoice_code=booking.invoice.invoice_code
-#             )
 
-#         return redirect("user_home")
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
+    # -----------------------------------------------------
+    # 2.5. Nếu chưa thanh toán thì tạo QR
+    #      Tuyệt đối không tạo invoice ở bước này
+    # -----------------------------------------------------
 
-#     bank_id = "970422"
-#     account_no = "0762535498"
-#     account_name = "HUY%20NGUYEN"
+    bank_id = "970422"
+    account_no = "0762535498"
+    account_name = "HUY%20NGUYEN"
 
-<<<<<<< HEAD
     amount = int(booking.total_price or 0)
-    description = booking.booking_code
-=======
-#     amount = int(booking.total_price or 0)
-#     description = booking.booking_code or f"BOOKING{booking.id}"
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
 
-#     vietqr_url = (
-#         f"https://img.vietqr.io/image/"
-#         f"{bank_id}-{account_no}-compact2.png"
-#         f"?amount={amount}"
-#         f"&addInfo={description}"
-#         f"&accountName={account_name}"
-#     )
+    # Nội dung CK phải dễ match với webhook
+    description = booking.booking_code or f"BM{booking.id}"
 
-#     return render(
-#         request,
-#         "recommendations/payment.html",
-#         {
-#             "booking": booking,
-#             "vietqr_url": vietqr_url,
-#         }
-#     )
+    vietqr_url = (
+        f"https://img.vietqr.io/image/"
+        f"{bank_id}-{account_no}-compact2.png"
+        f"?amount={amount}"
+        f"&addInfo={description}"
+        f"&accountName={account_name}"
+    )
+
+    return render(
+        request,
+        "recommendations/payment.html",
+        {
+            "booking": booking,
+            "vietqr_url": vietqr_url,
+            "payment_check_url": reverse(
+                "payment_status",
+                kwargs={
+                    "booking_id": booking.id
+                }
+            ),
+        }
+    )
 
 
-<<<<<<< HEAD
 @login_required
 def payment_status(request, booking_id):
+    # =====================================================
+    # 3. PAYMENT STATUS API
+    # - Frontend gọi API này định kỳ
+    # - Nếu webhook đã cập nhật paid thì trả invoice_code
+    # - Không tự chuyển unpaid thành paid ở đây
+    # =====================================================
+
     booking = get_object_or_404(
-        BookedMovie.objects.select_related("invoice"),
+        BookedMovie.objects.select_related("movie"),
         id=booking_id,
         user=request.user,
     )
 
     invoice_code = None
+
+    # -----------------------------------------------------
+    # 3.1. Nếu đã paid thì đảm bảo invoice tồn tại
+    # -----------------------------------------------------
+
     if booking.payment_status == "paid":
-        if not hasattr(booking, "invoice") or not booking.invoice:
-            invoice = create_or_get_invoice(booking)
-            invoice_code = invoice.invoice_code
-        else:
-            invoice_code = booking.invoice.invoice_code
-    elif hasattr(booking, "invoice") and booking.invoice:
-        invoice_code = booking.invoice.invoice_code
+        invoice = create_or_get_invoice(booking)
+        invoice_code = invoice.invoice_code
+
+    # -----------------------------------------------------
+    # 3.2. Trả JSON cho payment.html
+    # -----------------------------------------------------
 
     return JsonResponse({
         "payment_status": booking.payment_status,
@@ -1102,205 +1193,25 @@ def payment_status(request, booking_id):
 
 
 @login_required
-def confirm_payment(request, booking_id):
-    booking = get_object_or_404(
-        BookedMovie.objects.select_related("movie"),
-        id=booking_id,
+def invoice_detail(request, invoice_code):
+    # =====================================================
+    # 4. INVOICE DETAIL
+    # - Chỉ hiển thị hóa đơn cho đúng user sở hữu
+    # =====================================================
+
+    invoice = get_object_or_404(
+        Invoice,
+        invoice_code=invoice_code,
         user=request.user,
     )
 
-    now = timezone.now()
-    wants_json = (
-        request.headers.get("x-requested-with") == "XMLHttpRequest"
-        or "application/json" in request.headers.get("Accept", "")
-        or request.content_type == "application/json"
+    return render(
+        request,
+        "recommendations/invoice_detail.html",
+        {
+            "invoice": invoice,
+        }
     )
-
-    if request.method != "POST":
-        if wants_json:
-            return JsonResponse({
-                "error": "Phương thức không hợp lệ",
-            }, status=405)
-        return redirect(
-            "payment_page",
-            booking_id=booking.id
-        )
-=======
-# @login_required
-# def confirm_payment(request, booking_id):
-#     booking = get_object_or_404(
-#         BookedMovie.objects.select_related("movie"),
-#         id=booking_id,
-#         user=request.user,
-#     )
-
-#     now = timezone.now()
-
-#     if request.method != "POST":
-#         return redirect(
-#             "payment_page",
-#             booking_id=booking.id
-#         )
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
-
-#     if (
-#         booking.payment_status == "unpaid"
-#         and booking.booking_status == "pending_payment"
-#         and booking.booking_date < now
-#     ):
-#         booking.booking_status = "expired"
-#         booking.save(update_fields=["booking_status"])
-
-#         messages.error(
-#             request,
-#             "Đơn đặt phim này đã hết hạn vì đã qua ngày giờ xem nhưng chưa thanh toán."
-#         )
-
-#         return redirect("user_home")
-
-<<<<<<< HEAD
-    if booking.booking_status == "expired":
-        if wants_json:
-            return JsonResponse({
-                "error": "Đơn đặt phim này đã hết hạn nên không thể thanh toán.",
-                "payment_status": booking.payment_status,
-                "booking_status": booking.booking_status,
-            }, status=400)
-
-        messages.error(
-            request,
-            "Đơn đặt phim này đã hết hạn nên không thể thanh toán."
-        )
-        return redirect("user_home")
-
-    if booking.booking_status == "cancelled":
-        if wants_json:
-            return JsonResponse({
-                "error": "Đơn đặt phim này đã bị hủy nên không thể thanh toán.",
-                "payment_status": booking.payment_status,
-                "booking_status": booking.booking_status,
-            }, status=400)
-
-        messages.error(
-            request,
-            "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
-        )
-        return redirect("user_home")
-
-    if booking.payment_status == "paid":
-        if hasattr(booking, "invoice") and booking.invoice:
-            if wants_json:
-                return JsonResponse({
-                    "payment_status": "paid",
-                    "invoice_code": booking.invoice.invoice_code,
-                })
-            return redirect(
-                "invoice_detail",
-                invoice_code=booking.invoice.invoice_code
-            )
-
-        if wants_json:
-            invoice = create_or_get_invoice(booking)
-            return JsonResponse({
-                "payment_status": "paid",
-                "invoice_code": invoice.invoice_code,
-            })
-
-        messages.warning(
-            request,
-            "Đơn này đã được thanh toán trước đó."
-        )
-        return redirect("user_home")
-
-    booking.payment_status = "paid"
-    booking.booking_status = "confirmed"
-    booking.paid_at = timezone.now()
-    booking.save(
-        update_fields=[
-            "payment_status",
-            "booking_status",
-            "paid_at",
-        ]
-    )
-=======
-#     if booking.booking_status == "expired":
-#         messages.error(
-#             request,
-#             "Đơn đặt phim này đã hết hạn nên không thể thanh toán."
-#         )
-#         return redirect("user_home")
-
-#     if booking.booking_status == "cancelled":
-#         messages.error(
-#             request,
-#             "Đơn đặt phim này đã bị hủy nên không thể thanh toán."
-#         )
-#         return redirect("user_home")
-
-#     if booking.payment_status == "paid":
-#         messages.warning(
-#             request,
-#             "Đơn này đã được thanh toán trước đó."
-#         )
-
-#         if hasattr(booking, "invoice") and booking.invoice:
-#             return redirect(
-#                 "invoice_detail",
-#                 invoice_code=booking.invoice.invoice_code
-#             )
-
-#         return redirect("user_home")
-
-#     booking.payment_status = "paid"
-#     booking.booking_status = "confirmed"
-#     booking.paid_at = timezone.now()
-#     booking.save(
-#         update_fields=[
-#             "payment_status",
-#             "booking_status",
-#             "paid_at",
-#             "booking_end_time",
-#         ]
-#     )
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
-
-#     invoice = create_or_get_invoice(booking)
-
-<<<<<<< HEAD
-    if wants_json:
-        return JsonResponse({
-            "payment_status": "paid",
-            "invoice_code": invoice.invoice_code,
-        })
-
-    return redirect(
-        "invoice_detail",
-        invoice_code=invoice.invoice_code
-    )
-=======
-#     return redirect(
-#         "invoice_detail",
-#         invoice_code=invoice.invoice_code
-#     )
->>>>>>> 811e10033850c2668846147dbfce724615702d0e
-
-
-# @login_required
-# def invoice_detail(request, invoice_code):
-#     invoice = get_object_or_404(
-#         Invoice,
-#         invoice_code=invoice_code,
-#         user=request.user,
-#     )
-
-#     return render(
-#         request,
-#         "recommendations/invoice_detail.html",
-#         {
-#             "invoice": invoice,
-#         }
-#     )
-
 
 # =========================================================
 # OTHER
