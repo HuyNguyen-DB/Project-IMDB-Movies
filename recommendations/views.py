@@ -16,6 +16,11 @@ import requests
 import pandas as pd
 import json
 
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils.html import strip_tags
+
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -127,7 +132,42 @@ def create_or_get_invoice(booking):
 
     return invoice
 
+def send_payment_success_email(booking, invoice):
+    user = booking.user
 
+    if not user.email:
+        return
+
+    if booking.movie:
+        movie_title = booking.movie.primaryTitle
+    else:
+        movie_title = "Không rõ phim"
+
+    context = {
+        "booking": booking,
+        "invoice": invoice,
+        "customer_name": get_display_name(user),
+        "movie_title": movie_title,
+        "total_price": f"{int(booking.total_price):,}".replace(",", "."),
+    }
+
+    html_content = render_to_string(
+        "recommendations/emails/payment_success.html",
+        context
+    )
+
+    text_content = strip_tags(html_content)
+
+    email = EmailMultiAlternatives(
+        subject=f"Xác nhận thanh toán đơn {booking.booking_code}",
+        body=text_content,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
+    )
+
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+    
 # =========================================================
 # HOME / ROOM
 # =========================================================
@@ -1034,6 +1074,14 @@ def sepay_webhook(request):
         # -------------------------------------------------
 
         invoice = create_or_get_invoice(matched_booking)
+
+        try:
+            send_payment_success_email(
+                matched_booking,
+                invoice
+            )
+        except Exception as e:
+            print("EMAIL ERROR:", e)
 
         print(f"INVOICE CREATED: {invoice.invoice_code}")
 

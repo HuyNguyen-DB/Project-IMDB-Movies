@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán thành công</title>
+</head>
+<body style="margin:0; padding:0; background:#f4f4f4; font-family:Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:30px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; overflow:hidden;">
+                    <tr>
+                        <td style="background:#111827; color:white; padding:24px; text-align:center;">
+                            <h1 style="margin:0;">Thanh toán thành công</h1>
+                            <p style="margin:8px 0 0;">Cảm ơn bạn đã đặt phim</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:28px;">
+                            <p>Xin chào <strong>{{ customer_name }}</strong>,</p>
+
+                            <p>Hệ thống đã xác nhận thanh toán của bạn thành công.</p>
+
+                            <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
+                                <tr>
+                                    <td>Mã hóa đơn</td>
+                                    <td align="right"><strong>{{ invoice.invoice_code }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Mã thanh toán/td>
+                                    <td align="right"><strong>{{ booking.booking_code }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Phim</td>
+                                    <td align="right">{{ movie_title }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Phòng</td>
+                                    <td align="right">{{ booking.room_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Thời gian</td>
+                                    <td align="right">{{ booking.booking_date|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Thời lượng</td>
+                                    <td align="right">{{ booking.rental_duration_minutes }} phút</td>
+                                </tr>
+                            </table>
+
+                            <div style="margin-top:24px; padding:18px; background:#f9fafb; border-radius:10px; text-align:center;">
+                                <p style="margin:0;">Tổng thanh toán</p>
+                                <p style="margin:8px 0 0; font-size:26px; color:#dc2626; font-weight:bold;">
+                                    {{ total_price }} VNĐ
+                                </p>
+                            </div>
+
+                            <p style="margin-top:24px;">
+                                Vui lòng đến đúng giờ để sử dụng phòng chiếu. Chúc bạn xem phim vui vẻ!
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="background:#f9fafb; padding:16px; text-align:center; color:#777; font-size:13px;">
+                            Email này được gửi tự động, vui lòng không trả lời email này.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

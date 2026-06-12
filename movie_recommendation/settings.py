@@ -135,3 +135,15 @@ LOGOUT_REDIRECT_URL = 'login'  # Chuyển hướng đến trang đăng nhập sa
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 TMDB_API_KEY = "a3c425d862517f368af52863c3e6275e"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_HOST_USER = "huyhaituong@gmail.com"
+EMAIL_HOST_PASSWORD = "ysew vqpg midk tvtl"
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
