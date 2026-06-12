@@ -1234,23 +1234,37 @@ def chatbot_api(request):
 
         try:
             response = requests.post(
-                "https://baton-sweat-levers.ngrok-free.dev/chat",
+                "https://mutable-usual-endeared.ngrok-free.dev/chat",
                 json={
                     "message": user_message
                 },
-                timeout=20,
+                timeout=30,
             )
 
             response.raise_for_status()
             data = response.json()
 
+            reply = data.get("response", "Bot chưa có phản hồi.")
+
+            base_url = request.build_absolute_uri("/")[:-1]
+
+            reply = reply.replace(
+                "/select_movie/",
+                base_url + "/select_movie/"
+            )
+
+            reply = reply.replace(
+                "/room/",
+                base_url + "/room/"
+            )
+
             return JsonResponse({
-                "reply": data.get("response", "Bot chưa có phản hồi.")
+                "reply": reply
             })
 
-        except Exception:
+        except Exception as e:
             return JsonResponse({
-                "reply": "Hiện tại chatbot chưa phản hồi được. Vui lòng thử lại sau."
+                "reply": f"Hiện tại chatbot chưa phản hồi được. Lỗi: {str(e)}"
             })
 
     return JsonResponse({
