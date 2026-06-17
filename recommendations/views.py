@@ -1301,10 +1301,10 @@ def chatbot_api(request):
                 base_url + "/select_movie/"
             )
 
-            reply = reply.replace(
-                "/room/",
-                base_url + "/room/"
-            )
+            #reply = reply.replace(
+              #  "/room/",
+             #   base_url + "/room/"
+            #)
 
             return JsonResponse({
                 "reply": reply

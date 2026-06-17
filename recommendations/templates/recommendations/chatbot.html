@@ -6,29 +6,30 @@ function formatReply(text){
         return "";
     }
 
-    // Chống trường hợp bot còn trả link cũ
     text = text.replace(
         /\/select_movie\//g,
         "/select-movie/"
     );
 
-    // Link phim dạng tương đối: /select-movie/tt123/
+    text = text.replace(
+        /https?:\/\/[^\s<]+\/select-movie\/([a-zA-Z0-9]+)\//g,
+        '<a href="/select-movie/$1/" class="chat-link">🎬 Đặt phim</a>'
+    );
+
+    text = text.replace(
+    /https?:\/\/[^\/\s<]+\/room\/([a-zA-Z0-9_-]+)\//g,
+    '<a href="/room/$1/" class="chat-link">🍿 Xem phòng</a>'
+);
+
     text = text.replace(
         /\/select-movie\/([a-zA-Z0-9]+)\//g,
         '<a href="/select-movie/$1/" class="chat-link">🎬 Đặt phim</a>'
     );
 
-    // Link phòng dạng tương đối: /room/GROUP_01/
     text = text.replace(
-        /\/room\/([a-zA-Z0-9_]+)\//g,
-        '<a href="/room/$1/" class="chat-link">🍿 Xem phòng</a>'
-    );
-
-    // Link đầy đủ nếu có http/https
-    text = text.replace(
-        /(https?:\/\/[^\s<]+)/g,
-        '<a href="$1" target="_blank" class="chat-link">$1</a>'
-    );
+    /\/room\/([a-zA-Z0-9_-]+)\//g,
+    '<a href="/room/$1/" class="chat-link">🍿 Xem phòng</a>'
+);
 
     text = text.replace(/\n/g, "<br>");
 
