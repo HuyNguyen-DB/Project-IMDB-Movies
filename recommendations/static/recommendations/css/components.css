@@ -6,8 +6,8 @@
     position:sticky;
     top:0;
     z-index:1000;
-    background:rgba(2,6,23,.94);
-    backdrop-filter:blur(12px);
+    background:rgba(255,255,255,0.96);
+    backdrop-filter:blur(6px);
     border-bottom:1px solid var(--line);
 }
 
@@ -34,7 +34,7 @@
     display:flex;
     align-items:center;
     gap:10px;
-    color:white;
+    color:var(--text);
     flex-shrink:0;
 }
 
@@ -57,7 +57,7 @@
 }
 
 .logo-text strong{
-    color:white;
+    color:var(--text);
     font-size:15px;
 }
 
@@ -95,7 +95,7 @@
 .nav-links button,
 .btn-soft{
     background:var(--surface);
-    color:white;
+    color:var(--text);
     border:1px solid var(--line);
 }
 
@@ -133,7 +133,7 @@
     padding:7px 11px;
     cursor:pointer;
     min-width:205px;
-    color:white;
+    color:var(--text);
     transition:.2s;
 }
 
@@ -163,7 +163,7 @@
 
 .user-info strong{
     display:block;
-    color:white;
+    color:var(--text);
     font-size:13.5px;
     white-space:nowrap;
     overflow:hidden;
@@ -208,14 +208,14 @@
 
 .dropdown-header{
     padding:14px 16px;
-    border-bottom:1px solid rgba(255,255,255,.06);
-    background:rgba(255,255,255,.02);
+    border-bottom:1px solid var(--line);
+    background:transparent;
 }
 
 .dropdown-header strong{
     display:block;
     margin-bottom:4px;
-    color:white;
+    color:var(--text);
     font-size:14px;
 }
 
@@ -229,7 +229,7 @@
 
 .dropdown-item{
     display:block;
-    color:white;
+    color:var(--text);
     padding:12px 16px;
     transition:.2s;
     font-size:14px;
@@ -279,19 +279,19 @@
 .message-success{
     background:rgba(34,197,94,.12);
     border-color:rgba(34,197,94,.28);
-    color:#bbf7d0;
+    color:var(--primary-dark);
 }
 
 .message-error{
     background:rgba(248,113,113,.12);
     border-color:rgba(248,113,113,.28);
-    color:#fecaca;
+    color:#991b1b;
 }
 
 .message-warning{
     background:rgba(245,158,11,.12);
-    border-color:rgba(245,158,11,.28);
-    color:#fde68a;
+    border-color:rgba(245,158,11,.24);
+    color:#92400e;
 }
 
 /* =========================
@@ -350,7 +350,7 @@
     align-items:center;
     justify-content:center;
     font-size:44px;
-    background:linear-gradient(135deg,#111827,#020617);
+    background:linear-gradient(135deg,#eef2f7,#f8fafc);
 }
 
 .movie-overlay{
@@ -359,7 +359,7 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    background:rgba(0,0,0,.58);
+    background:rgba(0,0,0,.06);
     opacity:0;
     transition:.25s;
 }
@@ -377,7 +377,7 @@
 
 .movie-body h3{
     margin:0 0 9px;
-    color:white;
+    color:var(--text);
     font-size:16px;
     line-height:1.35;
     min-height:42px;
@@ -404,7 +404,7 @@
 }
 
 .meta-row span{
-    color:#cbd5e1;
+    color:var(--muted);
     background:var(--surface-2);
     border:1px solid var(--line);
     border-radius:999px;
@@ -446,7 +446,7 @@
     align-items:center;
     justify-content:center;
     font-size:42px;
-    background:linear-gradient(135deg,#111827,#020617);
+    background:linear-gradient(135deg,#eef2f7,#f8fafc);
 }
 
 .room-body{
@@ -467,7 +467,7 @@
 
 .room-title-row h3{
     margin:0;
-    color:white;
+    color:var(--text);
     font-size:15.5px;
     line-height:1.35;
     min-height:42px;
@@ -521,7 +521,7 @@
     border-radius:999px;
     background:var(--surface-2);
     border:1px solid var(--line);
-    color:#cbd5e1;
+    color:var(--muted);
     font-size:11.5px;
     font-weight:800;
     white-space:nowrap;
@@ -535,7 +535,7 @@
 .status-confirmed,
 .status-completed,
 .highlight{
-    color:#bbf7d0;
+    color:var(--primary-dark);
     background:rgba(34,197,94,.12);
     border-color:rgba(34,197,94,.24);
 }
@@ -543,7 +543,7 @@
 .status-booked,
 .status-pending_payment,
 .payment-unpaid{
-    color:#fde68a;
+    color:#92400e;
     background:rgba(245,158,11,.12);
     border-color:rgba(245,158,11,.24);
 }
@@ -552,7 +552,7 @@
 .status-cancelled,
 .status-expired,
 .payment-failed{
-    color:#fecaca;
+    color:#991b1b;
     background:rgba(248,113,113,.12);
     border-color:rgba(248,113,113,.24);
 }
@@ -597,7 +597,7 @@
 
 .booking-head h3{
     margin:0;
-    color:white;
+    color:var(--text);
 }
 
 .meta-grid{
