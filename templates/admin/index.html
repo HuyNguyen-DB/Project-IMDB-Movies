@@ -4,6 +4,84 @@
 {% block content %}
 
 {% get_admin_stats as stats %}
+<style>
+    .admin-dashboard-layout {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .admin-left-menu {
+        position: sticky;
+        top: 20px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    .admin-left-menu-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 16px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .admin-left-menu a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        margin-bottom: 8px;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #0f172a;
+        text-decoration: none;
+        font-weight: 700;
+        border: 1px solid transparent;
+    }
+
+    .admin-left-menu a:hover {
+        background: #eef2ff;
+        color: #4338ca;
+        border-color: #c7d2fe;
+    }
+
+    .admin-left-menu a.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        box-shadow: 0 8px 18px rgba(102, 126, 234, 0.35);
+    }
+
+    .admin-left-menu-section {
+        margin: 18px 8px 10px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .admin-dashboard-main {
+        min-width: 0;
+    }
+
+    @media (max-width: 1000px) {
+        .admin-dashboard-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-left-menu {
+            position: relative;
+            top: 0;
+        }
+    }
+</style>
 
 <div class="admin-dashboard">
 
@@ -46,12 +124,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
     </style>
-
-    <div class="dashboard-link-box">
-        <h2>📊 Xem Thống Kê Chi Tiết</h2>
-        <p>Nhấn nút dưới để xem các biểu đồ thống kê chi tiết và chỉ số kinh doanh</p>
-        <a href="/dashboard/">Đi tới Dashboard Thống Kê →</a>
-    </div>
 
     <div class="dashboard-hero">
         <div>
@@ -188,5 +260,4 @@
     {% endif %}
 
 </div>
-
 {% endblock %}
