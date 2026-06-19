@@ -21,8 +21,10 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from .recommender import (
+    recommend_movies,
+    build_user_genres_from_history,
+)
 
 from .models import (
     BookedMovie,
@@ -528,93 +530,6 @@ def user_home(request):
 # RECOMMENDATION
 # =========================================================
 
-def get_movie_recommendations(user_genres, num_recommendations=20):
-    movies_df = get_movies()
-
-    if movies_df.empty or "genres" not in movies_df.columns:
-        return pd.DataFrame()
-
-    movies_df["genres"] = movies_df["genres"].fillna("").str.lower()
-
-    count_vectorizer = CountVectorizer(
-        tokenizer=lambda value: [
-            genre.strip()
-            for genre in value.split(",")
-        ]
-    )
-
-    count_vectorizer.fit(movies_df["genres"])
-
-    user_genres = user_genres.lower()
-    user_vec = count_vectorizer.transform([user_genres])
-    genre_matrix = count_vectorizer.transform(movies_df["genres"])
-
-    sim_scores = cosine_similarity(user_vec, genre_matrix)[0]
-
-    movies_df["similarity"] = sim_scores
-
-    recommended = movies_df.sort_values(
-        by=["similarity", "averageRating"],
-        ascending=False
-    )
-
-    return recommended[
-        [
-            "tconst",
-            "primaryTitle",
-            "genres",
-            "averageRating",
-            "startYear",
-            "runtimeMinutes",
-            "poster_url",
-        ]
-    ].head(num_recommendations)
-
-
-def recommend(request, user_genres=None, user_title=None):
-    movies_df = get_movies()
-
-    if movies_df.empty:
-        return []
-
-    recommendations = pd.DataFrame()
-
-    if user_title:
-        title_matches = movies_df[
-            movies_df["primaryTitle"]
-            .str.contains(user_title, case=False, na=False)
-        ]
-
-        recommendations = pd.concat([recommendations, title_matches])
-
-    if user_genres:
-        genre_recommendations = get_movie_recommendations(
-            user_genres,
-            20
-        )
-
-        recommendations = pd.concat(
-            [recommendations, genre_recommendations]
-        )
-
-    if recommendations.empty:
-        return []
-
-    recommendations = recommendations[
-        [
-            "tconst",
-            "primaryTitle",
-            "genres",
-            "averageRating",
-            "startYear",
-            "runtimeMinutes",
-            "poster_url",
-        ]
-    ].drop_duplicates()
-
-    return recommendations.to_dict("records")
-
-
 def recommend_page(request):
     user_genres = None
     user_title = None
@@ -633,10 +548,10 @@ def recommend_page(request):
         else:
             return redirect("choose_genres")
 
-    recommendations = recommend(
-        request,
+    recommendations = recommend_movies(
         user_genres=user_genres,
         user_title=user_title,
+        num_recommendations=20,
     )
 
     if request.user.is_authenticated and recommendations:
@@ -663,7 +578,6 @@ def recommend_page(request):
         }
     )
 
-
 def choose_genres(request):
     genres = [
         "action", "adventure", "animation", "biography", "comedy",
@@ -680,37 +594,6 @@ def choose_genres(request):
             "genres": genres,
         }
     )
-
-
-def build_user_genres_from_history(user):
-    booked_movies = (
-        BookedMovie.objects
-        .filter(user=user, movie__isnull=False)
-        .select_related("movie")
-    )
-
-    if not booked_movies.exists():
-        return None
-
-    genres = []
-
-    for booking in booked_movies:
-        if booking.movie and booking.movie.genres:
-            parts = booking.movie.genres.lower().split(",")
-
-            genres.extend([
-                genre.strip()
-                for genre in parts
-                if genre.strip()
-            ])
-
-    if not genres:
-        return None
-
-    unique_genres = list(set(genres))
-
-    return ",".join(unique_genres)
-
 
 # =========================================================
 # MOVIE LIST
