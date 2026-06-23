@@ -270,15 +270,12 @@ body {
         <span>Menu quản trị</span>
     </div>
 
-    <a href="{% url 'admin:index' %}" class="admin-sidebar-link" data-url="{% url 'admin:index' %}">
-        <span class="admin-sidebar-icon">🏠</span>
-        <span>Trang quản trị</span>
-    </a>
-
-    <a href="/dashboard/" class="admin-sidebar-link" data-url="/dashboard/">
-        <span class="admin-sidebar-icon">📊</span>
-        <span>Dashboard thống kê</span>
-    </a>
+    {% if can_view_dashboard %}
+        <a href="/dashboard/" class="admin-sidebar-link" data-url="/dashboard/">
+            <span class="admin-sidebar-icon">📊</span>
+            <span>Dashboard thống kê</span>
+        </a>
+    {% endif %}
 
     <div class="admin-sidebar-section">Khu vực quản lý</div>
 

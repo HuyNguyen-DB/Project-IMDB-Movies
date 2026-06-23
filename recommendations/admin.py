@@ -23,6 +23,18 @@ class CustomAdminSite(admin.AdminSite):
     site_header = "Quản trị Movie Webapp"
     site_title = "Movie Webapp Admin"
     index_title = "Bảng điều khiển quản trị"
+
+    def each_context(self, request):
+        context = super().each_context(request)
+
+        role = get_user_role(request.user)
+
+        context["can_view_dashboard"] = role in [
+            ROLE_BOOKING_STAFF,
+            ROLE_SYSTEM_ADMIN,
+        ]
+
+        return context
     
     def get_urls(self):
         urls = super().get_urls()
@@ -32,14 +44,36 @@ class CustomAdminSite(admin.AdminSite):
         return custom_urls + urls
     
     def dashboard_redirect(self, request):
-        """Chuyển hướng đến dashboard"""
-        return HttpResponseRedirect('/dashboard/')
+        """
+        Chỉ nhân viên vận hành và admin tổng được vào dashboard thống kê.
+        Các vai trò khác sẽ được đưa về khu vực làm việc phù hợp.
+        """
+        role = get_user_role(request.user)
+
+        if role in [ROLE_BOOKING_STAFF, ROLE_SYSTEM_ADMIN]:
+            return HttpResponseRedirect("/dashboard/")
+
+        if role == ROLE_ROOM_STAFF:
+            return HttpResponseRedirect(reverse("admin:recommendations_screenroom_changelist"))
+
+        return HttpResponseRedirect("/admin/")
     
     def index(self, request, extra_context=None):
-        """Thêm link dashboard vào trang admin index"""
-        extra_context = extra_context or {}
-        extra_context['dashboard_url'] = reverse('admin:dashboard-redirect')
-        extra_context['has_dashboard'] = True
+        """
+        Khi vào /admin/ thì chuyển thẳng đến khu vực làm việc
+        theo vai trò của tài khoản.
+        """
+        role = get_user_role(request.user)
+
+        if role == ROLE_BOOKING_STAFF:
+            return HttpResponseRedirect(reverse("admin:recommendations_bookedmovie_changelist"))
+
+        if role == ROLE_ROOM_STAFF:
+            return HttpResponseRedirect(reverse("admin:recommendations_screenroom_changelist"))
+
+        if role == ROLE_SYSTEM_ADMIN:
+            return HttpResponseRedirect(reverse("admin:auth_user_changelist"))
+
         return super().index(request, extra_context)
 
 

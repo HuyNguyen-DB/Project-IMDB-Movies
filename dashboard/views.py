@@ -5,11 +5,17 @@ from urllib.parse import urlencode
 
 from django.contrib import admin
 from django.db.models import Count, Sum
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from recommendations.models import BookedMovie
-
+from recommendations.admin import (
+    get_user_role,
+    ROLE_BOOKING_STAFF,
+    ROLE_ROOM_STAFF,
+    ROLE_SYSTEM_ADMIN,
+)
 
 TIMEFRAMES = ["total", "quarter", "day", "month", "year"]
 
@@ -85,8 +91,16 @@ def build_time_query(key, timeframe):
 
     return {}
 
-
+@login_required
 def dashboard_view(request):
+    role = get_user_role(request.user)
+
+    if role == ROLE_ROOM_STAFF:
+        return redirect(reverse("admin:recommendations_screenroom_changelist"))
+
+    if role not in [ROLE_BOOKING_STAFF, ROLE_SYSTEM_ADMIN]:
+        return redirect("/admin/")
+    
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
     timeframe = request.GET.get("timeframe", "total")
