@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Chatbot local data
+chatbot/chroma_db/
+chatbot/.env
+
+# Model/cache/local files
+.cache/
+chatbot/.cache/
+models/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# Database / local temp
+*.sqlite3
