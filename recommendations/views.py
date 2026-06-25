@@ -115,11 +115,11 @@ def build_invoice_defaults(booking):
         "customer_name": customer_name,
         "customer_email": customer_email,
         "movie_title": movie_title,
-        "room_name": booking.room_name,
+        "room_name": booking.room.name if booking.room else "Không rõ phòng",
         "booking_start_time": booking.booking_date,
         "booking_end_time": booking.booking_end_time,
         "rental_duration_minutes": booking.rental_duration_minutes,
-        "price_per_30min": booking.price_per_30min,
+        "price_per_30min": booking.room.price_per_30min if booking.room else 0,
         "discount_amount": booking.discount_amount or 0,
         "final_amount": booking.total_price,
         "payment_status_at_issue": booking.payment_status,
@@ -638,7 +638,7 @@ def movie_list(request):
         sort_options.get(sort, "-startYear")
     )
 
-    paginator = Paginator(movies, 12)
+    paginator = Paginator(movies, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -741,12 +741,9 @@ def book_movie(request):
 
             booked_movie.user = request.user
             booked_movie.movie = movie
-
-            booked_movie.room_id_snapshot = room.room_id
-            booked_movie.room_name = room.name
+            booked_movie.room = room
 
             booked_movie.rental_duration_minutes = total_duration
-            booked_movie.price_per_30min = room.price_per_30min
             booked_movie.discount_amount = 0
             booked_movie.total_price = total_price
 

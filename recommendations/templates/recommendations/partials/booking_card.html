@@ -23,15 +23,38 @@
         </div>
 
         <div class="meta-grid">
-            <span>🏠 Phòng: <strong>{{ movie.room_name }}</strong></span>
-            <span>🕒 Bắt đầu: <strong>{{ movie.booking_date|vn_datetime }}</strong></span>
+            <span>
+                🏠 Phòng:
+                <strong>
+                    {% if movie.room %}
+                        {{ movie.room.name }}
+                    {% else %}
+                        Không rõ phòng
+                    {% endif %}
+                </strong>
+            </span>
+
+            <span>
+                🕒 Bắt đầu:
+                <strong>{{ movie.booking_date|vn_datetime }}</strong>
+            </span>
 
             {% if movie.booking_end_time %}
-                <span>⏳ Kết thúc: <strong>{{ movie.booking_end_time|vn_datetime }}</strong></span>
+                <span>
+                    ⏳ Kết thúc:
+                    <strong>{{ movie.booking_end_time|vn_datetime }}</strong>
+                </span>
             {% endif %}
 
-            <span>⏱ Thời lượng: <strong>{{ movie.rental_duration_minutes }} phút</strong></span>
-            <span>💰 Tổng tiền: <strong>{{ movie.total_price }}đ</strong></span>
+            <span>
+                ⏱ Thời lượng:
+                <strong>{{ movie.rental_duration_minutes }} phút</strong>
+            </span>
+
+            <span>
+                💰 Tổng tiền:
+                <strong>{{ movie.total_price }}đ</strong>
+            </span>
         </div>
 
         <div class="badge-row">

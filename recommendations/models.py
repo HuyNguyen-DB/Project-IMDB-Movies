@@ -217,22 +217,16 @@ class BookedMovie(models.Model):
         verbose_name='Mã đơn'
     )
 
-    room_id_snapshot = models.CharField(
-        max_length=20,
-        verbose_name='Mã phòng tại thời điểm đặt'
-    )
-
-    room_name = models.CharField(
-        max_length=255,
-        verbose_name='Tên phòng tại thời điểm đặt'
+    room = models.ForeignKey(
+    ScreenRoom,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    verbose_name='Phòng chiếu'
     )
 
     rental_duration_minutes = models.IntegerField(
         verbose_name='Thời lượng thuê'
-    )
-
-    price_per_30min = models.IntegerField(
-        verbose_name='Giá mỗi 30 phút tại thời điểm đặt'
     )
 
     discount_amount = models.IntegerField(
@@ -419,7 +413,10 @@ class Invoice(models.Model):
                     self.movie_title = "Không rõ phim"
 
             if not self.room_name:
-                self.room_name = self.booking.room_name
+                if self.booking.room:
+                    self.room_name = self.booking.room.name
+                else:
+                    self.room_name = "Không rõ phòng"
 
             if not self.booking_start_time:
                 self.booking_start_time = self.booking.booking_date
@@ -431,7 +428,10 @@ class Invoice(models.Model):
                 self.rental_duration_minutes = self.booking.rental_duration_minutes
 
             if not self.price_per_30min:
-                self.price_per_30min = self.booking.price_per_30min
+                if self.booking.room:
+                    self.price_per_30min = self.booking.room.price_per_30min
+                else:
+                    self.price_per_30min = 0
 
             if self.discount_amount is None:
                 self.discount_amount = self.booking.discount_amount

@@ -5,27 +5,7 @@
 
 {% block content %}
 
-{% comment %}
-=========================================================
-1. PAYMENT PAGE
-- Giao diện thanh toán theo phong cách payment_ofhuy.html
-- Vẫn dùng base.html, navbar chung, CSS chung của project
-- Luồng thanh toán:
-  + Hiển thị thông tin đơn đặt
-  + Hiển thị QR chuyển khoản
-  + Tự động kiểm tra trạng thái thanh toán mỗi 5 giây
-  + Khi paid thì tự chuyển sang hóa đơn
-=========================================================
-{% endcomment %}
-
 <main class="payment-page">
-
-    {% comment %}
-    =========================================================
-    2. PAGE HEADER
-    - Tiêu đề trang thanh toán
-    =========================================================
-    {% endcomment %}
 
     <header class="payment-page-header">
         <h1>💳 Thanh toán đơn đặt phim</h1>
@@ -34,33 +14,12 @@
         </p>
     </header>
 
-
-    {% comment %}
-    =========================================================
-    3. PAYMENT LAYOUT
-    - Cột trái: thông tin đơn đặt phim
-    - Cột phải: tóm tắt thanh toán + mã QR
-    =========================================================
-    {% endcomment %}
-
     <section class="payment-layout">
-
-        {% comment %}
-        =========================
-        3.1. LEFT PANEL - BOOKING INFO
-        =========================
-        {% endcomment %}
 
         <div class="payment-panel">
             <h2 class="payment-panel-title">Thông tin đơn đặt phim</h2>
 
             <div class="payment-info-grid">
-
-                {% comment %}
-                -------------------------
-                Mã đơn
-                -------------------------
-                {% endcomment %}
 
                 <div class="payment-info-card">
                     <span class="payment-info-label">Mã đơn</span>
@@ -68,13 +27,6 @@
                         {{ booking.booking_code }}
                     </div>
                 </div>
-
-
-                {% comment %}
-                -------------------------
-                Tên phim
-                -------------------------
-                {% endcomment %}
 
                 <div class="payment-info-card">
                     <span class="payment-info-label">Tên phim</span>
@@ -87,13 +39,6 @@
                     </div>
                 </div>
 
-
-                {% comment %}
-                -------------------------
-                Thể loại phim
-                -------------------------
-                {% endcomment %}
-
                 <div class="payment-info-card">
                     <span class="payment-info-label">Thể loại</span>
                     <div class="payment-info-value">
@@ -105,26 +50,16 @@
                     </div>
                 </div>
 
-
-                {% comment %}
-                -------------------------
-                Phòng chiếu
-                -------------------------
-                {% endcomment %}
-
                 <div class="payment-info-card">
                     <span class="payment-info-label">Phòng chiếu</span>
                     <div class="payment-info-value">
-                        {{ booking.room_name }}
+                        {% if booking.room %}
+                            {{ booking.room.name }}
+                        {% else %}
+                            Không rõ phòng
+                        {% endif %}
                     </div>
                 </div>
-
-
-                {% comment %}
-                -------------------------
-                Thời gian bắt đầu
-                -------------------------
-                {% endcomment %}
 
                 <div class="payment-info-card">
                     <span class="payment-info-label">Thời gian bắt đầu</span>
@@ -132,13 +67,6 @@
                         {{ booking.booking_date|vn_datetime }}
                     </div>
                 </div>
-
-
-                {% comment %}
-                -------------------------
-                Thời gian kết thúc
-                -------------------------
-                {% endcomment %}
 
                 <div class="payment-info-card">
                     <span class="payment-info-label">Thời gian kết thúc</span>
@@ -151,13 +79,6 @@
                     </div>
                 </div>
 
-
-                {% comment %}
-                -------------------------
-                Thời lượng thuê
-                -------------------------
-                {% endcomment %}
-
                 <div class="payment-info-card">
                     <span class="payment-info-label">Thời lượng thuê</span>
                     <div class="payment-info-value">
@@ -165,29 +86,18 @@
                     </div>
                 </div>
 
-
-                {% comment %}
-                -------------------------
-                Đơn giá
-                -------------------------
-                {% endcomment %}
-
                 <div class="payment-info-card">
                     <span class="payment-info-label">Đơn giá</span>
                     <div class="payment-info-value">
-                        {{ booking.price_per_30min }}đ / 30 phút
+                        {% if booking.room %}
+                            {{ booking.room.price_per_30min }}đ / 30 phút
+                        {% else %}
+                            0đ / 30 phút
+                        {% endif %}
                     </div>
                 </div>
 
             </div>
-
-
-            {% comment %}
-            =========================================================
-            4. STATUS BADGES
-            - Hiển thị trạng thái đơn và trạng thái thanh toán
-            =========================================================
-            {% endcomment %}
 
             <div class="payment-status-row">
                 <span class="payment-badge payment-badge-{{ booking.booking_status }}">
@@ -199,36 +109,13 @@
                 </span>
             </div>
 
-
-            {% comment %}
-            =========================================================
-            5. NOTE BOX
-            - Hướng dẫn người dùng
-            =========================================================
-            {% endcomment %}
-
             <div class="payment-note-box">
                 Hãy chuyển khoản đúng số tiền và đúng nội dung chuyển khoản. Sau khi SePay xác nhận giao dịch, hệ thống sẽ tự động tạo hóa đơn và chuyển bạn sang trang hóa đơn.
             </div>
         </div>
 
-
-        {% comment %}
-        =========================
-        3.2. RIGHT PANEL - PAYMENT SUMMARY
-        =========================
-        {% endcomment %}
-
         <aside class="payment-summary-panel">
             <h2 class="payment-panel-title">Tóm tắt thanh toán</h2>
-
-
-            {% comment %}
-            =========================================================
-            6. SUMMARY BOX
-            - Tổng hợp tiền và thông tin chính
-            =========================================================
-            {% endcomment %}
 
             <div class="payment-summary-box">
                 <div class="payment-summary-row">
@@ -243,7 +130,13 @@
 
                 <div class="payment-summary-row">
                     <span>Giá mỗi 30 phút</span>
-                    <strong>{{ booking.price_per_30min }}đ</strong>
+                    <strong>
+                        {% if booking.room %}
+                            {{ booking.room.price_per_30min }}đ
+                        {% else %}
+                            0đ
+                        {% endif %}
+                    </strong>
                 </div>
 
                 {% if booking.discount_amount %}
@@ -258,15 +151,6 @@
                     <strong>{{ booking.total_price }}đ</strong>
                 </div>
             </div>
-
-
-            {% comment %}
-            =========================================================
-            7. QR PAYMENT AREA
-            - Nếu chưa thanh toán thì hiển thị QR
-            - Nếu đã thanh toán thì hiển thị nút xem hóa đơn
-            =========================================================
-            {% endcomment %}
 
             {% if booking.payment_status == "unpaid" %}
                 <div class="payment-qr-box">
@@ -296,14 +180,6 @@
                     </div>
                 </div>
 
-
-                {% comment %}
-                =========================================================
-                8. AUTO PAYMENT STATUS MESSAGE
-                - JS sẽ cập nhật trạng thái ở đây
-                =========================================================
-                {% endcomment %}
-
                 <div id="payment-status-message" class="payment-status-message">
                     <div class="payment-spinner"></div>
 
@@ -326,13 +202,6 @@
                 </div>
             {% endif %}
 
-
-            {% comment %}
-            =========================================================
-            9. SECONDARY ACTIONS
-            =========================================================
-            {% endcomment %}
-
             <div class="payment-secondary-actions">
                 <a href="{% url 'user_home' %}" class="btn btn-soft">
                     📜 Lịch sử đặt phim
@@ -350,16 +219,7 @@
 
 {% endblock %}
 
-
 {% block extra_js %}
-
-{% comment %}
-=========================================================
-10. PAYMENT STATUS POLLING
-- Gọi API payment_status
-- Nếu paid và có invoice_code thì chuyển sang invoice_detail
-=========================================================
-{% endcomment %}
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {

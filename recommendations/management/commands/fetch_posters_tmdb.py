@@ -9,10 +9,9 @@ from django.utils import timezone
 
 class Command(BaseCommand):
     help = (
-        "Lấy poster phim theo 3 bước: "
+        "Lấy poster phim từ TMDb theo 2 bước: "
         "1) TMDb Find bằng IMDb ID, "
-        "2) TMDb Search bằng tên phim + năm, "
-        "3) OMDb bằng IMDb ID."
+        "2) TMDb Search bằng tên phim + năm."
     )
 
     def add_arguments(self, parser):
@@ -45,21 +44,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         tmdb_api_key = getattr(settings, "TMDB_API_KEY", "")
-        omdb_api_key = getattr(settings, "OMDB_API_KEY", "")
 
         if not tmdb_api_key:
             self.stderr.write(
                 self.style.ERROR("Thiếu TMDB_API_KEY trong settings.py.")
             )
             return
-
-        if not omdb_api_key:
-            self.stdout.write(
-                self.style.WARNING(
-                    "Chưa có OMDB_API_KEY. Script vẫn chạy TMDb, "
-                    "nhưng sẽ bỏ qua bước OMDb."
-                )
-            )
 
         limit = options["limit"]
         sleep_time = options["sleep"]
@@ -78,18 +68,17 @@ class Command(BaseCommand):
 
         if total == 0:
             self.stdout.write(
-                self.style.SUCCESS("Không còn phim nào cần cập nhật poster.")
+                self.style.SUCCESS("Không còn phim nào cần cập nhật poster bằng TMDb.")
             )
             return
 
         self.stdout.write(
-            self.style.WARNING(f"Bắt đầu kiểm tra poster cho {total} phim...")
+            self.style.WARNING(f"Bắt đầu kiểm tra poster TMDb cho {total} phim...")
         )
 
         updated_count = 0
         tmdb_find_count = 0
         tmdb_search_count = 0
-        omdb_count = 0
         no_poster_count = 0
         error_count = 0
 
@@ -103,16 +92,15 @@ class Command(BaseCommand):
                 continue
 
             self.stdout.write(
-                f"[{index}/{total}] Đang xử lý: {tconst} - {title}"
+                f"[{index}/{total}] Đang xử lý TMDb: {tconst} - {title}"
             )
 
             try:
-                poster_url, poster_source = self.get_poster_by_pipeline(
+                poster_url, poster_source = self.get_poster_by_tmdb_pipeline(
                     imdb_id=tconst,
                     title=title,
                     start_year=start_year,
                     tmdb_api_key=tmdb_api_key,
-                    omdb_api_key=omdb_api_key,
                 )
 
                 if poster_url:
@@ -131,8 +119,6 @@ class Command(BaseCommand):
                         tmdb_find_count += 1
                     elif poster_source == "tmdb_search":
                         tmdb_search_count += 1
-                    elif poster_source == "omdb":
-                        omdb_count += 1
 
                     self.stdout.write(
                         self.style.SUCCESS(
@@ -144,7 +130,7 @@ class Command(BaseCommand):
                     update_data = {
                         "poster_checked": True,
                         "poster_updated_at": timezone.now(),
-                        "poster_source": "not_found",
+                        "poster_source": "tmdb_not_found",
                     }
 
                     self.update_movie(collection, movie, update_data)
@@ -153,7 +139,7 @@ class Command(BaseCommand):
 
                     self.stdout.write(
                         self.style.WARNING(
-                            f"  Không tìm thấy poster: {title}"
+                            f"  TMDb không tìm thấy poster: {title}"
                         )
                     )
 
@@ -161,7 +147,7 @@ class Command(BaseCommand):
                 error_count += 1
 
                 self.stderr.write(
-                    self.style.ERROR(f"  Lỗi request {tconst}: {exc}")
+                    self.style.ERROR(f"  Lỗi request TMDb {tconst}: {exc}")
                 )
 
             except Exception as exc:
@@ -174,12 +160,11 @@ class Command(BaseCommand):
             time.sleep(sleep_time)
 
         self.stdout.write("")
-        self.stdout.write(self.style.SUCCESS("Hoàn tất cập nhật poster."))
+        self.stdout.write(self.style.SUCCESS("Hoàn tất cập nhật poster bằng TMDb."))
         self.stdout.write(f"Đã cập nhật poster: {updated_count}")
         self.stdout.write(f"  - TMDb Find IMDb ID: {tmdb_find_count}")
         self.stdout.write(f"  - TMDb Search title + year: {tmdb_search_count}")
-        self.stdout.write(f"  - OMDb IMDb ID: {omdb_count}")
-        self.stdout.write(f"Không tìm thấy poster: {no_poster_count}")
+        self.stdout.write(f"TMDb không tìm thấy poster: {no_poster_count}")
         self.stdout.write(f"Lỗi: {error_count}")
 
     def get_movie_collection(self, collection_name):
@@ -275,22 +260,13 @@ class Command(BaseCommand):
                 {"$set": update_data},
             )
 
-    def get_poster_by_pipeline(
+    def get_poster_by_tmdb_pipeline(
         self,
         imdb_id,
         title,
         start_year,
         tmdb_api_key,
-        omdb_api_key,
     ):
-        """
-        Luồng lấy poster:
-        1. TMDb Find bằng IMDb ID.
-        2. TMDb Search bằng primaryTitle + startYear.
-        3. OMDb bằng IMDb ID.
-        """
-
-        # Bước 1: TMDb Find bằng IMDb ID
         poster_url = self.get_poster_from_tmdb_find(
             imdb_id=imdb_id,
             api_key=tmdb_api_key,
@@ -299,7 +275,6 @@ class Command(BaseCommand):
         if poster_url:
             return poster_url, "tmdb_find"
 
-        # Bước 2: TMDb Search bằng tên phim + năm
         poster_url = self.get_poster_from_tmdb_search(
             title=title,
             start_year=start_year,
@@ -309,17 +284,7 @@ class Command(BaseCommand):
         if poster_url:
             return poster_url, "tmdb_search"
 
-        # Bước 3: OMDb bằng IMDb ID
-        if omdb_api_key:
-            poster_url = self.get_poster_from_omdb(
-                imdb_id=imdb_id,
-                api_key=omdb_api_key,
-            )
-
-            if poster_url:
-                return poster_url, "omdb"
-
-        return None, "not_found"
+        return None, "tmdb_not_found"
 
     def get_poster_from_tmdb_find(self, imdb_id, api_key):
         if not imdb_id:
@@ -334,7 +299,7 @@ class Command(BaseCommand):
                 "external_source": "imdb_id",
                 "language": "vi-VN",
             },
-            timeout=10,
+            timeout=30,
         )
 
         response.raise_for_status()
@@ -365,7 +330,6 @@ class Command(BaseCommand):
         if not title or title == "Không rõ tên":
             return None
 
-        # Ưu tiên search movie trước
         poster_url = self.search_tmdb_movie(
             title=title,
             start_year=start_year,
@@ -375,7 +339,6 @@ class Command(BaseCommand):
         if poster_url:
             return poster_url
 
-        # Nếu không có thì search tiếp TV
         poster_url = self.search_tmdb_tv(
             title=title,
             start_year=start_year,
@@ -403,7 +366,7 @@ class Command(BaseCommand):
         response = requests.get(
             url,
             params=params,
-            timeout=10,
+            timeout=30,
         )
 
         response.raise_for_status()
@@ -444,7 +407,7 @@ class Command(BaseCommand):
         response = requests.get(
             url,
             params=params,
-            timeout=10,
+            timeout=30,
         )
 
         response.raise_for_status()
@@ -476,16 +439,6 @@ class Command(BaseCommand):
         start_year=None,
         is_tv=False,
     ):
-        """
-        Chọn kết quả TMDb tốt nhất.
-
-        Ưu tiên:
-        1. Có poster_path.
-        2. Năm phát hành trùng với startYear nếu có.
-        3. Tên gần giống nhất nếu có title.
-        4. Popularity cao hơn.
-        """
-
         if not results:
             return None
 
@@ -563,39 +516,6 @@ class Command(BaseCommand):
             return poster_path
 
         return f"https://image.tmdb.org/t/p/w500{poster_path}"
-
-    def get_poster_from_omdb(self, imdb_id, api_key):
-        if not imdb_id or not api_key:
-            return None
-
-        url = "https://www.omdbapi.com/"
-
-        response = requests.get(
-            url,
-            params={
-                "apikey": api_key,
-                "i": imdb_id,
-                "plot": "short",
-            },
-            timeout=10,
-        )
-
-        response.raise_for_status()
-
-        data = response.json()
-
-        if data.get("Response") != "True":
-            return None
-
-        poster_url = data.get("Poster")
-
-        if not poster_url:
-            return None
-
-        if poster_url == "N/A":
-            return None
-
-        return poster_url
 
     def normalize_text(self, value):
         if not value:

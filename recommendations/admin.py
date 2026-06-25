@@ -921,7 +921,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "booking_code",
         "user",
         "movie_display",
-        "room_name",
+        "room_display",
         "booking_date_vi",
         "booking_end_time_vi",
         "rental_duration_minutes",
@@ -941,7 +941,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "payment_status",
         "booking_date",
         "date_booked",
-        "room_name",
+        "room",
     )
 
     search_fields = (
@@ -950,8 +950,8 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "user__email",
         "movie__primaryTitle",
         "movie__tconst",
-        "room_id_snapshot",
-        "room_name",
+        "room__room_id",
+        "room__name",
     )
 
     ordering = (
@@ -966,10 +966,8 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "booking_code",
         "user",
         "movie",
-        "room_id_snapshot",
-        "room_name",
+        "room",
         "rental_duration_minutes",
-        "price_per_30min",
         "discount_amount",
         "total_price",
         "booking_date",
@@ -1065,6 +1063,14 @@ class BookedMovieAdmin(admin.ModelAdmin):
     movie_display.short_description = "Tên phim"
     movie_display.admin_order_field = "movie__primaryTitle"
 
+    def room_display(self, obj):
+        if obj.room:
+            return f"{obj.room.room_id} - {obj.room.name}"
+        return "Không rõ phòng"
+
+    room_display.short_description = "Phòng chiếu"
+    room_display.admin_order_field = "room__name"
+    
     def booking_date_vi(self, obj):
         return format_datetime_vi(obj.booking_date)
 
