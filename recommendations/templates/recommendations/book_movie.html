@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đặt phim</title>
+{% extends "recommendations/base.html" %}
+
+{% block title %}Đặt phim{% endblock %}
+
+{% block extra_css %}
 
 <style>
 *{
@@ -13,236 +12,11 @@
 body{
     font-family: Arial, Helvetica, sans-serif;
     margin:0;
-    color:#e5e7eb;
-    background:linear-gradient(180deg,#020617,#0f172a,#020617);
+    color:#111827;
+    background:#f8fafc;
 }
 
-/* NAVBAR */
 
-.navbar{
-    position:sticky;
-    top:0;
-    z-index:1000;
-    background:rgba(2, 6, 23, 0.92);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid rgba(255,255,255,0.08);
-}
-
-.nav-container{
-    max-width:1300px;
-    margin:auto;
-    padding:14px 30px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:20px;
-}
-
-.nav-left{
-    display:flex;
-    align-items:center;
-    gap:18px;
-}
-
-.logo-box{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    text-decoration:none;
-    color:white;
-}
-
-.logo-icon{
-    width:42px;
-    height:42px;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(135deg,#22c55e,#16a34a);
-    font-size:22px;
-    box-shadow:0 8px 20px rgba(34,197,94,0.25);
-}
-
-.logo-text{
-    display:flex;
-    flex-direction:column;
-    line-height:1.2;
-}
-
-.logo-text strong{
-    font-size:16px;
-    color:#ffffff;
-}
-
-.logo-text span{
-    font-size:12px;
-    color:#94a3b8;
-}
-
-.nav-links{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.nav-links a{
-    text-decoration:none;
-}
-
-.nav-links button{
-    background:#111827;
-    color:white;
-    border:1px solid rgba(255,255,255,0.06);
-    padding:10px 16px;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:14px;
-    transition:0.2s;
-}
-
-.nav-links button:hover{
-    background:#1f2937;
-    transform:translateY(-1px);
-}
-
-/* USER MENU */
-
-.user-menu{
-    position:relative;
-}
-
-.user-trigger{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:14px;
-    padding:8px 12px;
-    cursor:pointer;
-    min-width:200px;
-    transition:0.2s;
-}
-
-.user-trigger:hover{
-    background:#1f2937;
-}
-
-.avatar{
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    background:linear-gradient(135deg,#22c55e,#06b6d4);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    color:white;
-    font-size:16px;
-    flex-shrink:0;
-    box-shadow:0 8px 20px rgba(6,182,212,0.2);
-}
-
-.user-info{
-    text-align:left;
-    flex:1;
-    min-width:0;
-}
-
-.user-info strong{
-    display:block;
-    font-size:14px;
-    color:white;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.user-info span{
-    display:block;
-    font-size:12px;
-    color:#9ca3af;
-}
-
-.dropdown-arrow{
-    color:#9ca3af;
-    font-size:13px;
-}
-
-.dropdown-menu{
-    position:absolute;
-    top:calc(100% + 10px);
-    right:0;
-    width:240px;
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:14px;
-    box-shadow:0 18px 40px rgba(0,0,0,0.4);
-    overflow:hidden;
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(10px);
-    transition:0.25s ease;
-}
-
-.user-menu:hover .dropdown-menu{
-    opacity:1;
-    visibility:visible;
-    transform:translateY(0);
-}
-
-.dropdown-header{
-    padding:16px;
-    border-bottom:1px solid rgba(255,255,255,0.06);
-    background:rgba(255,255,255,0.02);
-}
-
-.dropdown-header strong{
-    display:block;
-    margin-bottom:4px;
-    color:white;
-    font-size:15px;
-}
-
-.dropdown-header p{
-    margin:0;
-    color:#94a3b8;
-    font-size:12px;
-}
-
-.dropdown-item{
-    display:block;
-    text-decoration:none;
-    color:white;
-    padding:13px 16px;
-    transition:0.2s;
-    font-size:14px;
-}
-
-.dropdown-item:hover{
-    background:#1f2937;
-}
-
-.dropdown-form{
-    margin:0;
-}
-
-.dropdown-form button{
-    width:100%;
-    text-align:left;
-    background:none;
-    border:none;
-    color:#f87171;
-    padding:13px 16px;
-    cursor:pointer;
-    font-size:14px;
-}
-
-.dropdown-form button:hover{
-    background:#1f2937;
-}
 
 /* MAIN */
 
@@ -261,12 +35,12 @@ body{
 .page-header h1{
     margin:0 0 10px 0;
     font-size:34px;
-    color:white;
+    color:#0f172a;
 }
 
 .page-header p{
     margin:0;
-    color:#94a3b8;
+    color:#475569;
     line-height:1.6;
 }
 
@@ -282,11 +56,11 @@ body{
 /* POSTER CARD */
 
 .poster-panel{
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.06);
+    background:#ffffff;
+    border:1px solid rgba(148,163,184,0.3);
     border-radius:20px;
     padding:20px;
-    box-shadow:0 20px 45px rgba(0,0,0,0.35);
+    box-shadow:0 16px 35px rgba(15,23,42,0.08);
     position:sticky;
     top:90px;
 }
@@ -297,7 +71,7 @@ body{
     object-fit:cover;
     border-radius:16px;
     display:block;
-    box-shadow:0 12px 30px rgba(0,0,0,0.45);
+    box-shadow:0 12px 30px rgba(15,23,42,0.09);
 }
 
 .poster-badge{
@@ -306,7 +80,7 @@ body{
     padding:8px 12px;
     border-radius:999px;
     background:rgba(34,197,94,0.15);
-    color:#4ade80;
+    color:#166534;
     font-size:13px;
     font-weight:600;
     border:1px solid rgba(34,197,94,0.25);
@@ -315,18 +89,18 @@ body{
 /* INFO CARD */
 
 .info-panel{
-    background:#111827;
-    border:1px solid rgba(255,255,255,0.06);
+    background:#ffffff;
+    border:1px solid rgba(148,163,184,0.3);
     border-radius:20px;
     padding:30px;
-    box-shadow:0 20px 45px rgba(0,0,0,0.35);
+    box-shadow:0 16px 35px rgba(15,23,42,0.08);
 }
 
 .movie-title{
     font-size:38px;
     font-weight:700;
     margin:0 0 18px 0;
-    color:#22c55e;
+    color:#0f172a;
     line-height:1.2;
 }
 
@@ -338,15 +112,28 @@ body{
 }
 
 .meta-card{
-    background:#0f172a;
-    border:1px solid rgba(255,255,255,0.05);
+    background:#f8fafc;
+    border:1px solid rgba(148,163,184,0.25);
     border-radius:16px;
     padding:16px;
 }
 
+.info-panel > .meta-card{
+    margin-bottom:18px;
+}
+
+.info-panel > .meta-card + .meta-card{
+    margin-top:18px;
+}
+
+.shortcut-actions{
+    margin-top:24px;
+    margin-bottom:32px;
+}
+
 .meta-label{
     display:block;
-    color:#94a3b8;
+    color:#64748b;
     font-size:13px;
     margin-bottom:8px;
     text-transform:uppercase;
@@ -354,7 +141,7 @@ body{
 }
 
 .meta-value{
-    color:white;
+    color:#0f172a;
     font-size:17px;
     line-height:1.5;
     font-weight:600;
@@ -392,8 +179,8 @@ body{
 /* FORM BOX */
 
 .form-box{
-    background:#0f172a;
-    border:1px solid rgba(255,255,255,0.05);
+    background:#ffffff;
+    border:1px solid rgba(148,163,184,0.25);
     border-radius:18px;
     padding:24px;
 }
@@ -401,12 +188,12 @@ body{
 .form-box h2{
     margin:0 0 10px 0;
     font-size:22px;
-    color:white;
+    color:#0f172a;
 }
 
 .form-box p{
     margin:0 0 22px 0;
-    color:#94a3b8;
+    color:#475569;
     line-height:1.6;
 }
 
@@ -417,7 +204,7 @@ body{
 .form-group label{
     display:block;
     margin-bottom:8px;
-    color:#cbd5e1;
+    color:#0f172a;
     font-size:15px;
     font-weight:600;
 }
@@ -428,11 +215,11 @@ body{
     width:100%;
     max-width:360px;
     padding:12px 14px;
-    border:none;
+    border:1px solid rgba(148,163,184,0.3);
     outline:none;
     border-radius:12px;
     font-size:15px;
-    background:#f8fafc;
+    background:#ffffff;
     color:#111827;
 }
 
@@ -538,72 +325,12 @@ body{
     }
 }
 </style>
-</head>
 
-<body>
+{% endblock %}
 
-<nav class="navbar">
-    <div class="nav-container">
+{% block content %}
 
-        <div class="nav-left">
-            <a href="{% url 'home' %}" class="logo-box">
-                <div class="logo-icon">🎬</div>
-                <div class="logo-text">
-                    <strong>Movie Webapp</strong>
-                    <span>Đề xuất phim & đặt phòng</span>
-                </div>
-            </a>
-
-            <div class="nav-links">
-                <a href="{% url 'home' %}">
-                    <button>Trang chủ</button>
-                </a>
-                <a href="{% url 'movie_list' %}">
-                    <button>Danh sách phim</button>
-                </a>
-                <a href="{% url 'recommend' %}">
-                    <button>Gợi ý phim</button>
-                </a>
-            </div>
-        </div>
-
-        {% if user.is_authenticated %}
-        <div class="user-menu">
-            <div class="user-trigger">
-                <div class="avatar">
-                    {{ user.username|slice:":1"|upper }}
-                </div>
-                <div class="user-info">
-                    <strong>{{ user.username }}</strong>
-                    <span>Người dùng đã đăng nhập</span>
-                </div>
-                <div class="dropdown-arrow">▼</div>
-            </div>
-
-            <div class="dropdown-menu">
-                <div class="dropdown-header">
-                    <strong>{{ user.username }}</strong>
-                    <p>Quản lý tài khoản và lịch sử đặt phim</p>
-                </div>
-
-                <a href="{% url 'user_home' %}" class="dropdown-item">
-                    📜 Lịch sử đặt phim
-                </a>
-
-                <a href="{% url 'movie_list' %}" class="dropdown-item">
-                    🎥 Danh sách phim
-                </a>
-
-                <form method="POST" action="{% url 'logout' %}" class="dropdown-form">
-                    {% csrf_token %}
-                    <button type="submit">🚪 Đăng xuất</button>
-                </form>
-            </div>
-        </div>
-        {% endif %}
-
-    </div>
-</nav>
+<div class="container">
 
 <div class="container">
 
@@ -759,5 +486,4 @@ body{
 
 </div>
 
-</body>
-</html>
+{% endblock %}

@@ -15,6 +15,7 @@ import math
 import requests
 import pandas as pd
 import json
+import re
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -1154,15 +1155,231 @@ def some_view(request):
 
         return redirect("login")
 
+# =========================================================
+# CHATBOT RECOMMENDATION HELPERS
+# =========================================================
+
+CHATBOT_RECOMMEND_KEYWORDS = [
+    "gợi ý",
+    "đề xuất",
+    "recommend",
+    "recommendation",
+    "phim hay",
+    "nên xem",
+    "tư vấn phim",
+    "phim phù hợp",
+]
+
+
+CHATBOT_GENRE_MAP = {
+    "hành động": "action",
+    "phiêu lưu": "adventure",
+    "hoạt hình": "animation",
+    "tiểu sử": "biography",
+    "hài": "comedy",
+    "tội phạm": "crime",
+    "tài liệu": "documentary",
+    "chính kịch": "drama",
+    "drama": "drama",
+    "gia đình": "family",
+    "kỳ ảo": "fantasy",
+    "phim noir": "film-noir",
+    "noir": "film-noir",
+    "lịch sử": "history",
+    "kinh dị": "horror",
+    "âm nhạc": "music",
+    "nhạc kịch": "musical",
+    "bí ẩn": "mystery",
+    "tình cảm": "romance",
+    "lãng mạn": "romance",
+    "khoa học viễn tưởng": "sci-fi",
+    "viễn tưởng": "sci-fi",
+    "thể thao": "sport",
+    "giật gân": "thriller",
+    "chiến tranh": "war",
+    "cao bồi": "western",
+}
+
+
+def is_chatbot_recommendation_request(message):
+    q = (message or "").lower()
+
+    return any(
+        keyword in q
+        for keyword in CHATBOT_RECOMMEND_KEYWORDS
+    )
+
+
+def extract_genres_from_chat_message(message):
+    q = (message or "").lower()
+    genres = []
+
+    for vi_name, genre_code in CHATBOT_GENRE_MAP.items():
+        if vi_name in q and genre_code not in genres:
+            genres.append(genre_code)
+
+    return ",".join(genres)
+
+
+def extract_title_from_chat_message(message):
+    text = (message or "").strip()
+
+    patterns = [
+        r"(?:giống|tương tự|như)\s+(.+)",
+        r"(?:dựa theo phim|theo phim)\s+(.+)",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+
+        if match:
+            title = match.group(1).strip()
+            title = re.sub(r"[?.!]+$", "", title).strip()
+
+            if title:
+                return title
+
+    return ""
+
+
+def format_chatbot_recommendations(recommendations, used_history=False):
+    if not recommendations:
+        return "Tôi chưa tìm thấy phim phù hợp để gợi ý."
+
+    if used_history:
+        result = "Dựa trên lịch sử đặt phim của bạn, tôi gợi ý:\n"
+    else:
+        result = "Phim gợi ý:\n"
+
+    for movie in recommendations[:5]:
+        tconst = movie.get("tconst")
+
+        title = (
+            movie.get("primaryTitle")
+            or movie.get("title")
+            or movie.get("name")
+            or "Không rõ tên"
+        )
+
+        year = (
+            movie.get("startYear")
+            or movie.get("year")
+            or "Không rõ năm"
+        )
+
+        if tconst:
+            result += f"- {title} ({year}) - /select-movie/{tconst}/\n"
+        else:
+            result += f"- {title} ({year})\n"
+
+    return result.strip()
+
+
+def build_chatbot_recommendation_response(request, message):
+    user_genres = extract_genres_from_chat_message(message)
+    user_title = extract_title_from_chat_message(message)
+
+    used_history = False
+
+    # Nếu người dùng chỉ nói "gợi ý phim cho tôi"
+    # thì lấy lịch sử đặt phim để suy ra thể loại yêu thích.
+    if not user_genres and not user_title:
+        if request.user.is_authenticated:
+            user_genres = build_user_genres_from_history(request.user)
+
+            if user_genres:
+                used_history = True
+            else:
+                return (
+                    "Bạn chưa có lịch sử đặt phim đủ để tôi gợi ý theo sở thích. "
+                    "Bạn có thể nhập thể loại, ví dụ: Gợi ý phim hành động."
+                )
+
+        else:
+            return (
+                "Bạn cần đăng nhập để tôi gợi ý phim theo lịch sử đặt phim. "
+                "Hoặc bạn có thể nhập thể loại, ví dụ: Gợi ý phim kinh dị."
+            )
+
+    recommendations = recommend_movies(
+        user_genres=user_genres,
+        user_title=user_title,
+        num_recommendations=20,
+    )
+
+    # Không gợi ý lại phim user đã thanh toán/đặt thành công.
+    if request.user.is_authenticated and recommendations:
+        paid_movie_ids = set(
+            BookedMovie.objects
+            .filter(
+                user=request.user,
+                payment_status="paid",
+                movie__isnull=False,
+            )
+            .values_list("movie_id", flat=True)
+        )
+
+        recommendations = [
+            movie for movie in recommendations
+            if movie.get("tconst") not in paid_movie_ids
+        ]
+
+    return format_chatbot_recommendations(
+        recommendations,
+        used_history=used_history,
+    )
+
+def normalize_chatbot_reply_links(reply):
+    reply = re.sub(
+        r"https?://[^/\s<]+(?=/select-movie/|/select_movie/|/room/)",
+        "",
+        reply
+    )
+
+    reply = reply.replace(
+        "/select_movie/",
+        "/select-movie/"
+    )
+
+    return reply
 
 @csrf_exempt
 def chatbot_api(request):
     if request.method == "POST":
-        user_message = request.POST.get("message")
+        user_message = request.POST.get("message", "").strip()
 
+        if not user_message:
+            return JsonResponse({
+                "reply": "Bạn chưa nhập nội dung câu hỏi."
+            })
+
+        # =================================================
+        # 1. Nếu người dùng hỏi gợi ý / đề xuất / recommend
+        #    thì dùng recommendation trong Django.
+        # =================================================
+        if is_chatbot_recommendation_request(user_message):
+            try:
+                reply = build_chatbot_recommendation_response(
+                    request,
+                    user_message,
+                )
+
+                reply = normalize_chatbot_reply_links(reply)
+
+                return JsonResponse({
+                    "reply": reply
+                })
+
+            except Exception as e:
+                return JsonResponse({
+                    "reply": f"Lỗi recommendation chatbot: {str(e)}"
+                })
+        # =================================================
+        # 2. Còn lại thì gửi sang FastAPI RAG local.
+        # =================================================
         try:
             response = requests.post(
-                "https://mutable-usual-endeared.ngrok-free.dev/chat",
+                "http://127.0.0.1:8001/chat",
                 json={
                     "message": user_message
                 },
@@ -1173,18 +1390,11 @@ def chatbot_api(request):
             data = response.json()
 
             reply = data.get("response", "Bot chưa có phản hồi.")
-
-            base_url = request.build_absolute_uri("/")[:-1]
-
+            
             reply = reply.replace(
                 "/select_movie/",
-                base_url + "/select_movie/"
+                "/select-movie/"
             )
-
-            #reply = reply.replace(
-              #  "/room/",
-             #   base_url + "/room/"
-            #)
 
             return JsonResponse({
                 "reply": reply
