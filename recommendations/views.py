@@ -1345,6 +1345,11 @@ def normalize_chatbot_reply_links(reply):
 
 @csrf_exempt
 def chatbot_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            "reply": "Bạn cần đăng nhập để sử dụng tính năng này."
+        })
+        
     if request.method == "POST":
         user_message = request.POST.get("message", "").strip()
 

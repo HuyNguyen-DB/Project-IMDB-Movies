@@ -1,5 +1,6 @@
 # chatbot/app.py
 
+from logging import info
 import os
 import re
 import shutil
@@ -342,9 +343,6 @@ def parse_query(query):
 
     intent = "movie"
 
-    if re.search(r"\d+\s*người", q):
-        intent = "both"
-
     if "phòng" in q:
         intent = "room"
 
@@ -353,6 +351,24 @@ def parse_query(query):
 
     if match:
         people = int(match.group(1))
+        intent = "room"
+
+    room_type = None
+
+    # Ưu tiên số người trước
+    if people is not None:
+        if people <= 2:
+            room_type = "double"
+        else:
+            room_type = "group"
+
+    # Nếu không có số người thì mới đọc theo chữ "phòng đôi", "phòng nhóm"
+    else:
+        if "phòng đôi" in q:
+            room_type = "double"
+
+        elif "phòng nhóm" in q:
+            room_type = "group"
 
     year = None
     match = re.search(r"(19|20)\d{2}", q)
@@ -370,10 +386,10 @@ def parse_query(query):
     return {
         "intent": intent,
         "people": people,
+        "room_type": room_type,
         "year": year,
         "genre": genre,
     }
-
 
 def suggest_room_type(people):
     if not people:
@@ -384,6 +400,19 @@ def suggest_room_type(people):
 
     return "phòng nhóm"
 
+def room_matches_query(room, info):
+    name = str(room.get("name", "")).lower()
+
+    room_type = info.get("room_type")
+
+    if room_type == "double":
+        return "đôi" in name and "nhóm" not in name
+
+    if room_type == "group":
+        return "nhóm" in name and "đôi" not in name
+
+    return True
+
 
 def enhance_query(query):
     info = parse_query(query)
@@ -393,6 +422,12 @@ def enhance_query(query):
     if info["people"]:
         room_type = suggest_room_type(info["people"])
         extra += f"\nNgười dùng đi {info['people']} người → nên chọn {room_type}"
+
+    elif info.get("room_type") == "double":
+        extra += "\nNgười dùng muốn đặt phòng đôi"
+
+    elif info.get("room_type") == "group":
+        extra += "\nNgười dùng muốn đặt phòng nhóm"
 
     if info["genre"]:
         extra += f"\nThể loại: {info['genre']}"
@@ -409,7 +444,7 @@ def get_retriever(query):
     if info["intent"] == "room":
         return vectordb.as_retriever(
             search_kwargs={
-                "k": 2,
+                "k": 9,
                 "filter": {"type": "room"},
             }
         )
@@ -650,7 +685,7 @@ def chat(req: ChatRequest):
                 unique_movies.append(movie)
                 seen_movie_urls.add(movie["url"])
 
-        # Xóa trùng phòng
+                # Xóa trùng phòng
         unique_rooms = []
         seen_room_urls = set()
 
@@ -658,6 +693,15 @@ def chat(req: ChatRequest):
             if room["url"] not in seen_room_urls:
                 unique_rooms.append(room)
                 seen_room_urls.add(room["url"])
+
+        info = parse_query(query)
+
+        if info.get("room_type"):
+            unique_rooms = [
+                room
+                for room in unique_rooms
+                if room_matches_query(room, info)
+            ]
 
         result = ""
 
