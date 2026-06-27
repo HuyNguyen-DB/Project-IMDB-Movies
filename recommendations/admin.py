@@ -29,10 +29,7 @@ class CustomAdminSite(admin.AdminSite):
 
         role = get_user_role(request.user)
 
-        context["can_view_dashboard"] = role in [
-            ROLE_BOOKING_STAFF,
-            ROLE_SYSTEM_ADMIN,
-        ]
+        context["can_view_dashboard"] = role == ROLE_SYSTEM_ADMIN
 
         return context
     
@@ -45,13 +42,18 @@ class CustomAdminSite(admin.AdminSite):
     
     def dashboard_redirect(self, request):
         """
-        Chỉ nhân viên vận hành và admin tổng được vào dashboard thống kê.
+        Chỉ admin tổng được vào dashboard thống kê.
         Các vai trò khác sẽ được đưa về khu vực làm việc phù hợp.
         """
         role = get_user_role(request.user)
 
-        if role in [ROLE_BOOKING_STAFF, ROLE_SYSTEM_ADMIN]:
+        if role == ROLE_SYSTEM_ADMIN:
             return HttpResponseRedirect("/dashboard/")
+        
+        if role == ROLE_BOOKING_STAFF:
+            return HttpResponseRedirect(
+                reverse("admin:recommendations_bookedmovie_changelist")
+            )
 
         if role == ROLE_ROOM_STAFF:
             return HttpResponseRedirect(reverse("admin:recommendations_screenroom_changelist"))

@@ -98,8 +98,9 @@ def dashboard_view(request):
 
     if role == ROLE_ROOM_STAFF:
         return redirect(reverse("admin:recommendations_screenroom_changelist"))
-
-    if role not in [ROLE_BOOKING_STAFF, ROLE_SYSTEM_ADMIN]:
+    if role == ROLE_BOOKING_STAFF:
+        return redirect(reverse("admin:recommendations_bookedmovie_changelist"))
+    if role != ROLE_SYSTEM_ADMIN:
         return redirect("/admin/")
 
     start_date = request.GET.get("start_date")

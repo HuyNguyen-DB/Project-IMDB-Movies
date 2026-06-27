@@ -181,7 +181,6 @@ class ScreenRoom(models.Model):
 class BookedMovie(models.Model):
     BOOKING_STATUS_CHOICES = [
         ('pending_payment', 'Chờ thanh toán'),
-        ('confirmed', 'Đã xác nhận'),
         ('in_use', 'Đang sử dụng'),
         ('completed', 'Đã hoàn tất'),
         ('cancelled', 'Đã hủy'),
