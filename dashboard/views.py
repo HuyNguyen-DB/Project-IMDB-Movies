@@ -91,6 +91,7 @@ def build_time_query(key, timeframe):
 
     return {}
 
+
 @login_required
 def dashboard_view(request):
     role = get_user_role(request.user)
@@ -100,7 +101,7 @@ def dashboard_view(request):
 
     if role not in [ROLE_BOOKING_STAFF, ROLE_SYSTEM_ADMIN]:
         return redirect("/admin/")
-    
+
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
     timeframe = request.GET.get("timeframe", "total")
@@ -131,8 +132,10 @@ def dashboard_view(request):
             pass
 
     if filter_kwargs:
-        bookings_queryset = BookedMovie.objects.filter(**filter_kwargs).order_by(
-            "date_booked"
+        bookings_queryset = (
+            BookedMovie.objects
+            .filter(**filter_kwargs)
+            .order_by("date_booked")
         )
     else:
         bookings_queryset = BookedMovie.objects.order_by("date_booked")
@@ -196,30 +199,31 @@ def dashboard_view(request):
     ]
 
     # ===== TOP PHÒNG =====
+    # BookedMovie hiện đã tham chiếu trực tiếp tới ScreenRoom bằng field "room".
+    # Vì vậy không dùng room_name nữa, mà dùng room__name và room__room_id.
     top_rooms_query = (
         bookings_queryset
-        .exclude(room_name__isnull=True)
-        .exclude(room_name="")
-        .values("room_name")
+        .filter(room__isnull=False)
+        .values("room__room_id", "room__name")
         .annotate(total=Count("id"))
         .order_by("-total")[:5]
     )
 
     room_labels = [
-        room["room_name"]
-        for room in top_rooms_query
+        item["room__name"] or "Không rõ phòng"
+        for item in top_rooms_query
     ]
 
     room_data = [
-        room["total"]
-        for room in top_rooms_query
+        item["total"]
+        for item in top_rooms_query
     ]
 
     room_urls = [
         room_url + "?" + urlencode({
-            "q": room["room_name"],
+            "q": item["room__name"] or item["room__room_id"] or "",
         })
-        for room in top_rooms_query
+        for item in top_rooms_query
     ]
 
     # ===== THỐNG KÊ THEO THỜI GIAN =====
