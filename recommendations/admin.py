@@ -914,7 +914,6 @@ class RoomImageInline(admin.StackedInline):
 # =========================================================
 # BOOKED MOVIE ADMIN
 # =========================================================
-
 @admin.register(BookedMovie)
 class BookedMovieAdmin(admin.ModelAdmin):
     list_display = (
@@ -925,6 +924,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "booking_date_vi",
         "booking_end_time_vi",
         "rental_duration_minutes",
+        "room_price_display",
         "total_price_vi",
         "booking_status_badge",
         "payment_badge",
@@ -967,6 +967,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "user",
         "movie",
         "room",
+        "room_price_display",
         "rental_duration_minutes",
         "discount_amount",
         "total_price",
@@ -1001,10 +1002,9 @@ class BookedMovieAdmin(admin.ModelAdmin):
             "Thông tin phòng chiếu",
             {
                 "fields": (
-                    "room_id_snapshot",
-                    "room_name",
+                    "room",
+                    "room_price_display",
                     "rental_duration_minutes",
-                    "price_per_30min",
                     "discount_amount",
                     "total_price",
                 )
@@ -1048,8 +1048,10 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
     def get_actions(self, request):
         actions = super().get_actions(request)
+
         if not (is_system_admin(request.user) or is_booking_staff(request.user)):
             actions.clear()
+
         return actions
 
     def get_readonly_fields(self, request, obj=None):
@@ -1058,6 +1060,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
     def movie_display(self, obj):
         if obj.movie:
             return obj.movie.primaryTitle
+
         return "Không rõ phim"
 
     movie_display.short_description = "Tên phim"
@@ -1066,11 +1069,20 @@ class BookedMovieAdmin(admin.ModelAdmin):
     def room_display(self, obj):
         if obj.room:
             return f"{obj.room.room_id} - {obj.room.name}"
+
         return "Không rõ phòng"
 
     room_display.short_description = "Phòng chiếu"
     room_display.admin_order_field = "room__name"
-    
+
+    def room_price_display(self, obj):
+        if obj.room:
+            return format_money(obj.room.price_per_30min)
+
+        return "Không rõ giá"
+
+    room_price_display.short_description = "Giá phòng / 30 phút"
+
     def booking_date_vi(self, obj):
         return format_datetime_vi(obj.booking_date)
 
@@ -1098,7 +1110,12 @@ class BookedMovieAdmin(admin.ModelAdmin):
             "cancelled": ("Đã hủy", "red"),
             "expired": ("Hết hạn", "gray"),
         }
-        text, color = status_map.get(obj.booking_status, (obj.booking_status, "gray"))
+
+        text, color = status_map.get(
+            obj.booking_status,
+            (obj.booking_status, "gray")
+        )
+
         return badge(text, color)
 
     booking_status_badge.short_description = "Trạng thái đơn"
@@ -1111,7 +1128,12 @@ class BookedMovieAdmin(admin.ModelAdmin):
             "refunded": ("Đã hoàn tiền", "blue"),
             "failed": ("Thanh toán lỗi", "red"),
         }
-        text, color = payment_map.get(obj.payment_status, (obj.payment_status, "gray"))
+
+        text, color = payment_map.get(
+            obj.payment_status,
+            (obj.payment_status, "gray")
+        )
+
         return badge(text, color)
 
     payment_badge.short_description = "Thanh toán"
@@ -1119,10 +1141,13 @@ class BookedMovieAdmin(admin.ModelAdmin):
     def invoice_badge(self, obj):
         try:
             invoice = obj.invoice
+
             if invoice and invoice.invoice_code:
                 return badge(invoice.invoice_code, "blue")
+
         except Exception:
             pass
+
         return badge("Chưa có hóa đơn", "gray")
 
     invoice_badge.short_description = "Hóa đơn"
@@ -1210,7 +1235,6 @@ class BookedMovieAdmin(admin.ModelAdmin):
         )
 
     expire_bookings.short_description = "Chuyển đơn chưa thanh toán sang hết hạn"
-
 
 # =========================================================
 # INVOICE ADMIN
