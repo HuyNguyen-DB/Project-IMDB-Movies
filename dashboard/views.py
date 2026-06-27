@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from recommendations.models import BookedMovie
+from recommendations.models import BookedMovie, Invoice
 from recommendations.admin import (
     get_user_role,
     ROLE_BOOKING_STAFF,
@@ -199,18 +199,18 @@ def dashboard_view(request):
     ]
 
     # ===== TOP PHÒNG =====
-    # BookedMovie hiện đã tham chiếu trực tiếp tới ScreenRoom bằng field "room".
-    # Vì vậy không dùng room_name nữa, mà dùng room__name và room__room_id.
     top_rooms_query = (
-        bookings_queryset
-        .filter(room__isnull=False)
-        .values("room__room_id", "room__name")
-        .annotate(total=Count("id"))
+        Invoice.objects
+        .filter(booking__in=bookings_queryset)
+        .exclude(room_name__isnull=True)
+        .exclude(room_name="")
+        .values("room_name")
+        .annotate(total=Count("invoice_code"))
         .order_by("-total")[:5]
     )
 
     room_labels = [
-        item["room__name"] or "Không rõ phòng"
+        item["room_name"] or "Không rõ phòng"
         for item in top_rooms_query
     ]
 
@@ -220,8 +220,8 @@ def dashboard_view(request):
     ]
 
     room_urls = [
-        room_url + "?" + urlencode({
-            "q": item["room__name"] or item["room__room_id"] or "",
+        booking_url + "?" + urlencode({
+            "invoice__room_name": item["room_name"] or "",
         })
         for item in top_rooms_query
     ]
