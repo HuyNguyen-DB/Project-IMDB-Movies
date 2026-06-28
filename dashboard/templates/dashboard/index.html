@@ -220,9 +220,11 @@
             </div>
 
             <div class="stat-card revenue">
-                <h3>Tổng Doanh Thu</h3>
-                <div class="number">{{ total_revenue|floatformat:0 }}đ</div>
-            </div>
+    <h3>Tổng Doanh Thu</h3>
+    <div class="number money-format" data-value="{{ total_revenue|floatformat:0 }}">
+        {{ total_revenue|floatformat:0 }}đ
+    </div>
+</div>
 
             <div class="stat-card confirmed">
                 <h3>Đã Xác Nhận</h3>
@@ -317,6 +319,15 @@
     const roomUrls = JSON.parse('{{ room_urls|escapejs }}');
     const invoiceUrl = "{{ invoice_url }}";
     const bookingUrl = "{{ booking_url }}";
+
+    function formatMoneyVND(value) {
+    return Number(value).toLocaleString('vi-VN') + 'đ';
+}
+
+document.querySelectorAll('.money-format').forEach(function(element) {
+    const value = element.dataset.value || 0;
+    element.textContent = formatMoneyVND(value);
+});
 
     const movieCtx = document.getElementById('movieChart').getContext('2d');
     new Chart(movieCtx, {
@@ -511,7 +522,7 @@
     maintainAspectRatio: false,
 
     onClick: function() {
-        window.location.href = invoiceUrl;
+        window.location.href = bookingUrl;
     },
             plugins: {
                 legend: {

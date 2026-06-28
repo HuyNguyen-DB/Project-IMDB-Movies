@@ -221,8 +221,8 @@ def dashboard_view(request):
     ]
 
     room_urls = [
-        booking_url + "?" + urlencode({
-            "invoice__room_name": item["room_name"] or "",
+        room_url + "?" + urlencode({
+            "q": item["room_name"] or "",
         })
         for item in top_rooms_query
     ]
@@ -310,8 +310,6 @@ def dashboard_view(request):
             revenue_query = query.copy()
             revenue_query["payment_status"] = "paid"
 
-            payment_query = query.copy()
-
             time_booking_urls[tf].append(
                 booking_url + "?" + urlencode(booking_query)
             )
@@ -321,8 +319,10 @@ def dashboard_view(request):
             )
 
             time_payment_urls[tf].append(
-                booking_url + "?" + urlencode(payment_query)
+                booking_url
             )
+
+            
 
     context = {
         "total_bookings": total_bookings,
