@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin
 from django import forms
+from requests import request
 
 from .models import (
     UserProfile,
@@ -758,7 +759,7 @@ class CustomUserAdmin(UserAdmin):
             profile.save()
 
         apply_user_role(obj, selected_role)
-
+    
     def has_module_permission(self, request):
         return is_system_admin(request.user)
 
@@ -772,7 +773,15 @@ class CustomUserAdmin(UserAdmin):
         return is_system_admin(request.user)
 
     def has_delete_permission(self, request, obj=None):
-        return is_system_admin(request.user)
+        return False
+    
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+
+        return actions
 
     def password_change_link(self, obj):
         if not obj or not obj.pk:
@@ -962,7 +971,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
     )
 
     list_per_page = 25
-    save_on_top = True
+    save_on_top = False
 
     readonly_fields = (
         "booking_code",
@@ -1031,6 +1040,7 @@ class BookedMovieAdmin(admin.ModelAdmin):
         "mark_as_unpaid",
         "cancel_bookings",
         "expire_bookings",
+        "delete_unpaid_bookings",
     )
 
     def has_module_permission(self, request):
@@ -1044,42 +1054,157 @@ class BookedMovieAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return is_system_admin(request.user) or is_booking_staff(request.user)
+    
+    def get_object(self, request, object_id, from_field=None):
+        obj = super().get_object(request, object_id, from_field)
+
+        if not obj:
+            return obj
+
+        update_data = {}
+
+        if obj.movie_id and not Movie.objects.filter(pk=obj.movie_id).exists():
+            update_data["movie"] = None
+            obj.movie_id = None
+
+        if obj.room_id and not ScreenRoom.objects.filter(pk=obj.room_id).exists():
+            update_data["room"] = None
+            obj.room_id = None
+
+        if update_data:
+            BookedMovie.objects.filter(pk=obj.pk).update(**update_data)
+
+        return obj
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        """
+        Cho phép xóa đơn đặt phim, nhưng chặn xóa đơn đã thanh toán.
+        """
+        if not (is_system_admin(request.user) or is_booking_staff(request.user)):
+            return False
+
+        # obj=None là khi Django kiểm tra quyền chung ở trang danh sách
+        if obj is None:
+            return True
+
+        # Đơn đã thanh toán thì không hiện nút Xóa
+        if obj.payment_status == "paid":
+            return False
+
+        return True
+
 
     def get_actions(self, request):
         actions = super().get_actions(request)
 
         if not (is_system_admin(request.user) or is_booking_staff(request.user)):
             actions.clear()
+            return actions
+
+        # Bỏ action xóa mặc định của Django để tránh xóa nhầm đơn đã thanh toán
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
 
         return actions
 
     def get_readonly_fields(self, request, obj=None):
         return self.readonly_fields
+    
+    def delete_model(self, request, obj):
+        """
+        Xóa 1 đơn đặt phim.
+        Đơn đã thanh toán thì không được xóa.
+        Các đơn còn lại được phép xóa.
+        """
+        if obj.payment_status == "paid":
+            self.message_user(
+                request,
+                "Không thể xóa đơn đã thanh toán.",
+                messages.ERROR,
+            )
+            return
+
+        # Nếu đơn có hóa đơn phụ do dữ liệu cũ/lỗi thao tác, xóa hóa đơn trước
+        # để tránh bị on_delete=PROTECT chặn.
+        Invoice.objects.filter(booking=obj).delete()
+
+        obj.delete()
+
+
+    def delete_queryset(self, request, queryset):
+        """
+        Dùng khi xóa nhiều đơn bằng action.
+        Chỉ xóa các đơn không phải trạng thái paid.
+        """
+        paid_count = queryset.filter(payment_status="paid").count()
+        deletable_bookings = list(queryset.exclude(payment_status="paid"))
+
+        deleted_count = 0
+
+        for booking in deletable_bookings:
+            Invoice.objects.filter(booking=booking).delete()
+            booking.delete()
+            deleted_count += 1
+
+        if deleted_count:
+            self.message_user(
+                request,
+                f"Đã xóa {deleted_count} đơn chưa thanh toán / không ở trạng thái đã thanh toán.",
+                messages.SUCCESS,
+            )
+
+        if paid_count:
+            self.message_user(
+                request,
+                f"Đã bỏ qua {paid_count} đơn đã thanh toán. Các đơn này không được phép xóa.",
+                messages.WARNING,
+            )
+
+
+    def delete_unpaid_bookings(self, request, queryset):
+        """
+        Action xóa nhiều đơn, nhưng tự động bỏ qua đơn đã thanh toán.
+        """
+        self.delete_queryset(request, queryset)
+
+    delete_unpaid_bookings.short_description = "Xóa các đơn không ở trạng thái đã thanh toán"
 
     def movie_display(self, obj):
-        if obj.movie:
-            return obj.movie.primaryTitle
+        if not obj.movie_id:
+            return "Không rõ phim"
 
-        return "Không rõ phim"
+        movie = Movie.objects.filter(pk=obj.movie_id).first()
+
+        if movie:
+            return movie.primaryTitle
+
+        return "Phim đã bị xóa"
 
     movie_display.short_description = "Tên phim"
     movie_display.admin_order_field = "movie__primaryTitle"
 
     def room_display(self, obj):
-        if obj.room:
-            return f"{obj.room.room_id} - {obj.room.name}"
+        if not obj.room_id:
+            return "Không rõ phòng"
 
-        return "Không rõ phòng"
+        room = ScreenRoom.objects.filter(pk=obj.room_id).first()
+
+        if room:
+            return f"{room.room_id} - {room.name}"
+
+        return "Phòng đã bị xóa"
 
     room_display.short_description = "Phòng chiếu"
     room_display.admin_order_field = "room__name"
 
     def room_price_display(self, obj):
-        if obj.room:
-            return format_money(obj.room.price_per_30min)
+        if not obj.room_id:
+            return "Không rõ giá"
+
+        room = ScreenRoom.objects.filter(pk=obj.room_id).first()
+
+        if room:
+            return format_money(room.price_per_30min)
 
         return "Không rõ giá"
 
@@ -1370,6 +1495,35 @@ class InvoiceAdmin(admin.ModelAdmin):
 # MOVIE ADMIN
 # =========================================================
 
+class GenreFilter(admin.SimpleListFilter):
+    title = "Thể loại"
+    parameter_name = "genre"
+
+    def lookups(self, request, model_admin):
+        genres_set = set()
+
+        qs = model_admin.get_queryset(request)
+
+        for value in qs.values_list("genres", flat=True):
+            if not value:
+                continue
+
+            genres = str(value).split(",")
+
+            for genre in genres:
+                genre = genre.strip()
+
+                if genre and genre.lower() != "adult":
+                    genres_set.add(genre)
+
+        return [(genre, genre) for genre in sorted(genres_set)]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(genres__icontains=self.value())
+
+        return queryset
+    
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
     list_display = (
@@ -1393,7 +1547,7 @@ class MovieAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "genres",
+        GenreFilter,
         "startYear",
     )
 
