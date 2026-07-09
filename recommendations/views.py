@@ -170,7 +170,19 @@ def send_payment_success_email(booking, invoice):
 
     email.attach_alternative(html_content, "text/html")
     email.send()
-    
+
+def has_room_booking_conflict(room, start_time, end_time):
+    return BookedMovie.objects.filter(
+        room=room,
+        booking_status__in=[
+            "pending_payment",
+            "in_use",
+            "completed",
+            "confirmed",
+        ],
+        booking_date__lt=end_time,
+        booking_end_time__gt=start_time,
+    ).exists()
 # =========================================================
 # HOME / ROOM
 # =========================================================
@@ -233,6 +245,7 @@ def home(request):
     )
 
 
+
 def room_list(request):
     available_rooms = ScreenRoom.objects.filter(
         status="available"
@@ -244,6 +257,45 @@ def room_list(request):
         "image",
         "price_per_30min",
     )
+
+    booking_start_time = request.session.get("booking_start_time")
+    booking_end_time = request.session.get("booking_end_time")
+
+    if booking_start_time and booking_end_time:
+        try:
+            start_time = timezone.datetime.fromisoformat(
+                booking_start_time
+            )
+            end_time = timezone.datetime.fromisoformat(
+                booking_end_time
+            )
+
+            conflicted_room_ids = BookedMovie.objects.filter(
+                booking_status__in=[
+                    "pending_payment",
+                    "in_use",
+                    "completed",
+                    "confirmed",
+                ],
+                booking_date__lt=end_time,
+                booking_end_time__gt=start_time,
+                room__isnull=False,
+            ).values_list(
+                "room_id",
+                flat=True
+            )
+
+            available_rooms = available_rooms.exclude(
+                room_id__in=list(conflicted_room_ids)
+            )
+
+            messages.info(
+                request,
+                "Hệ thống đang hiển thị các phòng còn trống trong khung giờ bạn vừa chọn."
+            )
+
+        except Exception:
+            pass
 
     normal_rooms = available_rooms.filter(name__icontains="Thường")
     vip_rooms = available_rooms.filter(name__icontains="VIP")
@@ -751,6 +803,27 @@ def book_movie(request):
             booked_movie.booking_status = "pending_payment"
             booked_movie.payment_status = "unpaid"
 
+            new_start_time = booked_movie.booking_date
+            new_end_time = new_start_time + timedelta(
+                minutes=total_duration
+            )
+
+            if has_room_booking_conflict(
+                room,
+                new_start_time,
+                new_end_time
+            ):
+                request.session["booking_start_time"] = new_start_time.isoformat()
+                request.session["booking_end_time"] = new_end_time.isoformat()
+
+                messages.error(
+                    request,
+                    "Phòng này đã có người đặt trong khung giờ bạn chọn. "
+                    "Vui lòng chọn phòng khác hoặc chọn thời gian khác."
+                )
+
+                return redirect("room_list")
+            
             booked_movie.save()
 
             return redirect(
